@@ -3,6 +3,7 @@
 , ... }:
 let stable = import nixpkgs-stable { };
 in {
+  nixpkgs.config.allowUnfree = true;
 
   nix = {
     settings = {
