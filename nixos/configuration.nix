@@ -1,14 +1,17 @@
-{ pkgs, nixpkgs-stable
-# config, lib,  inputs, pkgs-unstable, 
-, ... }:
-let stable = import nixpkgs-stable { };
+{
+  pkgs,
+  nixpkgs-stable,
+  # config, lib,  inputs, pkgs-unstable,
+  ...
+}: let
+  stable = import nixpkgs-stable {};
 in {
   nixpkgs.config.allowUnfree = true;
 
   nix = {
     settings = {
-      substituters = [ "https://aseipp-nix-cache.global.ssl.fastly.net" ];
-      experimental-features = [ "nix-command" "flakes" ];
+      substituters = ["https://aseipp-nix-cache.global.ssl.fastly.net"];
+      experimental-features = ["nix-command" "flakes"];
     };
 
     gc = {
@@ -19,7 +22,7 @@ in {
 
     optimise = {
       automatic = true;
-      dates = [ "03:45" ];
+      dates = ["03:45"];
     };
 
     # free up to 1GiB whenever there is less than 100MiB left
@@ -41,7 +44,7 @@ in {
 
   programs.nix-ld = {
     enable = true;
-    libraries = with pkgs; [ gtk3 ];
+    libraries = with pkgs; [gtk3];
   };
 
   environment.variables = {
@@ -113,5 +116,4 @@ in {
     mpv
     sxiv # Simple X Image Viewer https://github.com/muennich/sxiv
   ];
-
 }

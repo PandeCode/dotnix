@@ -1,4 +1,8 @@
-{ config, pkgs, ... }: {
+{
+  config,
+  pkgs,
+  ...
+}: {
   # useUserPackages = true;
   # useGlobalPkgs = true;
 
@@ -42,19 +46,18 @@
 
   home.file = {
     ".cargo/config.toml".text = ''
-            [build]
-            target-dir = "/home/nixos/.cache/target"
-            rustc-wrapper = "sccache"
+      [build]
+      target-dir = "/home/nixos/.cache/target"
+      rustc-wrapper = "sccache"
 
-            [target.x86_64-unknown-linux-gnu]
-            linker = "clang"
-            rustflags = ["-C", "link-arg=--ld-path=mold"]
-      		'';
+      [target.x86_64-unknown-linux-gnu]
+      linker = "clang"
+      rustflags = ["-C", "link-arg=--ld-path=mold"]
+    '';
   };
 
   home.packages = with pkgs; [
-		commitizen
-
+    commitizen
 
     # hasekll
     # cabal-install # The command-line interface for Cabal and Hackage https://hackage.haskell.org/package/cabal-install
@@ -69,30 +72,35 @@
     # mdbook # Create books from MarkDown https://github.com/rust-lang/mdBook
 
     silicon # Create beautiful image of your source code https://github.com/Aloxaf/silicon
+    glow # Render markdown on the CLI, with pizzazz! https://github.com/charmbracelet/glow
     # charm-freeze # Tool to generate images of code and terminal output https://github.com/charmbracelet/freeze
     # goshot
 
     shc # Shell Script Compiler https://neurobin.org/projects/softwares/unix/shc/
+
     glslviewer
-    cargo-binstall # Tool for installing rust binaries as an alternative to building from source https://github.com/cargo-bins/cargo-binstall
-    gh # GitHub CLI tool https://cli.github.com/
-    glow # Render markdown on the CLI, with pizzazz! https://github.com/charmbracelet/glow
-    ncdu # Disk usage analyzer with an ncurses interface https://dev.yorhel.nl/ncdu
+
+    ncdu
     # fdupes
     # nnn
     # yazi
 
-    delta
-    tre-command
-    nix-search-cli # CLI for searching packages on search.nixos.org https://github.com/peterldowns/nix-search-cli
-    thefuck # Magnificent app which corrects your previous console command https://github.com/nvbn/thefuck
-    gitoxide
+	tre-command
+    thefuck
     libresprite
     ast-grep
     ripgrep
 
-    tree-sitter
+    nix-search-cli
+
+	# git
+    gh
+    delta
+    pre-commit
     lazygit
+    gitoxide
+
+    tree-sitter
 
     # LSPs
     nixd
@@ -169,5 +177,4 @@
     #   echo "Hello, ${config.home.username}!"
     # '')
   ];
-
 }

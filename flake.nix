@@ -15,51 +15,52 @@
     };
   };
 
-  outputs =
-    { self, nixpkgs, nixpkgs-stable, home-manager, nixos-wsl, ... }@inputs:
-    let
-      inherit (self) outputs;
-      system = "x86_64-linux";
-    in {
-      nixosConfigurations = {
-        nixos = nixpkgs.lib.nixosSystem {
+  outputs = {
+    self,
+    nixpkgs,
+    nixpkgs-stable,
+    home-manager,
+    nixos-wsl,
+    ...
+  } @ inputs: let
+    inherit (self) outputs;
+    system = "x86_64-linux";
+  in {
+    nixosConfigurations = {
+      nixos = nixpkgs.lib.nixosSystem {
+        inherit system;
 
-          inherit system;
-
-          specialArgs = { inherit nixpkgs-stable; };
-
-          modules = [
-            nixos-wsl.nixosModules.default
-            {
-              system.stateVersion =
-                "24.05"; # IMPORTANT: NixOS-WSL breaks on other state versions
-              wsl = {
-                enable = true;
-                defaultUser = "nixos";
-              };
-            }
-            ./nixos/configuration.nix
-          ];
-        };
-      };
-
-      homeConfigurations.nixos = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.${system};
-
-        extraSpecialArgs = { inherit inputs outputs; };
+        specialArgs = {inherit nixpkgs-stable;};
 
         modules = [
+          nixos-wsl.nixosModules.default
           {
-            home = {
-              username = "nixos";
-              homeDirectory = "/home/nixos";
-              stateVersion = "24.05";
+            system.stateVersion = "24.05"; # IMPORTANT: NixOS-WSL breaks on other state versions
+            wsl = {
+              enable = true;
+              defaultUser = "nixos";
             };
           }
-          ./home-manager/home.nix
-
+          ./nixos/configuration.nix
         ];
       };
-
     };
+
+    homeConfigurations.nixos = home-manager.lib.homeManagerConfiguration {
+      pkgs = nixpkgs.legacyPackages.${system};
+
+      extraSpecialArgs = {inherit inputs outputs;};
+
+      modules = [
+        {
+          home = {
+            username = "nixos";
+            homeDirectory = "/home/nixos";
+            stateVersion = "24.05";
+          };
+        }
+        ./home-manager/home.nix
+      ];
+    };
+  };
 }
