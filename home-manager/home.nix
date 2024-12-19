@@ -53,7 +53,8 @@
   };
 
   home.packages = with pkgs; [
-	hello
+		commitizen
+
 
     # hasekll
     # cabal-install # The command-line interface for Cabal and Hackage https://hackage.haskell.org/package/cabal-install
