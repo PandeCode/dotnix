@@ -116,7 +116,7 @@
     # Formatters
     stylua
     black # Uncompromising Python code formatter https://github.com/psf/black
-    nixfmt-classic # An opinionated formatter for Nix https://hackage.haskell.org/package/nixfmt
+    alejandra # An opinionated formatter for Nix https://hackage.haskell.org/package/nixfmt
     nodePackages.lua-fmt # Format Lua code https://github.com/trixnz/lua-fmt
     nodePackages.prettier # An opinionated `toml` formatter plugin for Prettier https://github.com/un-ts/prettier/tree/master/packages/prettier
     xxd # Most popular clone of the VI editor http://www.vim.org
