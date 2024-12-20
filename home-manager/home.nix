@@ -85,7 +85,7 @@
     # nnn
     # yazi
 
-	tre-command
+    tre-command
     thefuck
     libresprite
     ast-grep
@@ -93,7 +93,7 @@
 
     nix-search-cli
 
-	# git
+    # git
     gh
     delta
     pre-commit
