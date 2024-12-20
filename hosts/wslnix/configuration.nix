@@ -58,7 +58,6 @@ in {
   environment.systemPackages = with pkgs; [
     # Editors
     neovim
-		hello
 
     # Build tools
     gnumake

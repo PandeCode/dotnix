@@ -1,14 +1,24 @@
 {
   description = "nix config";
 
+  nixConfig = {
+    extra-substituters = [
+      "https://nix-community.cachix.org"
+      "https://cache.nixos.org/"
+    ];
+    extra-trusted-public-keys = [
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+    ];
+  };
+
   inputs = {
-    # Nixpkgs
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable?shallow=1";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.11?shallow=1";
 
-    nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
+    nixos-wsl.url = "github:nix-community/NixOS-WSL/main?shallow=1";
 
-    # Home manager
+    neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay?shallow=1";
+
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -27,7 +37,7 @@
     system = "x86_64-linux";
   in {
     nixosConfigurations = {
-      nixos = nixpkgs.lib.nixosSystem {
+      wslnix = nixpkgs.lib.nixosSystem {
         inherit system;
 
         specialArgs = {inherit nixpkgs-stable;};
@@ -36,31 +46,39 @@
           nixos-wsl.nixosModules.default
           {
             system.stateVersion = "24.05"; # IMPORTANT: NixOS-WSL breaks on other state versions
+            networking.hostName = "wslnix";
             wsl = {
               enable = true;
-              defaultUser = "nixos";
+              defaultUser = "shawn";
+              wslConf.network.hostname = "wslnix";
             };
           }
-          ./nixos/configuration.nix
+
+          ./hosts/wslnix/configuration.nix # this causes the below error
+          				# ./nixos/configuration.nix # this works
+
         ];
       };
     };
 
-    homeConfigurations.nixos = home-manager.lib.homeManagerConfiguration {
-      pkgs = nixpkgs.legacyPackages.${system};
+    homeConfigurations = {
+      "shawn@wslnix" = home-manager.lib.homeManagerConfiguration {
 
-      extraSpecialArgs = {inherit inputs outputs;};
+        pkgs = nixpkgs.legacyPackages.${system};
 
-      modules = [
-        {
-          home = {
-            username = "nixos";
-            homeDirectory = "/home/nixos";
-            stateVersion = "24.05";
-          };
-        }
-        ./home-manager/home.nix
-      ];
+        extraSpecialArgs = {inherit inputs outputs;};
+
+        modules = [
+          {
+            home = {
+              username = "shawn";
+              homeDirectory = "/home/shawn";
+              stateVersion = "24.05";
+            };
+          }
+          ./homes/wslnix/home.nix
+        ];
+      };
     };
   };
 }
