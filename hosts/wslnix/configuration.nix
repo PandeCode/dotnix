@@ -3,14 +3,13 @@
   nixpkgs-stable,
   # config, lib,  inputs, pkgs-unstable,
   ...
-}: let
-  stable = import nixpkgs-stable {};
-in {
+}:
+# let stable = import nixpkgs-stable {}; in
+{
   nixpkgs.config.allowUnfree = true;
 
   nix = {
     settings = {
-      # substituters = ["https://aseipp-nix-cache.global.ssl.fastly.net"];
       experimental-features = ["nix-command" "flakes"];
       trusted-users = ["root" "nixos"];
     };
@@ -56,6 +55,8 @@ in {
   };
 
   environment.systemPackages = with pkgs; [
+    home-manager
+
     # Editors
     neovim
 

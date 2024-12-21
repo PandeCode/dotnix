@@ -3,12 +3,7 @@
   pkgs,
   ...
 }: {
-  # useUserPackages = true;
-  # useGlobalPkgs = true;
-
   programs = {
-    home-manager.enable = true;
-
     direnv = {
       enable = true;
       enableBashIntegration = true; # see note on other shells below
@@ -17,7 +12,7 @@
 
     nushell = {
       enable = true;
-      configFile.source = ../config/nushell/nix.nu;
+      configFile.source = ../../config/nushell/nix.nu;
     };
 
     carapace = {
@@ -85,7 +80,7 @@
     # nnn
     # yazi
 
-	tre-command
+    tre-command
     thefuck
     libresprite
     ast-grep
@@ -93,7 +88,7 @@
 
     nix-search-cli
 
-	# git
+    # git
     gh
     delta
     pre-commit

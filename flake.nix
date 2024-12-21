@@ -5,6 +5,7 @@
     extra-substituters = [
       "https://nix-community.cachix.org"
       "https://cache.nixos.org/"
+      "https://aseipp-nix-cache.global.ssl.fastly.net"
     ];
     extra-trusted-public-keys = [
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
@@ -53,17 +54,13 @@
               wslConf.network.hostname = "wslnix";
             };
           }
-
-          ./hosts/wslnix/configuration.nix # this causes the below error
-          				# ./nixos/configuration.nix # this works
-
+          ./hosts/wslnix/configuration.nix
         ];
       };
     };
 
     homeConfigurations = {
       "shawn@wslnix" = home-manager.lib.homeManagerConfiguration {
-
         pkgs = nixpkgs.legacyPackages.${system};
 
         extraSpecialArgs = {inherit inputs outputs;};
