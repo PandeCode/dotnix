@@ -16,6 +16,10 @@
     };
 
     file = {
+      ".gdbinit".source = builtins.fetchurl {
+        url = "https://github.com/cyrus-and/gdb-dashboard/raw/master/.gdbinit";
+        sha256 = "8bd249b8642977fd9c07a7ff5727d9de3556c48cf56712dbd23e5498cff410b2";
+      };
       ".cargo/config.toml".text = ''
         [build]
         target-dir = "/home/shawn/.cache/target"
