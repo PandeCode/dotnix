@@ -1,73 +1,82 @@
 {
-  config,
+  # config,
   pkgs,
   ...
 }: {
-  home.file.".config/zellji/config.kdl".source = ../../config/zellij/config.kdl;
+  home.file.".config/zellij/config.kdl".source = ../../config/zellij/config.kdl;
 
   programs = let
-    mergeAttrs = pkgs.lib.mergeAttrs;
+    inherit (pkgs.lib) mergeAttrs;
     enable_shells = {
       enable = true;
       enableBashIntegration = true;
       enableFishIntegration = true;
       enableNushellIntegration = true;
     };
-  in {
-    zellij = {
-      enable = true;
-      enableBashIntegration = true;
+    sharedShellAliases = {
+      # File operations
+      mkdir = "mkdir";
+      mkdri = "mkdir";
+      mkidr = "mkdir";
+      mdkir = "mkdir";
+      dmkir = "mkdir";
+      cp = "cp -ir";
+      df = "df -h";
+      free = "free -m";
+      sizeof = "du -h --max-depth=0";
+      sl = "ls";
+      l = "ls -la";
+      tree = "tre";
+      more = "less";
+
+      # Navigation
+      win = "cd /mnt/c/Users/pande";
+      windev = "cd /mnt/c/Users/pande/dev";
+      windl = "cd /mnt/c/Users/pande/Downloads";
+      j = "z";
+
+      # Clipboard operations
+      cs = "xclip -selection clipboard";
+      cso = "xclip -selection clipboard -o";
+      clonec = "xclip -selection clipboard -o | xargs git clone --depth 1";
+      wgetc = "xclip -selection clipboard -o | xargs wget -c ";
+
+      # Git operations
+      commit = "cz commit";
+      psuh = "git push";
+      push = "git push";
+
+      # Shell commands
+      ":e" = "nvim";
+      ":q" = "exit";
+      eixt = "exit";
+      f = "fuck";
+      idea = "nvim /home/shawn/dev/ideas.txt";
+      neovide = "neovide.exe --wsl";
+      nivm = "nvim";
+      np = "nano -w PKGBUILD";
+      ns = "nix-shell shell.nix --command 'nu'";
+      nsp = "nix-shell --command 'nu' -p";
+      nue = "nvim ~/dotnix/config/nushell/config.nu ;";
+      pwsh = "pwsh.exe";
+      py = "python3";
+      wsl = "wsl.exe";
+
+      cls = "clear";
+      tls = "clear";
+      cmb = "cmake --build Debug/";
+      cmc = "rm -fr CMakeCache.txt CMakeFiles Debug/ compile_commands.json";
+      taskkill = "taskkill.exe /F /IM";
+      winget = "winget.exe";
     };
+  in {
+    # fish = {
+    #   enable = true;
+    # };
 
     nushell = {
       enable = true;
-      shellAliases = {
-        ":e" = "nvim";
-        ":q" = "exit";
-        mkdir = "mkdir";
-        mkdri = "mkdir";
-        mkidr = "mkdir";
-        mdkir = "mkdir";
-        dmkir = "mkdir";
-        clonec = "git clone --depth 1 (xclip -selection clipboard -o)";
-        cls = "clear";
-        cmb = "cmake --build Debug/";
-        cmc = "rm -fr CMakeCache.txt CMakeFiles Debug/ compile_commands.json";
-        commit = "cz commit";
-        cp = "cp -ir";
-        cs = "xclip -selection clipboard";
-        cso = "xclip -selection clipboard -o";
-        df = "df -h";
-        eixt = "exit";
-        f = "fuck";
-        free = "free -m";
-        idea = "nvim /home/shawn/dev/ideas.txt";
-        j = "z";
-        l = "ls -la";
-        md = "mkdir";
-        more = "less";
-        neovide = "neovide.exe --wsl";
-        nivm = "nvim";
-        np = "nano -w PKGBUILD";
-        ns = "nix-shell shell.nix --command 'nu'";
-        nsp = "nix-shell --command 'nu' -p";
-        nue = "nvim ~/dotnix/config/nushell/config.nu ;";
-        psuh = "git push";
-        push = "git push";
-        pwsh = "pwsh.exe";
-        py = "python3";
-        sizeof = "du -h --max-depth=0";
-        sl = "ls";
-        taskkill = "taskkill.exe /F /IM";
-        tls = "clear";
-        tree = "tre";
-        wgetc = "wget -c (xclip -selection clipboard -o)";
-        win = "cd /mnt/c/Users/pande";
-        windev = "cd /mnt/c/Users/pande/dev";
-        windl = "cd /mnt/c/Users/pande/Downloads";
-        winget = "winget.exe";
-        wsl = "wsl.exe";
-      };
+      shellAliases = sharedShellAliases;
       # environmentVariables = {};
       configFile.source = ../../config/nushell/config.nu;
     };

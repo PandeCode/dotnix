@@ -83,14 +83,14 @@ def tokyo-night [] { return {
 
 let fish_completer =  {|spans|
 	fish --command $'complete "--do-complete=($spans | str join " ")"'
-		| $"value(char tab)description(char newline)" + $in
-		| from tsv --flexible --no-infer
+	| $"value(char tab)description(char newline)" + $in
+	| from tsv --flexible --no-infer
 }
 
 let carapace_completer = {|spans: list<string>|
 	carapace $spans.0 nushell ...$spans
-		| from json
-		| if ($in | default [] | where value =~ '^-.*ERR$' | is-empty) { $in } else { null }
+	| from json
+	| if ($in | default [] | where value =~ '^-.*ERR$' | is-empty) { $in } else { null }
 }
 
 let zoxide_completer = {|spans|
@@ -99,16 +99,16 @@ let zoxide_completer = {|spans|
 
 let external_completer = {|spans|
 	let expanded_alias = scope aliases
-		| where name == $spans.0
-		| get -i 0.expansion
+	| where name == $spans.0
+	| get -i 0.expansion
 
-		let spans = if $expanded_alias != null {
-			$spans
-				| skip 1
-				| prepend ($expanded_alias | split row ' ' | take 1)
-		} else {
-			$spans
-		}
+	let spans = if $expanded_alias != null {
+		$spans
+		| skip 1
+		| prepend ($expanded_alias | split row ' ' | take 1)
+	} else {
+		$spans
+	}
 
 	match $spans.0 {
 		nu => $fish_completer
@@ -172,15 +172,24 @@ $env.config = {
 
 	completions: {
 		external: {
-			enable: true 
-			max_results: 100 
-			completer: $external_completer 
+			enable: true
+			max_results: 100
+			completer: $external_completer
 		}
 	}
 
 	filesize: {
 		metric: true
 	}
+
+	hooks: {
+        display_output: "if (term size).columns >= 100 { table -e } else { table }" # run to display the output of a pipeline
+        command_not_found: {
+            |cmd_name| (
+                command-not-found $cmd_name
+            )
+        } # return an error message when a command is not found
+    }
 }
 
 fastfetch
