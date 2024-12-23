@@ -3,46 +3,21 @@
   pkgs,
   ...
 }: {
-  programs = {
-    direnv = {
-      enable = true;
-      enableBashIntegration = true; # see note on other shells below
-      nix-direnv.enable = true;
-    };
-
-    nushell = {
-      enable = true;
-      configFile.source = ../../config/nushell/nix.nu;
-    };
-
-    carapace = {
-      enable = true;
-      enableNushellIntegration = true;
-    };
-
-    starship = {
-      enable = true;
-      settings = {
-        add_newline = true;
-        character = {
-          success_symbol = "[➜](bold green)";
-          error_symbol = "[➜](bold red)";
-        };
-      };
-    };
-  };
+  imports = [../../modules/programs/shells.nix];
 
   home.sessionVariables = {
     EDITOR = "nvim";
+    NVIM_IMG_DIR = "/home/${config.home.username}/.config/nvim/startup_images";
+    PYTHONPYCACHEPREFIX = "/home/${config.home.username}/.cache/__pycache__";
+
     WINHOME = "/mnt/c/Users/pande";
     NVIM_ASCII_DIR = "/mnt/c/Users/pande/Pictures/nvim";
-    NVIM_IMG_DIR = "/home/nixos/.config/nvim/startup_images";
   };
 
   home.file = {
     ".cargo/config.toml".text = ''
       [build]
-      target-dir = "/home/nixos/.cache/target"
+      target-dir = "/home/shawn/.cache/target"
       rustc-wrapper = "sccache"
 
       [target.x86_64-unknown-linux-gnu]
@@ -52,7 +27,8 @@
   };
 
   home.packages = with pkgs; [
-    commitizen
+    pscircle
+    nh
 
     # hasekll
     # cabal-install # The command-line interface for Cabal and Hackage https://hackage.haskell.org/package/cabal-install
@@ -60,7 +36,7 @@
     # haskell-language-server # LSP server for GHC https://hackage.haskell.org/package/haskell-language-server
     # stack # The Haskell Tool Stack https://hackage.haskell.org/package/stack
     # aspell # Spell checker for many languages http://aspell.net/
-    # (nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
+    # (nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })home
     # spotify-player # Terminal spotify player that has feature parity with the official client https://github.com/aome510/spotify-player
     # spotifyd # Open source Spotify client running as a UNIX daemon https://spotifyd.rs/
 
@@ -73,6 +49,8 @@
 
     shc # Shell Script Compiler https://neurobin.org/projects/softwares/unix/shc/
 
+    imagemagick
+
     glslviewer
 
     ncdu
@@ -81,7 +59,6 @@
     # yazi
 
     tre-command
-    thefuck
     libresprite
     ast-grep
     ripgrep
@@ -91,6 +68,7 @@
     # git
     gh
     delta
+    commitizen
     pre-commit
     lazygit
     gitoxide
