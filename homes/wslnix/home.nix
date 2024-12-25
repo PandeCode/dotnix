@@ -3,13 +3,18 @@
   pkgs,
   ...
 }: {
-  imports = [../../modules/programs/shells.nix];
+  imports = [
+    ../../modules/programs/shells.nix
+    ../../modules/programs/git.nix
+  ];
 
   home = {
     sessionVariables = {
       EDITOR = "nvim";
       NVIM_IMG_DIR = "/home/${config.home.username}/.config/nvim/startup_images";
       PYTHONPYCACHEPREFIX = "/home/${config.home.username}/.cache/__pycache__";
+
+      FZF_DEFAULT_OPTS = "--highlight-line  --info=inline-right  --ansi  --layout=reverse  --border=none --color=bg+:#283457  --color=bg:#16161e  --color=border:#27a1b9  --color=fg:#c0caf5  --color=gutter:#16161e  --color=header:#ff9e64  --color=hl+:#2ac3de  --color=hl:#2ac3de  --color=info:#545c7e  --color=marker:#ff007c  --color=pointer:#ff007c  --color=prompt:#2ac3de  --color=query:#c0caf5:regular  --color=scrollbar:#27a1b9  --color=separator:#ff9e64  --color=spinner:#ff007c"; # https://github.com/folke/tokyonight.nvim/blob/main/extras/fzf/tokyonight_night.sh
 
       WINHOME = "/mnt/c/Users/pande";
       NVIM_ASCII_DIR = "/mnt/c/Users/pande/Pictures/nvim";

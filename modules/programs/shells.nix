@@ -13,6 +13,8 @@
       enableFishIntegration = true;
       enableNushellIntegration = true;
     };
+    envs = {
+    };
     sharedShellAliases = {
       # File operations
       mkdir = "mkdir";
@@ -43,11 +45,14 @@
 
       # Git operations
       commit = "cz commit";
+      add = "git add";
       psuh = "git push";
       push = "git push";
 
       # Shell commands
       ":e" = "nvim";
+      e = "nvim";
+      ef = "nvim (fzf)";
       ":q" = "exit";
       eixt = "exit";
       f = "fuck";
@@ -72,12 +77,14 @@
   in {
     # fish = {
     #   enable = true;
+    #   shellAliases = sharedShellAliases;
+    #   environmentVariables = envs;
     # };
 
     nushell = {
       enable = true;
       shellAliases = sharedShellAliases;
-      # environmentVariables = {};
+      environmentVariables = envs;
       configFile.source = ../../config/nushell/config.nu;
     };
 

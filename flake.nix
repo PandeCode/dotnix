@@ -86,6 +86,7 @@
             };
           }
           ./homes/wslnix/home.nix
+          ./modules/desktop_env/hyprland.nix
         ];
       };
     };
