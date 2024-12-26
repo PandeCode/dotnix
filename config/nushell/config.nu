@@ -81,10 +81,10 @@ def tokyo-night [] { return {
     cursor: "#c0caf5"
 }}
 
-let fish_completer =  {|spans|
-	fish --command $'complete "--do-complete=($spans | str join " ")"'
-	| $"value(char tab)description(char newline)" + $in
-	| from tsv --flexible --no-infer
+let fish_completer = {|spans|
+    fish --command $'complete "--do-complete=($spans | str join " ")"'
+    | from tsv --flexible --noheaders --no-infer
+    | rename value description
 }
 
 let carapace_completer = {|spans: list<string>|
@@ -97,31 +97,32 @@ let zoxide_completer = {|spans|
 	$spans | skip 1 | zoxide query -l ...$in | lines | where {|x| $x != $env.PWD}
 }
 
+
 let external_completer = {|spans|
-	let expanded_alias = scope aliases
-	| where name == $spans.0
-	| get -i 0.expansion
+    let expanded_alias = scope aliases
+    | where name == $spans.0
+    | get -i 0.expansion
 
-	let spans = if $expanded_alias != null {
-		$spans
-		| skip 1
-		| prepend ($expanded_alias | split row ' ' | take 1)
-	} else {
-		$spans
-	}
+    let spans = if $expanded_alias != null {
+        $spans
+        | skip 1
+        | prepend ($expanded_alias | split row ' ' | take 1)
+    } else {
+        $spans
+    }
 
-	match $spans.0 {
-		nu => $fish_completer
-		git => $fish_completer
-		__zoxide_z | __zoxide_zi => $zoxide_completer
-		z => $zoxide_completer
-		j => $zoxide_completer
-		zi => $zoxide_completer
-
-		_ => $carapace_completer
-	} | do $in $spans
+    match $spans.0 {
+        # carapace completions are incorrect for nu
+        nu => $fish_completer
+        # fish completes commits and branch names in a nicer way
+        git => $fish_completer
+        # carapace doesn't have completions for asdf
+        asdf => $fish_completer
+        # use zoxide completions for zoxide commands
+        __zoxide_z | __zoxide_zi => $zoxide_completer
+        _ => $carapace_completer
+    } | do $in $spans
 }
-
 
 export def --env cmd [d] { ^mkdir -p $d; cd $d }
 
@@ -173,7 +174,7 @@ $env.config = {
 	completions: {
 		external: {
 			enable: true
-			max_results: 100
+			max_results: 50
 			completer: $external_completer
 		}
 	}
@@ -183,12 +184,12 @@ $env.config = {
 	}
 
 	hooks: {
-        display_output: "if (term size).columns >= 100 { table -e } else { table }" # run to display the output of a pipeline
-        command_not_found: {
-            |cmd_name| (
-                command-not-found $cmd_name
-            )
-        } # return an error message when a command is not found
+		display_output: "if (term size).columns >= 100 { table -e } else { table }" # run to display the output of a pipeline
+		command_not_found: {
+    		|cmd_name| (
+        		command-not-found $cmd_name
+    		)
+		} # return an error message when a command is not found
     }
 }
 

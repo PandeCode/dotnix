@@ -1,6 +1,6 @@
 {
   pkgs,
-  nixpkgs-stable,
+  # nixpkgs-stable,
   # config, lib,  inputs, pkgs-unstable,
   ...
 }:
@@ -49,9 +49,6 @@
 
   environment.variables = {
     EDITOR = "nvim";
-    NVIM_ASCII_DIR = "/home/nixos/.config/nvim/startup_images";
-    NVIM_IMG_DIR = "/mnt/c/Users/pande/Pictures/nvim";
-    WINHOME = "/mnt/c/Users/pande";
   };
 
   environment.systemPackages = with pkgs; [

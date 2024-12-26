@@ -13,8 +13,6 @@
       enableFishIntegration = true;
       enableNushellIntegration = true;
     };
-    envs = {
-    };
     sharedShellAliases = {
       # File operations
       mkdir = "mkdir";
@@ -75,16 +73,18 @@
       winget = "winget.exe";
     };
   in {
-    # fish = {
-    #   enable = true;
-    #   shellAliases = sharedShellAliases;
-    #   environmentVariables = envs;
-    # };
+    fish = {
+      enable = true;
+      shellAliases = sharedShellAliases;
+    };
 
+    bash = {
+      enable = true;
+      shellAliases = sharedShellAliases;
+    };
     nushell = {
       enable = true;
       shellAliases = sharedShellAliases;
-      environmentVariables = envs;
       configFile.source = ../../config/nushell/config.nu;
     };
 
@@ -93,7 +93,10 @@
     carapace = enable_shells;
     zoxide = enable_shells;
 
-    direnv = mergeAttrs enable_shells {
+    direnv = {
+      enable = true;
+      enableBashIntegration = true;
+      enableNushellIntegration = true;
       nix-direnv.enable = true;
     };
 

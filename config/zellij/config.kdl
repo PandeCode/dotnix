@@ -58,7 +58,7 @@ keybinds clear-defaults=true {
         bind "9" { GoToTab 9; SwitchToMode "Normal"; }
 
         bind "f" { ToggleFocusFullscreen ; SwitchToMode "Normal"; }
-        bind "g" { ToggleFloatingPanes; SwitchToMode "Normal"; }
+        bind "F" { ToggleFloatingPanes; SwitchToMode "Normal"; }
 
         bind "Space"{ NextSwapLayout ; }
     }

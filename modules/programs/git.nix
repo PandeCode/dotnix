@@ -1,10 +1,21 @@
-{lib, ...}: {
+{
+  lib,
+  pkgs,
+  ...
+}: {
   programs = {
     git = {
+      package = pkgs.gitAndTools.gitFull;
       enable = true;
 
       userName = "PandeCode";
       userEmail = "pandeshawnbenjamin@gmail.com";
+
+      extraConfig = {
+        color = {
+          ui = "auto";
+        };
+      };
 
       aliases = {
         lg = ''log --all --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit'';
@@ -31,17 +42,17 @@
         enable = true;
         options = {
           # https://raw.githubusercontent.com/folke/tokyonight.nvim/refs/heads/main/extras/delta/tokyonight_night.gitconfig
-          minus-style = ''syntax "#37222c"'';
-          minus-non-emph-style = ''syntax "#37222c"'';
-          minus-emph-style = ''syntax "#713137"'';
-          minus-empty-line-marker-style = ''syntax "#37222c"'';
-          line-numbers-minus-style = ''"#914c54"'';
-          plus-style = ''syntax "#20303b"'';
-          plus-non-emph-style = ''syntax "#20303b"'';
-          plus-emph-style = ''syntax "#2c5a66"'';
-          plus-empty-line-marker-style = ''syntax "#20303b"'';
-          line-numbers-plus-style = ''"#449dab"'';
-          line-numbers-zero-style = ''"#3b4261"'';
+          minus-style = "syntax \"#37222c\"";
+          minus-non-emph-style = "syntax \"#37222c\"";
+          minus-emph-style = "syntax \"#713137\"";
+          minus-empty-line-marker-style = "syntax \"#37222c\"";
+          line-numbers-minus-style = "\"#914c54\"";
+          plus-style = "syntax \"#20303b\"";
+          plus-non-emph-style = "syntax \"#20303b\"";
+          plus-emph-style = "syntax \"#2c5a66\"";
+          plus-empty-line-marker-style = "syntax \"#20303b\"";
+          line-numbers-plus-style = "\"#449dab\"";
+          line-numbers-zero-style = "\"#3b4261\"";
         };
       };
     };

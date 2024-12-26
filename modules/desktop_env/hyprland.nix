@@ -5,6 +5,9 @@
   ...
 }:
 with lib; {
+  imports = [
+    ./widgets.nix
+  ];
   # options.hyprland.enable = mkOption {
   #   type = types.bool;
   #   default = false;
