@@ -159,10 +159,16 @@ plugins {
     // session-manager { path "session-manager"; }
 }
 
-default_shell "nu"
-pane_frames false
+// load_plugins {
+//     "file:~/.config/zellij/plugins/zjframes.wasm" {
+//         hide_frame_for_single_pane       "true"
+//         hide_frame_except_for_search     "true"
+//         hide_frame_except_for_fullscreen "true"
+//     }
+// }
 
-default_layout "compact"
+default_shell "fish"
+pane_frames false
 
 scrollback_editor "nvim"
 

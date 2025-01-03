@@ -191,6 +191,11 @@ $env.config = {
     		)
 		} # return an error message when a command is not found
     }
+
+    cursor_shape: {
+    	vi_insert: blink_line
+    	vi_normal: blink_block
+	}
 }
 
-fastfetch
+# fastfetch

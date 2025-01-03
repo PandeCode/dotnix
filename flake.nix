@@ -19,12 +19,30 @@
     nixos-wsl.url = "github:nix-community/NixOS-WSL/main?shallow=1";
 
     home-manager = {
-      url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager?shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # pyproject-nix = {
+    #   url = "github:pyproject-nix/pyproject.nix?shallow=1";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+    #
+    # uv2nix = {
+    #   url = "github:pyproject-nix/uv2nix?shallow=1";
+    #   inputs.pyproject-nix.follows = "pyproject-nix";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+    #
+    # pyproject-build-systems = {
+    #   url = "github:pyproject-nix/build-system-pkgs?shallow=1";
+    #   inputs.pyproject-nix.follows = "pyproject-nix";
+    #   inputs.uv2nix.follows = "uv2nix";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay?shallow=1";
-    pre-commit-hooks.url = "github:cachix/git-hooks.nix";
+    pre-commit-hooks.url = "github:cachix/git-hooks.nix?shallow=1";
   };
 
   outputs = {
@@ -33,20 +51,51 @@
     nixpkgs-stable,
     home-manager,
     nixos-wsl,
+    # uv2nix,
+    # pyproject-nix,
+    # pyproject-build-systems,
     ...
   } @ inputs: let
     inherit (self) outputs;
+    inherit (inputs.nixpkgs.lib) attrValues;
+
     system = "x86_64-linux";
 
     supportedSystems = ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
 
     forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
-    overlays = [
-      inputs.neovim-nightly-overlay.overlays.default
+    overlays = with inputs; [
+      neovim-nightly-overlay.overlays.default
     ];
   in {
+    nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
+
     nixosConfigurations = {
+      nixiso = nixpkgs.lib.nixosSystem {
+        inherit system;
+
+        specialArgs = {
+          inherit inputs;
+          inherit nixpkgs-stable;
+        };
+        modules = [
+          {
+            nixpkgs.overlays = overlays;
+          }
+          {
+            system.stateVersion = "24.05";
+            networking.hostName = "nixiso";
+            wsl = {
+              enable = true;
+              defaultUser = "shawn";
+              wslConf.network.hostname = "nixiso";
+            };
+          }
+          ./hosts/iso/configuration.nix
+        ];
+      };
+
       wslnix = nixpkgs.lib.nixosSystem {
         inherit system;
 
@@ -78,6 +127,9 @@
         extraSpecialArgs = {inherit inputs outputs;};
 
         modules = [
+          {
+            nixpkgs.overlays = overlays;
+          }
           {
             home = {
               username = "shawn";

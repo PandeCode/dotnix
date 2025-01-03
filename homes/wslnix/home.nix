@@ -6,8 +6,13 @@
   win_user = "pande";
 in {
   imports = [
+    ../../modules/programs/zellij.nix
     ../../modules/programs/shells.nix
     ../../modules/programs/git.nix
+    ../../modules/programs/mpls.nix
+    ../../modules/programs/codelldb.nix
+    ../../modules/programs/bin.nix
+    # ../../modules/programs/python.nix
   ];
 
   home = {
@@ -22,6 +27,8 @@ in {
 
       # https://github.com/folke/tokyonight.nvim/blob/main/extras/fzf/tokyonight_night.sh
       FZF_DEFAULT_OPTS = "--highlight-line  --info=inline-right  --ansi  --layout=reverse  --border=none --color=bg+:#283457  --color=bg:#16161e  --color=border:#27a1b9  --color=fg:#c0caf5  --color=gutter:#16161e  --color=header:#ff9e64  --color=hl+:#2ac3de  --color=hl:#2ac3de  --color=info:#545c7e  --color=marker:#ff007c  --color=pointer:#ff007c  --color=prompt:#2ac3de  --color=query:#c0caf5:regular  --color=scrollbar:#27a1b9  --color=separator:#ff9e64  --color=spinner:#ff007c --preview 'bat --color=always --style=numbers --line-range=:500 {}'";
+
+      PING_HOST = "9.9.9.9"; # for a ping script
     };
 
     file = {
@@ -42,6 +49,7 @@ in {
 
     packages = with pkgs; [
       pscircle
+      xdg-utils
 
       nh
       statix
@@ -97,14 +105,14 @@ in {
       yaml-language-server # Language Server for YAML Files
       tailwindcss-language-server # Intelligent Tailwind CSS tooling for Visual Studio code
       vscode-langservers-extracted
-      pyright # Type checker for the Python language https://github.com/Microsoft/pyright
-      # basedpyright
+      basedpyright
+      pylyzer
 
       ctags # Tool for fast source code browsing (exuberant ctags) https://ctags.sourceforge.net/
       emmet-ls # Emmet support based on LSP https://github.com/aca/emmet-ls
       lua-language-server # Language server that offers Lua language support https://github.com/luals/lua-language-server
       neocmakelsp # CMake lsp based on tower-lsp and treesitter https://github.com/Decodetalkers/neocmakelsp
-      nil # Yet another language server for Nix https://github.com/oxalica/nil
+      # nil # Yet another language server for Nix https://github.com/oxalica/nil
       nodePackages.bash-language-server
       ra-multiplex # Multiplexer for rust-analyzer https://github.com/pr2502/ra-multiplex
       glsl_analyzer
@@ -112,11 +120,12 @@ in {
 
       # Formatters
       stylua
-      black # Uncompromising Python code formatter https://github.com/psf/black
-      alejandra # An opinionated formatter for Nix https://hackage.haskell.org/package/nixfmt
-      nodePackages.lua-fmt # Format Lua code https://github.com/trixnz/lua-fmt
-      nodePackages.prettier # An opinionated `toml` formatter plugin for Prettier https://github.com/un-ts/prettier/tree/master/packages/prettier
-      xxd # Most popular clone of the VI editor http://www.vim.org
+      shfmt
+      black
+      alejandra
+      nodePackages.prettier
+
+      xxd
 
       # Better Tools
       axel # parallel downloads
@@ -162,10 +171,8 @@ in {
       # # qemu_full # Too big
       # nasm
       # radare2 # UNIX-like reverse engineering framework and command-line toolset https://radare.org
-
-      # (pkgs.writeShellScriptBin "my-hello" ''
-      #   echo "Hello, ${config.home.username}!"
-      # '')
+      # aflplusplus
+      # pwntools
     ];
   };
 }
