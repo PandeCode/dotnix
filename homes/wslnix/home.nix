@@ -124,6 +124,7 @@ in {
       black
       alejandra
       nodePackages.prettier
+      prettierd
 
       xxd
 
