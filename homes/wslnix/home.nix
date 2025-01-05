@@ -100,6 +100,7 @@ in {
       tree-sitter
 
       # LSPs
+      texlab
       nixd
       vim-language-server # VImScript language server, LSP for vim script
       yaml-language-server # Language Server for YAML Files
