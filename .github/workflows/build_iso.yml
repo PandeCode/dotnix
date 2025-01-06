@@ -22,9 +22,11 @@ jobs:
       - name: Build ISO
         run: |
           ISO_PATH=$(nix run nixpkgs#nixos-generators -- --format iso --flake .#nixiso -o result)
+          echo "$ISO_PATH : $(du -h $ISO_PATH)"
           echo "ISO_PATH=$ISO_PATH" >> $GITHUB_ENV
           TAG_NAME=$(date +"iso-%Y%m%d-%H%M%S")
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+          split $ISO_PATH -b 1900000000 ISO_PART_
 
       - name: Create Release Tag
         uses: softprops/action-gh-release@v2
@@ -32,5 +34,5 @@ jobs:
           prerelease: true
           name: ${{ env.TAG_NAME }}
           tag_name: ${{ env.TAG_NAME }}
-          files: ${{ env.ISO_PATH }}
+          files: ISO_PART_*
             
