@@ -83,7 +83,7 @@
         };
         modules = [
           overlays
-          ./hosts/iso/configuration.nix
+          ./hosts/nixiso/configuration.nix
         ];
       };
 
@@ -94,6 +94,7 @@
 
         modules = [
           nixos-wsl.nixosModules.default
+          overlays
           {
             system.stateVersion = "24.05"; # IMPORTANT: NixOS-WSL breaks on other state versions
             networking.hostName = "wslnix";
@@ -117,14 +118,13 @@
         modules = [
           overlays
           {
-            home = {
+            home = rec {
               username = "shawn";
-              homeDirectory = "/home/shawn";
+              homeDirectory = "/home/${username}";
               stateVersion = "24.05";
             };
           }
           ./homes/wslnix/home.nix
-          ./modules/desktop_env/hyprland.nix
         ];
       };
     };

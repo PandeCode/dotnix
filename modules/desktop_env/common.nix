@@ -1,26 +1,11 @@
-{pkgs, ...}: {
-  xdg.portal.enable = true;
-  xdg.portal.extraPortals = [pkgs.xdg-desktop-portal-gtk];
-
-  sound.enable = true;
-
-  security.rtkit.enable = true;
-
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-    jack.enable = true;
-  };
-
+{
+  pkgs,
+  lib,
+  ...
+}: {
   environment = {
     systemPackages = with pkgs; [
       (writeShellScriptBin "check_git_status.sh" ''${builtins.readFile ../../bin/check_git_status.sh}'')
-
-      # (pkgs.warbar.overrideAttrs (oldAttrs: {
-      #   mesonFlags = oldAttrs.mesonFlags ++ ["-Dexperimental=true"];
-      # }))
 
       dunst
       libnotify
@@ -28,6 +13,68 @@
       kitty
       wezterm
       alacritty
+
+      gparted
+      blueman
+      networkmanagerapplet
     ];
+  };
+  xdg.portal.enable = true;
+  xdg.portal.extraPortals = [pkgs.xdg-desktop-portal-gtk];
+
+  networking = {
+    # networkmanager = {
+    #   enable = true;
+    #   dns = "none";
+    #   # wifi.powersave = true;
+    # };
+
+    nameservers = [
+      "1.1.1.1"
+      "1.0.0.1"
+      "8.8.8.8"
+      "8.8.4.4"
+    ];
+  };
+  # users.users.<name>.extraGroups = [ "networkmanager" ];
+
+  security.rtkit.enable = true;
+
+  hardware = {
+    pulseaudio = {
+      enable = true;
+      package = pkgs.pulseaudioFull;
+      extraConfig = "load-module module-switch-on-connect";
+    };
+
+    bluetooth = {
+      enable = true;
+      powerOnBoot = true;
+      settings = {
+        General = {
+          Enable = "Source,Sink,Media,Socket";
+          # Experimental = true; # Show battery # WARN: Arch Wiki warns for bugs
+        };
+      };
+    };
+  };
+
+  # enable headset control for bluetooth headsets
+  systemd.user.services.mpris-proxy = {
+    description = "Mpris proxy";
+    after = ["network.target" "sound.target"];
+    wantedBy = ["default.target"];
+    serviceConfig.ExecStart = "${pkgs.bluez}/bin/mpris-proxy";
+  };
+
+  services.pulseaudio = {
+    enable = lib.mkForce false;
+  };
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+    jack.enable = true;
   };
 }

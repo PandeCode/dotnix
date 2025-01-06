@@ -20,7 +20,6 @@
       mdkir = "mkdir";
       dmkir = "mkdir";
       cp = "cp -ir";
-      df = "df -h";
       free = "free -m";
       sizeof = "du -h --max-depth=0";
       ls = "eza";

@@ -1,5 +1,9 @@
-{pkgs, ...}: {
+{pkgs, ...}:
+# let swap = "/dev/hda7"; in
+{
+  # swapDevices = [ {device = swap;} ];
   boot = {
+    # resumeDevice = swap;
     plymouth = {
       enable = true;
       theme = "rings";

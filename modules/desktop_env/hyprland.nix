@@ -1,8 +1,4 @@
-{
-  config,
-  pkgs,
-  ...
-}: {
+{pkgs, ...}: {
   imports = [
     ./common.nix
     ./widgets.nix
@@ -11,7 +7,6 @@
   programs = {
     hyprland = {
       enable = true;
-      nvidiaPatches = true;
       xwayland.enable = true;
     };
   };

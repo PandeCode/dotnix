@@ -1,6 +1,7 @@
 {
   pkgs,
   config,
+  inputs,
   ...
 }: {
   home = let
@@ -17,6 +18,7 @@
     viAlias = true;
     vimAlias = true;
     vimdiffAlias = true;
+    package = inputs.neovim-nightly-overlay.packages.${pkgs.system}.default;
 
     extraPackages = with pkgs; [
       (pkgs.python3.withPackages (python-pkgs:
@@ -65,7 +67,7 @@
       lazygit
       ra-multiplex
       tree-sitter
-      xdd
+      xxd
     ];
   };
 }
