@@ -1,10 +1,10 @@
 {pkgs, ...}: let
-  mplsBinary = pkgs.stdenv.mkDerivation {
+  mpls = pkgs.stdenv.mkDerivation {
     pname = "mpls";
-    version = "0.4.1";
+    version = "0.6.0";
     src = pkgs.fetchurl {
-      url = "https://github.com/mhersson/mpls/releases/download/v0.4.1/mpls_0.4.1_linux_amd64.tar.gz";
-      sha256 = "b29df8378f9021e752c1a991735fa049332b5dd3eb63b2ac0c84789369aa5683";
+      url = "https://github.com/mhersson/mpls/releases/download/v0.6.0/mpls_0.6.0_linux_amd64.tar.gz";
+      sha256 = "93cb6ef1491ccb71abdecfb8e27045cbacf2eba191513a28957f94010d328fa5";
     };
     phases = ["unpackPhase" "installPhase"];
     unpackPhase = ''
@@ -17,5 +17,5 @@
     '';
   };
 in {
-  home.packages = [mplsBinary];
+  home.packages = [mpls];
 }

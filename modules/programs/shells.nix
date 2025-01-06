@@ -12,6 +12,7 @@
       enableNushellIntegration = true;
     };
     sharedShellAliases = {
+      df = "duf";
       # File operations
       mkdir = "mkdir";
       mkdri = "mkdir";
@@ -59,9 +60,8 @@
       neovide = "neovide.exe --wsl";
       nivm = "nvim";
       np = "nano -w PKGBUILD";
-      ns = "nix-shell shell.nix --command 'nu'";
-      nsp = "nix-shell --command 'nu' -p";
-      nue = "nvim ~/dotnix/config/nushell/config.nu ;";
+      ns = "nix-shell shell.nix --command 'fish'";
+      nsp = "nix-shell --command 'fish' -p";
       pwsh = "pwsh.exe";
       py = "python3";
       wsl = "wsl.exe";

@@ -25,3 +25,5 @@
 - WSL provides a more familiar Linux-like environment.
 
 I built this, brick by brick
+
+nix run nixpkgs#nixos-generators -- --format iso --flake ~/dotnix#nixiso -o result

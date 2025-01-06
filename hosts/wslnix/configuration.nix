@@ -6,40 +6,19 @@
 }:
 # let stable = import nixpkgs-stable {}; in
 {
-  nixpkgs.config.allowUnfree = true;
+  imports = [
+    ../../modules/hosts/default.nix
+  ];
 
   nix = {
     settings = {
-      experimental-features = ["nix-command" "flakes"];
-      trusted-users = ["root" "nixos" "shawn"];
+      trusted-users = ["root" "shawn"];
     };
-
-    gc = {
-      automatic = true;
-      dates = "weekly";
-      options = "--delete-older-than 30d";
-    };
-
-    optimise = {
-      automatic = true;
-      dates = ["03:45"];
-    };
-
-    # free up to 1GiB whenever there is less than 100MiB left
-    extraOptions = ''
-      min-free = ${toString (100 * 1024 * 1024)}
-      max-free = ${toString (1024 * 1024 * 1024)}'';
   };
 
   systemd.services."user-runtime-dir@" = {
     overrideStrategy = "asDropin";
     unitConfig.ConditionPathExists = "!/run/user/%i";
-  };
-
-  services.ananicy = {
-    enable = true;
-    package = pkgs.ananicy-cpp;
-    rulesProvider = pkgs.ananicy-rules-cachyos;
   };
 
   programs.nix-ld = {
@@ -120,7 +99,5 @@
     # install mpv to ensure display manager gets installed as a dependency
     mpv
     sxiv # Simple X Image Viewer https://github.com/muennich/sxiv
-
-    cachix
   ];
 }

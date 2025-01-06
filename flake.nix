@@ -65,9 +65,11 @@
 
     forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
-    overlays = with inputs; [
-      neovim-nightly-overlay.overlays.default
-    ];
+    overlays = {
+      nixpkgs.overlays = with inputs; [
+        neovim-nightly-overlay.overlays.default
+      ];
+    };
   in {
     nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
 
@@ -80,18 +82,7 @@
           inherit nixpkgs-stable;
         };
         modules = [
-          {
-            nixpkgs.overlays = overlays;
-          }
-          {
-            system.stateVersion = "24.05";
-            networking.hostName = "nixiso";
-            wsl = {
-              enable = true;
-              defaultUser = "shawn";
-              wslConf.network.hostname = "nixiso";
-            };
-          }
+          overlays
           ./hosts/iso/configuration.nix
         ];
       };
@@ -103,9 +94,6 @@
 
         modules = [
           nixos-wsl.nixosModules.default
-          {
-            nixpkgs.overlays = overlays;
-          }
           {
             system.stateVersion = "24.05"; # IMPORTANT: NixOS-WSL breaks on other state versions
             networking.hostName = "wslnix";
@@ -127,9 +115,7 @@
         extraSpecialArgs = {inherit inputs outputs;};
 
         modules = [
-          {
-            nixpkgs.overlays = overlays;
-          }
+          overlays
           {
             home = {
               username = "shawn";

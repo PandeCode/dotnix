@@ -1,23 +1,42 @@
 {
   config,
   pkgs,
-  lib,
   ...
-}:
-with lib; {
+}: {
   imports = [
+    ./common.nix
     ./widgets.nix
   ];
-  # options.hyprland.enable = mkOption {
-  #   type = types.bool;
-  #   default = false;
-  #   description = "Enable the example service provided by hyprland.";
-  # };
-  #
-  # config = mkIf config.hyprland.enable {
-  home.packages = with pkgs; [
-    hyprland
-    xorg.xorgserver
-  ];
-  # };
+
+  programs = {
+    hyprland = {
+      enable = true;
+      nvidiaPatches = true;
+      xwayland.enable = true;
+    };
+  };
+  hardware = {
+    opengl.enable = true;
+  };
+
+  environment = {
+    sessionVariables = {
+      WLR_NO_HARDWARE_CURSORS = "1"; # invisible cursor protection
+      NIXOS_OZONE_WL = "1";
+    };
+
+    systemPackages = with pkgs; [
+      rofi-wayland
+      bemenu
+
+      waybar
+
+      swww
+      # linux-wallpaperengine
+      # hyprpaper
+      # swaybg
+      # wpaperd
+      # mpvpaper
+    ];
+  };
 }
