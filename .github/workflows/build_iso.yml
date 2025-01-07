@@ -16,17 +16,25 @@ jobs:
 
       - name: Install Nix
         uses: cachix/install-nix-action@v20
-        with:
-          nix_version: "2.24.1"
 
       - name: Build ISO
         run: |
           ISO_PATH=$(nix run nixpkgs#nixos-generators -- --format iso --flake .#nixiso -o result)
           echo "$ISO_PATH : $(du -h $ISO_PATH)"
           echo "ISO_PATH=$ISO_PATH" >> $GITHUB_ENV
+          
+          split $ISO_PATH -b 1900000000 ISO_PART_
+          
           TAG_NAME=$(date +"iso-%Y%m%d-%H%M%S")
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-          split $ISO_PATH -b 1900000000 ISO_PART_
+      - name: Generate sha256
+        run: |          
+          echo "Starting SHA256 hashes generated for ISO and parts."
+          for PART in ISO_PART_*; do
+            SHA256_PART_FILE="sha256_${PART}"
+            sha256sum $PART > $SHA256_PART_FILE
+          done
+          echo "Checksums and SHA256 hashes generated for ISO and parts."
 
       - name: Create Release Tag
         uses: softprops/action-gh-release@v2
@@ -34,5 +42,6 @@ jobs:
           prerelease: true
           name: ${{ env.TAG_NAME }}
           tag_name: ${{ env.TAG_NAME }}
-          files: ISO_PART_*
-            
+          files: |
+            ISO_PART_*
+            sha256_*
