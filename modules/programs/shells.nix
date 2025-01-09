@@ -18,6 +18,10 @@
       };
       sharedShellAliases = {
         df = "duf";
+        du = "dust";
+        ls = "eza";
+        sl = "eza";
+        l = "eza -la";
         # File operations
         mkdir = "mkdir";
         mkdri = "mkdir";
@@ -27,9 +31,6 @@
         cp = "cp -ir";
         free = "free -m";
         sizeof = "du -h --max-depth=0";
-        ls = "eza";
-        sl = "ls";
-        l = "ls -la";
         tree = "tre";
         more = "less";
 

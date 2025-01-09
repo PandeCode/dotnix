@@ -93,6 +93,7 @@ in {
       just
       duf
       hurl
+      xh
       hyperfine
 
       # Eye Candy

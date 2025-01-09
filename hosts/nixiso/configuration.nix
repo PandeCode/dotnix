@@ -34,9 +34,23 @@
       gnumake
       gcc
 
+      miniserve
+
+      ouch # unzip
+      pipr
+
       # Utilities
       busybox
+
       inetutils
+      sd
+
+      bandwhich
+      dust
+      dua
+      grex
+      fclones
+      htmlq
 
       wget
 

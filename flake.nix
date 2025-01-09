@@ -136,6 +136,7 @@
         hooks = {
           alejandra.enable = true;
           check-added-large-files.enable = true;
+          ripsecrets.enable = true;
           check-json.enable = true;
           check-shebang-scripts-are-executable.enable = true;
           check-symlinks.enable = true;
