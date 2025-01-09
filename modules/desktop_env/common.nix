@@ -23,6 +23,9 @@
   xdg.portal.extraPortals = [pkgs.xdg-desktop-portal-gtk];
 
   networking = {
+    firewall = {
+      enable = true;
+    };
     # networkmanager = {
     #   enable = true;
     #   dns = "none";
@@ -39,14 +42,13 @@
   # users.users.<name>.extraGroups = [ "networkmanager" ];
 
   security.rtkit.enable = true;
+  services.pulseaudio = {
+    enable = true;
+    package = pkgs.pulseaudioFull;
+    extraConfig = "load-module module-switch-on-connect";
+  };
 
   hardware = {
-    pulseaudio = {
-      enable = true;
-      package = pkgs.pulseaudioFull;
-      extraConfig = "load-module module-switch-on-connect";
-    };
-
     bluetooth = {
       enable = true;
       powerOnBoot = true;
@@ -67,14 +69,11 @@
     serviceConfig.ExecStart = "${pkgs.bluez}/bin/mpris-proxy";
   };
 
-  services.pulseaudio = {
-    enable = lib.mkForce false;
-  };
   services.pipewire = {
     enable = true;
     alsa.enable = true;
     alsa.support32Bit = true;
-    pulse.enable = true;
+    pulse.enable = lib.mkForce true;
     jack.enable = true;
   };
 }

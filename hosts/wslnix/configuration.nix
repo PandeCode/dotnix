@@ -9,6 +9,24 @@
   imports = [
     ../../modules/hosts/default.nix
   ];
+  system.stateVersion = "24.05"; # IMPORTANT: NixOS-WSL breaks on other state versions
+  networking.hostName = "wslnix";
+  wsl = {
+    enable = true;
+    defaultUser = "shawn";
+    wslConf.network.hostname = "wslnix";
+  };
+
+  # boot.loader.systemd-boot.enable = true;
+  # boot.loader.efi.canTouchEfiVariables = true;
+
+  # timezone = "Toronto/Canada";
+
+  # users.users.shawn = {
+  # 	isNormalUser = true;
+  # 	description = "shawn";
+  # 	extraGroups = [ "networkmanager" "wheel" ];
+  # };
 
   nix = {
     settings = {

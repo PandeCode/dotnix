@@ -13,36 +13,43 @@
   };
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable?shallow=1";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.11?shallow=1";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.11";
 
-    nixos-wsl.url = "github:nix-community/NixOS-WSL/main?shallow=1";
+    nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
 
     home-manager = {
-      url = "github:nix-community/home-manager?shallow=1";
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    stylix.url = "github:danth/stylix";
+
+    # darwin = {
+    #   url = "github:LnL7/nix-darwin";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+
     # pyproject-nix = {
-    #   url = "github:pyproject-nix/pyproject.nix?shallow=1";
+    #   url = "github:pyproject-nix/pyproject.nix";
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
     #
     # uv2nix = {
-    #   url = "github:pyproject-nix/uv2nix?shallow=1";
+    #   url = "github:pyproject-nix/uv2nix";
     #   inputs.pyproject-nix.follows = "pyproject-nix";
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
     #
     # pyproject-build-systems = {
-    #   url = "github:pyproject-nix/build-system-pkgs?shallow=1";
+    #   url = "github:pyproject-nix/build-system-pkgs";
     #   inputs.pyproject-nix.follows = "pyproject-nix";
     #   inputs.uv2nix.follows = "uv2nix";
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
 
-    neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay?shallow=1";
-    pre-commit-hooks.url = "github:cachix/git-hooks.nix?shallow=1";
+    neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
+    pre-commit-hooks.url = "github:cachix/git-hooks.nix";
   };
 
   outputs = {
@@ -89,24 +96,18 @@
 
       wslnix = nixpkgs.lib.nixosSystem {
         inherit system;
-
         specialArgs = {inherit nixpkgs-stable;};
-
         modules = [
           nixos-wsl.nixosModules.default
           overlays
-          {
-            system.stateVersion = "24.05"; # IMPORTANT: NixOS-WSL breaks on other state versions
-            networking.hostName = "wslnix";
-            wsl = {
-              enable = true;
-              defaultUser = "shawn";
-              wslConf.network.hostname = "wslnix";
-            };
-          }
           ./hosts/wslnix/configuration.nix
         ];
       };
+
+      # darwinConfigurations."«hostname»" = darwin.lib.darwinSystem {
+      #   system = "aarch64-darwin";
+      #   modules = [stylix.darwinModules.stylix ./configuration.nix];
+      # };
     };
 
     homeConfigurations = {
@@ -133,7 +134,6 @@
       pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
         src = ./.;
         hooks = {
-          # "taplo fmt".enable = true; # toml
           alejandra.enable = true;
           check-added-large-files.enable = true;
           check-json.enable = true;

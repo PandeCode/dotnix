@@ -6,13 +6,7 @@
   win_user = "pande";
 in {
   imports = [
-    ../../modules/programs/zellij.nix
-    ../../modules/programs/shells.nix
-    ../../modules/programs/git.nix
-    ../../modules/programs/mpls.nix
-    ../../modules/programs/codelldb.nix
-    ../../modules/programs/bin.nix
-    ../../modules/programs/neovim.nix
+    ../../modules/programs/default.nix
     # TODO ../../modules/theming/default.nix
     # TODO ../../modules/programs/python.nix
   ];
