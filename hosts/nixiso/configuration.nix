@@ -22,11 +22,6 @@
   };
 
   environment = {
-    variables = {
-      EDITOR = "nvim";
-      VISUAL = "nvim";
-    };
-
     systemPackages = with pkgs; [
       disko
       parted
