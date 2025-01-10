@@ -80,7 +80,7 @@ layout {
 
         		datetime        "#[fg=#6C7086,bold] {format} "
         		datetime_format "%a %d %b %H:%M"
-        		datetime_timezone "Costa_Rica"
+        		datetime_timezone "America/Costa_Rica"
     		}
         }
         children

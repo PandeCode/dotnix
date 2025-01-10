@@ -17,6 +17,12 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v20
 
+      - name: Cache Nix Store
+        uses: actions/cache@v4
+        with:
+          path: /nix/store
+          key: nix-store
+
       - name: Build ISO
         run: |
           ISO_PATH=$(nix run nixpkgs#nixos-generators -- --format iso --flake .#nixiso -o result)
