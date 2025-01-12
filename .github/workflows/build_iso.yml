@@ -56,7 +56,7 @@ jobs:
             },
           ]
 
-    if: startsWith(github.event.head_commit.message, matrix.target.message)
+    if: startsWith(github.event.head_commit.message, "build-${matrix.target.format}")
     runs-on: ubuntu-latest
 
     steps:
