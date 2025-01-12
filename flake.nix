@@ -58,6 +58,7 @@
     nixpkgs-stable,
     home-manager,
     nixos-wsl,
+    stylix,
     # uv2nix,
     # pyproject-nix,
     # pyproject-build-systems,
@@ -90,16 +91,22 @@
         };
         modules = [
           overlays
+          stylix.nixosModules.stylix
           ./hosts/nixiso/configuration.nix
         ];
       };
 
       wslnix = nixpkgs.lib.nixosSystem {
         inherit system;
-        specialArgs = {inherit nixpkgs-stable;};
+        specialArgs = {
+          inherit nixpkgs-stable;
+          inherit inputs;
+        };
         modules = [
           nixos-wsl.nixosModules.default
           overlays
+
+          stylix.nixosModules.stylix
           ./hosts/wslnix/configuration.nix
         ];
       };
@@ -110,22 +117,26 @@
       # };
     };
 
-    homeConfigurations = {
-      "shawn@wslnix" = home-manager.lib.homeManagerConfiguration {
+    homeConfigurations = let
+      username = "shawn";
+      os = "wslnix";
+    in {
+      "${username}@${os}" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.${system};
 
         extraSpecialArgs = {inherit inputs outputs;};
 
         modules = [
           overlays
+          stylix.homeManagerModules.stylix
           {
             home = rec {
-              username = "shawn";
+              inherit username;
               homeDirectory = "/home/${username}";
               stateVersion = "24.05";
             };
           }
-          ./homes/wslnix/home.nix
+          ./homes/${os}/home.nix
         ];
       };
     };

@@ -1,15 +1,22 @@
 {
   config,
   pkgs,
+  lib,
   ...
 }: let
   win_user = "pande";
 in {
   imports = [
     ../../modules/programs/default.nix
+    ../../modules/homes/stylix.nix
     # TODO ../../modules/theming/default.nix
     # TODO ../../modules/programs/python.nix
   ];
+
+  stylix_home = {
+    enable = true;
+    dis.enable = lib.mkForce false;
+  };
 
   home = {
     sessionVariables = {
@@ -108,23 +115,6 @@ in {
       numbat
       kalker
       # sc-im
-
-      # Pentesting
-      # whois
-      # holehe
-      # lemmeknow
-      # nmap
-      # rustscan
-      # rustcat
-      # binwalk
-      # aircrack-ng
-      # john
-      # sshs
-      # # qemu_full # Too big
-      # nasm
-      # radare2
-      # aflplusplus
-      # pwntools
     ];
   };
 }

@@ -61,7 +61,6 @@
         ":q" = "exit";
         eixt = "exit";
         f = "fuck";
-        idea = "nvim /home/shawn/dev/ideas.txt";
         neovide = "neovide.exe --wsl";
         nivm = "nvim";
         np = "nano -w PKGBUILD";
@@ -83,16 +82,16 @@
         enable = true;
         config = {
           pager = "less -FR";
-          theme = "tokyonight_night";
+          # theme = "tokyonight_night";
         };
-        themes = {
-          tokyonight_night = {
-            src = builtins.fetchurl {
-              url = "https://raw.githubusercontent.com/folke/tokyonight.nvim/054790b8676d0c561b22320d4b5ab3ef175f7445/extras/sublime/tokyonight_night.tmTheme";
-              sha256 = "955c14a16b04917428ffa8b567e2d3760f872f1044a1ad157857001274dceecd";
-            };
-          };
-        };
+        # themes = {
+        #   tokyonight_night = {
+        #     src = builtins.fetchurl {
+        #       url = "https://raw.githubusercontent.com/folke/tokyonight.nvim/054790b8676d0c561b22320d4b5ab3ef175f7445/extras/sublime/tokyonight_night.tmTheme";
+        #       sha256 = "955c14a16b04917428ffa8b567e2d3760f872f1044a1ad157857001274dceecd";
+        #     };
+        #   };
+        # };
       };
       fish = {
         enable = true;
@@ -109,17 +108,15 @@
           fish
           */
           ''
-             set fish_greeting
-             set -g fish_emoji_width 1
-             set -g fish_ambiguous_width 1
-             set -gx GPG_TTY (tty)
-             function cmd
-             	eval {mkdir,cd}\ $argv\;
-             end
-            ${builtins.readFile (builtins.fetchurl {
-              url = "https://raw.githubusercontent.com/folke/tokyonight.nvim/78cc1ae48a26990dd028f4098892a5d6c041e194/extras/fish/tokyonight_night.fish";
-              sha256 = "0a35f4a2d2b05520afd7bda03a88b6548929e05961f9d1054945fd0bc05b9dba";
-            })}'';
+            set fish_greeting
+            set -g fish_emoji_width 1
+            set -g fish_ambiguous_width 1
+            set -gx GPG_TTY (tty)
+            function cmd
+            	eval {mkdir,cd}\ $argv\;
+            end
+          '';
+        # ${builtins.readFile (builtins.fetchurl { url = "https://raw.githubusercontent.com/folke/tokyonight.nvim/78cc1ae48a26990dd028f4098892a5d6c041e194/extras/fish/tokyonight_night.fish"; sha256 = "0a35f4a2d2b05520afd7bda03a88b6548929e05961f9d1054945fd0bc05b9dba"; })}
       };
 
       bash = {

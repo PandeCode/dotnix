@@ -55,15 +55,15 @@
           set writebackup=false
           set wildmode=longest,list,full
           set wildmenu
-          set wildignore=*.pyc,*_build/*,**/coverage/*,**/Debug/*,**/build/*,**/node_modules/*,**/android/*,**/\ ios/*,**/.git/*
+          "set wildignore=*.pyc,*_build/*,**/coverage/*,**/Debug/*,**/build/*,**/node_modules/*,**/android/*,**/\ ios/*,**/.git/*
 
-          colorscheme tokyonight-night
+          "colorscheme tokyonight-night
         '';
       packages = {
         myVimPackage = with pkgs.vimPlugins; {
           start = [
             bufferline-nvim
-            tokyonight-nvim
+            # tokyonight-nvim
             vim-cursorword
             vim-multiple-cursors
             vim-wordmotion
