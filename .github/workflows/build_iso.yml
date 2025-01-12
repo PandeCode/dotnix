@@ -7,8 +7,57 @@ on:
 
 jobs:
   build-iso:
-    if: startsWith(github.event.head_commit.message, 'build-iso')
     runs-on: ubuntu-latest
+    if: |
+      startsWith(github.event.head_commit.message, 'build-')
+    strategy:
+      matrix:
+        format:
+          [
+            iso,
+            install-iso,
+            virtualbox,
+            vm,
+            vm-bootloader,
+            vm-nogui,
+            vmware,
+            raw,
+            raw-efi,
+            hyperv,
+          ]
+        suffix:
+          [
+            ISO_PART_,
+            INSTALL_ISO_PART_,
+            VM_PART_,
+            VM_BOOT_PART_,
+            VM_NOGUI_PART_,
+            VMWARE_PART_,
+            RAW_PART_,
+            RAW_EFI_PART_,
+            HYPERV_ISO_PART_,
+          ]
+        include:
+          - format: iso
+            suffix: ISO_PART_
+          - format: install-iso
+            suffix: INSTALL_ISO_PART_
+          - format: virtualbox
+            suffix: VM_PART_
+          - format: vm
+            suffix: VM_PART_
+          - format: vm-bootloader
+            suffix: VM_BOOT_PART_
+          - format: vm-nogui
+            suffix: VM_NOGUI_PART_
+          - format: vmware
+            suffix: VMWARE_PART_
+          - format: raw
+            suffix: RAW_PART_
+          - format: raw-efi
+            suffix: RAW_EFI_PART_
+          - format: hyperv
+            suffix: HYPERV_ISO_PART_
 
     steps:
       - name: Checkout Code
@@ -23,24 +72,24 @@ jobs:
           path: /nix/store
           key: nix-store
 
-      - name: Build ISO
+      - name: Build and Split Artifact
         run: |
-          ISO_PATH=$(nix run nixpkgs#nixos-generators -- --format iso --flake .#nixiso -o result)
-          echo "$ISO_PATH : $(du -h $ISO_PATH)"
-          echo "ISO_PATH=$ISO_PATH" >> $GITHUB_ENV
+          OUTPUT=$(nix run nixpkgs#nixos-generators -- --format ${{ matrix.format }} --flake .#nixiso -o result)
+          echo "$OUTPUT : $(du -h $OUTPUT)"
+          echo "OUTPUT=$OUTPUT" >> $GITHUB_ENV
 
-          split $ISO_PATH -b 1900000000 ISO_PART_
+          split $OUTPUT -b 1900000000 ${{ matrix.suffix }}
 
-          TAG_NAME=$(date +"iso-%Y%m%d-%H%M%S")
+          TAG_NAME=$(date +"${{ matrix.format }}-%Y%m%d-%H%M%S")
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-      - name: Generate sha256
+
+      - name: Generate SHA256
         run: |
-          echo "Starting SHA256 hashes generated for ISO and parts."
-          for PART in ISO_PART_*; do
+          echo "Generating SHA256 hashes for parts."
+          for PART in ${{ matrix.suffix }}*; do
             SHA256_PART_FILE="sha256_${PART}"
             sha256sum $PART > $SHA256_PART_FILE
           done
-          echo "Checksums and SHA256 hashes generated for ISO and parts."
 
       - name: Create Release Tag
         uses: softprops/action-gh-release@v2
@@ -49,5 +98,5 @@ jobs:
           name: ${{ env.TAG_NAME }}
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            ISO_PART_*
+            ${{ matrix.suffix }}*
             sha256_*
