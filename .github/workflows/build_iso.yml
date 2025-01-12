@@ -6,58 +6,58 @@ on:
       - main
 
 jobs:
-  build-iso:
-    runs-on: ubuntu-latest
-    if: |
-      startsWith(github.event.head_commit.message, 'build-')
+  build-template:
     strategy:
       matrix:
-        format:
+        target:
           [
-            iso,
-            install-iso,
-            virtualbox,
-            vm,
-            vm-bootloader,
-            vm-nogui,
-            vmware,
-            raw,
-            raw-efi,
-            hyperv,
+            { format: "iso", prefix: "ISO_PART_", message: "build-iso" },
+            {
+              format: "install-iso",
+              prefix: "INSTALL_ISO_PART_",
+              message: "build-install-iso",
+            },
+            {
+              format: "virtualbox",
+              prefix: "VM_PART_",
+              message: "build-virtualbox",
+            },
+            { format: "vm", prefix: "VM_PART_", message: "build-vm" },
+            {
+              format: "vm-bootloader",
+              prefix: "VM_BOOT_PART_",
+              message: "build-vm-bootloader",
+            },
+            {
+              format: "vm-nogui",
+              prefix: "VM_NOGUI_PART_",
+              message: "build-vm-nogui",
+            },
+            {
+              format: "vmware",
+              prefix: "VMWARE_PART_",
+              message: "build-vmware",
+            },
+            { format: "raw", prefix: "RAW_PART_", message: "build-raw" },
+            {
+              format: "raw-efi",
+              prefix: "RAW_EFI_PART_",
+              message: "build-raw-efi",
+            },
+            {
+              format: "hyperv",
+              prefix: "HYPERV_ISO_PART_",
+              message: "build-hyperv",
+            },
+            {
+              format: "install-hyperv",
+              prefix: "INSTALL_HYPERV_ISO_PART_",
+              message: "build-install-iso-hyperv",
+            },
           ]
-        suffix:
-          [
-            ISO_PART_,
-            INSTALL_ISO_PART_,
-            VM_PART_,
-            VM_BOOT_PART_,
-            VM_NOGUI_PART_,
-            VMWARE_PART_,
-            RAW_PART_,
-            RAW_EFI_PART_,
-            HYPERV_ISO_PART_,
-          ]
-        include:
-          - format: iso
-            suffix: ISO_PART_
-          - format: install-iso
-            suffix: INSTALL_ISO_PART_
-          - format: virtualbox
-            suffix: VM_PART_
-          - format: vm
-            suffix: VM_PART_
-          - format: vm-bootloader
-            suffix: VM_BOOT_PART_
-          - format: vm-nogui
-            suffix: VM_NOGUI_PART_
-          - format: vmware
-            suffix: VMWARE_PART_
-          - format: raw
-            suffix: RAW_PART_
-          - format: raw-efi
-            suffix: RAW_EFI_PART_
-          - format: hyperv
-            suffix: HYPERV_ISO_PART_
+
+    if: startsWith(github.event.head_commit.message, matrix.target.message)
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
@@ -72,23 +72,22 @@ jobs:
           path: /nix/store
           key: nix-store
 
-      - name: Build and Split Artifact
+      - name: Build Artifact
         run: |
-          OUTPUT=$(nix run nixpkgs#nixos-generators -- --format ${{ matrix.format }} --flake .#nixiso -o result)
-          echo "$OUTPUT : $(du -h $OUTPUT)"
-          echo "OUTPUT=$OUTPUT" >> $GITHUB_ENV
+          OUTPUT_PATH=$(nix run nixpkgs#nixos-generators -- --format ${matrix.target.format} --flake .#nixiso -o result)
+          echo "$OUTPUT_PATH : $(du -h $OUTPUT_PATH)"
+          echo "OUTPUT_PATH=$OUTPUT_PATH" >> $GITHUB_ENV
 
-          split $OUTPUT -b 1900000000 ${{ matrix.suffix }}
+          split $OUTPUT_PATH -b 1900000000 ${matrix.target.prefix}
 
-          TAG_NAME=$(date +"${{ matrix.format }}-%Y%m%d-%H%M%S")
+          TAG_NAME=$(date +"${matrix.target.format}-%Y%m%d-%H%M%S")
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
 
-      - name: Generate SHA256
+      - name: Generate sha256
         run: |
-          echo "Generating SHA256 hashes for parts."
-          for PART in ${{ matrix.suffix }}*; do
-            SHA256_PART_FILE="sha256_${PART}"
-            sha256sum $PART > $SHA256_PART_FILE
+          for PART in ${matrix.target.prefix}*; do
+            SHA256_FILE="sha256_${PART}"
+            sha256sum $PART > $SHA256_FILE
           done
 
       - name: Create Release Tag
@@ -98,5 +97,5 @@ jobs:
           name: ${{ env.TAG_NAME }}
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            ${{ matrix.suffix }}*
+            ${matrix.target.prefix}*
             sha256_*
