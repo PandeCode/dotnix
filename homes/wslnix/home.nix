@@ -48,13 +48,7 @@ in {
       nh
       statix
 
-      # hasekll
-      # cabal-install # The command-line interface for Cabal and Hackage https://hackage.haskell.org/package/cabal-install
-      # ghc # Glasgow Haskell Compiler http://haskell.org/ghc
-      # haskell-language-server # LSP server for GHC https://hackage.haskell.org/package/haskell-language-server
-      # stack # The Haskell Tool Stack https://hackage.haskell.org/package/stack
-
-      # (nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })home
+      (nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
       # spotify-player # Terminal spotify player that has feature parity with the official client https://github.com/aome510/spotify-player
       # spotifyd # Open source Spotify client running as a UNIX daemon https://spotifyd.rs/
 

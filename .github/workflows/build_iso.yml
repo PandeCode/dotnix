@@ -6,57 +6,8 @@ on:
       - main
 
 jobs:
-  build-template:
-    strategy:
-      matrix:
-        target:
-          [
-            { format: "iso", prefix: "ISO_PART_", message: "build-iso" },
-            {
-              format: "install-iso",
-              prefix: "INSTALL_ISO_PART_",
-              message: "build-install-iso",
-            },
-            {
-              format: "virtualbox",
-              prefix: "VM_PART_",
-              message: "build-virtualbox",
-            },
-            { format: "vm", prefix: "VM_PART_", message: "build-vm" },
-            {
-              format: "vm-bootloader",
-              prefix: "VM_BOOT_PART_",
-              message: "build-vm-bootloader",
-            },
-            {
-              format: "vm-nogui",
-              prefix: "VM_NOGUI_PART_",
-              message: "build-vm-nogui",
-            },
-            {
-              format: "vmware",
-              prefix: "VMWARE_PART_",
-              message: "build-vmware",
-            },
-            { format: "raw", prefix: "RAW_PART_", message: "build-raw" },
-            {
-              format: "raw-efi",
-              prefix: "RAW_EFI_PART_",
-              message: "build-raw-efi",
-            },
-            {
-              format: "hyperv",
-              prefix: "HYPERV_ISO_PART_",
-              message: "build-hyperv",
-            },
-            {
-              format: "install-hyperv",
-              prefix: "INSTALL_HYPERV_ISO_PART_",
-              message: "build-install-iso-hyperv",
-            },
-          ]
-
-    if: startsWith(github.event.head_commit.message, matrix.target.message)
+  build-iso:
+    if: startsWith(github.event.head_commit.message, 'build-iso')
     runs-on: ubuntu-latest
 
     steps:
@@ -72,23 +23,24 @@ jobs:
           path: /nix/store
           key: nix-store
 
-      - name: Build Artifact
+      - name: Build ISO
         run: |
-          OUTPUT_PATH=$(nix run nixpkgs#nixos-generators -- --format ${matrix.target.format} --flake .#nixiso -o result)
-          echo "$OUTPUT_PATH : $(du -h $OUTPUT_PATH)"
-          echo "OUTPUT_PATH=$OUTPUT_PATH" >> $GITHUB_ENV
+          ISO_PATH=$(nix run nixpkgs#nixos-generators -- --format iso --flake .#nixiso -o result)
+          echo "$ISO_PATH : $(du -h $ISO_PATH)"
+          echo "ISO_PATH=$ISO_PATH" >> $GITHUB_ENV
 
-          split $OUTPUT_PATH -b 1900000000 ${matrix.target.prefix}
+          split $ISO_PATH -b 1900000000 ISO_PART_
 
-          TAG_NAME=$(date +"${matrix.target.format}-%Y%m%d-%H%M%S")
+          TAG_NAME=$(date +"iso-%Y%m%d-%H%M%S")
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-
       - name: Generate sha256
         run: |
-          for PART in ${matrix.target.prefix}*; do
-            SHA256_FILE="sha256_${PART}"
-            sha256sum $PART > $SHA256_FILE
+          echo "Starting SHA256 hashes generated for ISO and parts."
+          for PART in ISO_PART_*; do
+            SHA256_PART_FILE="sha256_${PART}"
+            sha256sum $PART > $SHA256_PART_FILE
           done
+          echo "Checksums and SHA256 hashes generated for ISO and parts."
 
       - name: Create Release Tag
         uses: softprops/action-gh-release@v2
@@ -97,5 +49,51 @@ jobs:
           name: ${{ env.TAG_NAME }}
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            ${matrix.target.prefix}*
+            ISO_PART_*
+            sha256_*
+
+  build-intall-iso:
+    if: startsWith(github.event.head_commit.message, 'build-install-iso')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v20
+
+      - name: Cache Nix Store
+        uses: actions/cache@v4
+        with:
+          path: /nix/store
+          key: nix-store
+
+      - name: Build ISO
+        run: |
+          ISO_PATH=$(nix run nixpkgs#nixos-generators -- --format install-iso --flake .#nixiso -o result)
+          echo "$ISO_PATH : $(du -h $ISO_PATH)"
+          echo "ISO_PATH=$ISO_PATH" >> $GITHUB_ENV
+
+          split $INSTALL_ISO_PATH -b 1900000000 INSTALL_ISO_PART_
+
+          TAG_NAME=$(date +"iso-%Y%m%d-%H%M%S")
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+      - name: Generate sha256
+        run: |
+          echo "Starting SHA256 hashes generated for ISO and parts."
+          for PART in INSTALL_ISO_PART_*; do
+            SHA256_PART_FILE="sha256_${PART}"
+            sha256sum $PART > $SHA256_PART_FILE
+          done
+          echo "Checksums and SHA256 hashes generated for ISO and parts."
+
+      - name: Create Release Tag
+        uses: softprops/action-gh-release@v2
+        with:
+          prerelease: true
+          name: ${{ env.TAG_NAME }}
+          tag_name: ${{ env.TAG_NAME }}
+          files: |
+            INSTALL_ISO_PART_*
             sha256_*
