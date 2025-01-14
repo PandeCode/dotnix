@@ -12,6 +12,8 @@ Use cat in a POSIX compliant shell with glob support(or a manual ref).
 
 ```bash
 cat ISO_PART_* > nixiso.iso
+# or
+cat INSTALL_ISO_PART_* > nixiso.iso
 ```
 
 > Because of the nature of the files, it will trigger security in flashers like Rufus. You can ignore this.
