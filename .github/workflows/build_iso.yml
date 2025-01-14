@@ -52,7 +52,7 @@ jobs:
             ISO_PART_*
             sha256_*
 
-  build-intall-iso:
+  build-install-iso:
     if: startsWith(github.event.head_commit.message, 'build-install-iso')
     runs-on: ubuntu-latest
 
