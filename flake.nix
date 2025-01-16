@@ -91,6 +91,7 @@
         };
         modules = [
           overlays
+          home-manager.nixosModules.home-manager
           stylix.nixosModules.stylix
           ./hosts/nixiso/configuration.nix
         ];

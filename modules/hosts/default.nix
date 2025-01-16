@@ -8,6 +8,10 @@
 
   packages.enable = true;
 
+  environment.sessionVariables = {
+    NIX_BUILD_CORES = 6;
+  };
+
   services = {
     enable = true;
     isLaptop = false;

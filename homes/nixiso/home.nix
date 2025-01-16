@@ -1,5 +1,6 @@
 {
   config,
+  osConfig,
   pkgs,
   lib,
   ...
@@ -8,11 +9,18 @@
 in {
   imports = [
     ../../modules/programs/default.nix
+    ../../modules/wm/hyprland/home.nix
     ../../modules/homes/stylix.nix
   ];
 
+  hyprland_home.enable = true;
+
   stylix_home = {
     enable = true;
-    dis.enable = false;
+    dis.enable = true;
+  };
+
+  home = {
+    stateVersion = osConfig.system.stateVersion;
   };
 }

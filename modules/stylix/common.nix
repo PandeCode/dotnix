@@ -13,17 +13,18 @@
     fonts = {
       serif = {
         package = pkgs.dejavu_fonts;
+
         name = "dejavu serif";
       };
 
-      # sansserif = {
-      #   package = pkgs.dejavu_fonts;
-      #   name = "dejavu sans";
-      # };
+      sansSerif = {
+        package = pkgs.dejavu_fonts;
+        name = "dejavu sans";
+      };
 
       monospace = {
-        package = pkgs.dejavu_fonts;
-        name = "dejavu sans mono";
+        package = pkgs.nerd-fonts.fantasque-sans-mono;
+        name = "fantasque sans mono";
       };
 
       emoji = {
