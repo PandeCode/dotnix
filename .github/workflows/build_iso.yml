@@ -16,7 +16,7 @@ jobs:
 
       - name: Build ISO
         run: mkdir -p /nix/store
-        
+
       - name: Install Nix
         uses: cachix/install-nix-action@v20
 
