@@ -8,6 +8,7 @@
     ../../modules/programs/shells.nix
     ../../modules/programs/zellij.nix
     ../../modules/programs/bin.nix
+    ../../modules/programs/tools.nix
 
     ../../modules/programs/neovim.nix
     ../../modules/programs/mpls.nix
@@ -21,6 +22,7 @@
 
   bin.enable = true;
   git.enable = true;
+  tools.enable = true;
 
   neovim.enable = lib.mkDefault true;
 
@@ -44,6 +46,8 @@
     };
 
     packages = with pkgs; [
+      gcc
+
       pscircle
       xdg-utils
 

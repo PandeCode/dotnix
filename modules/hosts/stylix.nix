@@ -37,7 +37,7 @@ in {
 
           chromium.enable = boot; # GUI
 
-          plymouth.enable = boot;
+          plymouth.enable = false; # i handle this
           # plymouth.logo = boot;
           plymouth.logoAnimated = boot;
 

@@ -2,6 +2,7 @@
   imports = [
     ./nix.nix
     ./neovim.nix
+    ./boot.nix
     ./services.nix
     ./packages.nix
   ];
@@ -11,6 +12,8 @@
   environment.sessionVariables = {
     NIX_BUILD_CORES = 6;
   };
+
+  boot_opts.enable = true;
 
   services = {
     enable = true;

@@ -2,6 +2,7 @@
   pkgs,
   lib,
   config,
+  inputs,
   ...
 }: let
   cfg = config.hyprland_os;
@@ -9,10 +10,13 @@ in {
   options.hyprland_os.enable = lib.mkEnableOption "enable hyprland os level";
 
   config = lib.mkIf cfg.enable {
+    services.displayManager.sddm.wayland.enable = true;
+
     programs = {
       hyprland = {
         enable = true;
         xwayland.enable = true;
+        package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
       };
     };
     hardware = {

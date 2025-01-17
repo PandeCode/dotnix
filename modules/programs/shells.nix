@@ -22,7 +22,8 @@
         ls = "eza";
         sl = "eza";
         l = "eza -la";
-        # File operations
+        j = "z";
+
         mkdir = "mkdir";
         mkdri = "mkdir";
         mkidr = "mkdir";
@@ -32,15 +33,11 @@
         free = "free -m";
         sizeof = "du -h --max-depth=0";
         tree = "tre";
-        more = "less";
 
-        # Navigation
         win = "cd /mnt/c/Users/pande";
         windev = "cd /mnt/c/Users/pande/dev";
         windl = "cd /mnt/c/Users/pande/Downloads";
-        j = "z";
 
-        # Clipboard operations
         cs = "xclip -selection clipboard";
         cso = "xclip -selection clipboard -o";
         clonec = "xclip -selection clipboard -o | xargs git clone --depth 1";

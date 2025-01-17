@@ -21,6 +21,6 @@ in {
   };
 
   home = {
-    stateVersion = osConfig.system.stateVersion;
+    inherit (osConfig.system) stateVersion;
   };
 }

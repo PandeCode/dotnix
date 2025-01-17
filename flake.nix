@@ -1,14 +1,17 @@
-{
+rec {
   description = "nix config";
 
-  nixConfig = {
+  nixConfig = rec {
     extra-substituters = [
       "https://nix-community.cachix.org"
       "https://cache.nixos.org/"
       "https://aseipp-nix-cache.global.ssl.fastly.net"
+      "https://hyprland.cachix.org"
     ];
+    extra-trusted-substituters = extra-substituters;
     extra-trusted-public-keys = [
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
     ];
   };
 
@@ -22,8 +25,6 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    stylix.url = "github:danth/stylix";
 
     # darwin = {
     #   url = "github:LnL7/nix-darwin";
@@ -48,6 +49,13 @@
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
 
+    stylix.url = "github:danth/stylix";
+    hyprland.url = "github:hyprwm/Hyprland";
+
+    hyprland-contrib = {
+      url = "github:hyprwm/contrib";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
     pre-commit-hooks.url = "github:cachix/git-hooks.nix";
   };
@@ -78,8 +86,12 @@
         neovim-nightly-overlay.overlays.default
       ];
     };
+    settings = {
+      nix.settings = nixConfig;
+    };
   in {
     nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
+    # nix.settings = nixConfig;
 
     nixosConfigurations = {
       nixiso = nixpkgs.lib.nixosSystem {
@@ -90,6 +102,7 @@
           inherit nixpkgs-stable;
         };
         modules = [
+          settings
           overlays
           home-manager.nixosModules.home-manager
           stylix.nixosModules.stylix
@@ -106,6 +119,7 @@
         modules = [
           nixos-wsl.nixosModules.default
           overlays
+          settings
 
           stylix.nixosModules.stylix
           ./hosts/wslnix/configuration.nix
