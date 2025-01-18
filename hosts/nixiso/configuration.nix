@@ -9,10 +9,14 @@
     "${modulesPath}/installer/cd-dvd/installation-cd-minimal.nix"
     ../../modules/hosts/default.nix
     ../../modules/wm/hyprland/default.nix
+    ../../modules/wm/sddm.nix
+    ../../modules/wm/plymouth.nix
     ../../modules/hosts/stylix.nix
   ];
 
   hyprland_os.enable = true;
+  sddm.enable = true;
+  plymouth.enable = true;
 
   system.stateVersion = "24.05";
 
@@ -54,8 +58,10 @@
     };
   };
 
-  home-manager.extraSpecialArgs = {inherit inputs;};
-  home-manager.users.nixos = import ../../homes/nixiso/home.nix;
-  home-manager.useGlobalPkgs = true;
+  home-manager = {
+    extraSpecialArgs = {inherit inputs;};
+    users.nixos = import ../../homes/nixiso/home.nix;
+    useGlobalPkgs = true;
+  };
   users.extraUsers.root.password = "nixos";
 }

@@ -10,8 +10,6 @@ in {
   options.hyprland_os.enable = lib.mkEnableOption "enable hyprland os level";
 
   config = lib.mkIf cfg.enable {
-    services.displayManager.sddm.wayland.enable = true;
-
     programs = {
       hyprland = {
         enable = true;

@@ -39,7 +39,7 @@ in {
 
           plymouth.enable = false; # i handle this
           # plymouth.logo = boot;
-          plymouth.logoAnimated = boot;
+          # plymouth.logoAnimated = boot;
 
           regreet.enable = boot;
           lightdm.enable = boot;
