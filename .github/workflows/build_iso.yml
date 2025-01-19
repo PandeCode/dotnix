@@ -14,6 +14,10 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Generate Tag Name
+        run: |
+          echo "TAG_NAME=$(date +"iso-%Y%m%d-%H%M%S")" >> $GITHUB_ENV
+
       - uses: nixbuild/nix-quick-install-action@v27
 
       - name: Restore and cache Nix store
@@ -21,34 +25,22 @@ jobs:
         with:
           primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix') }}
           restore-prefixes-first-match: nix-${{ runner.os }}-
-          purge: false
 
       - name: Build ISO
         run: |
-          ISO_PATH=$(NIX_BUILD_CORES=6 nix --log-format internal-json run nixpkgs#nixos-generators -- --format iso --flake .#nixiso -o result)
-          # ISO_PATH=$(
-          # 	{
-          # 		NIX_BUILD_CORES=6 nix --store ~/nix --log-format internal-json -vL run nixpkgs#nixos-generators -- --format iso --flake .#nixiso -o result 2>&1 1>&3 3>&- |
-          # 			nix --store ~/nix run nixpkgs#nix-output-monitor -- --json
-          # 	} 3>&1 1>&2 |
-          # 		cat
-          # )
-
+          ISO_PATH=$(NIX_BUILD_CORES=6 nix run nixpkgs#nixos-generators -- --format iso --flake .#nixiso -o result)
           echo "$ISO_PATH : $(du -h $ISO_PATH)"
-          echo "ISO_PATH=$ISO_PATH" >> $GITHUB_ENV
 
+      - name: Split File
+        run: |
           split $ISO_PATH -b 1900000000 ISO_PART_
 
-          TAG_NAME=$(date +"iso-%Y%m%d-%H%M%S")
-          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
       - name: Generate sha256
         run: |
-          echo "Starting SHA256 hashes generated for ISO and parts."
           for PART in ISO_PART_*; do
             SHA256_PART_FILE="sha256_${PART}"
             sha256sum $PART > $SHA256_PART_FILE
           done
-          echo "Checksums and SHA256 hashes generated for ISO and parts."
 
       - name: Create Release Tag
         uses: softprops/action-gh-release@v2
@@ -68,40 +60,34 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Generate Tag Name
+        run: |
+          echo "TAG_NAME=$(date +"iso-%Y%m%d-%H%M%S")" >> $GITHUB_ENV
+
       - uses: nixbuild/nix-quick-install-action@v27
 
       - name: Restore and cache Nix store
         uses: nix-community/cache-nix-action@v5
         with:
-          # restore and save a cache using this key
           primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix') }}
-          # if there's no cache hit, restore a cache by this prefix
           restore-prefixes-first-match: nix-${{ runner.os }}-
-          # collect garbage until Nix store size (in bytes) is at most this number
-          # before trying to save a new cache
-          gc-max-store-size-linux: 1073741824
-          # do purge caches
-          purge: false
 
       - name: Build ISO
         run: |
-          export NIX_BUILD_CORES = 6;
-          ISO_PATH=$(nix run nixpkgs#nixos-generators -- --format install-iso --flake .#nixiso -o result)
+          ISO_PATH=$(NIX_BUILD_CORES=6 nix run nixpkgs#nixos-generators -- --format install-iso --flake .#nixiso -o result)
           echo "$ISO_PATH : $(du -h $ISO_PATH)"
           echo "ISO_PATH=$ISO_PATH" >> $GITHUB_ENV
 
+      - name: Split File
+        run: |
           split $ISO_PATH -b 1900000000 INSTALL_ISO_PART_
 
-          TAG_NAME=$(date +"iso-%Y%m%d-%H%M%S")
-          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
       - name: Generate sha256
         run: |
-          echo "Starting SHA256 hashes generated for ISO and parts."
           for PART in INSTALL_ISO_PART_*; do
             SHA256_PART_FILE="sha256_${PART}"
             sha256sum $PART > $SHA256_PART_FILE
           done
-          echo "Checksums and SHA256 hashes generated for ISO and parts."
 
       - name: Create Release Tag
         uses: softprops/action-gh-release@v2

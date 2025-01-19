@@ -8,15 +8,21 @@
   imports = [
     "${modulesPath}/installer/cd-dvd/installation-cd-minimal.nix"
     ../../modules/hosts/default.nix
-    ../../modules/wm/hyprland/default.nix
+
+    ../../modules/wm/default.nix
     ../../modules/wm/sddm.nix
     ../../modules/wm/plymouth.nix
+    ../../modules/wm/hyprland/os.nix
+    ../../modules/wm/dwm.nix
+
     ../../modules/hosts/stylix.nix
   ];
 
   hyprland_os.enable = true;
   sddm.enable = true;
   plymouth.enable = true;
+
+  dwm.enable = true;
 
   system.stateVersion = "24.05";
 

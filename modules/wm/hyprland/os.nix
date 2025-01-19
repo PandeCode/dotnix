@@ -3,7 +3,6 @@
   lib,
   config,
   inputs,
-  utils,
   ...
 }: let
   cfg = config.hyprland_os;

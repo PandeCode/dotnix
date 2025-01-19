@@ -4,13 +4,9 @@
   lib,
   ...
 }: {
-  imports = [
-    ./os.nix
-  ];
   environment = {
     systemPackages = with pkgs; [
       (writeShellScriptBin "check_git_status.sh" ''${builtins.readFile ../../../bin/check_git_status.sh}'')
-
       dunst
       libnotify
 

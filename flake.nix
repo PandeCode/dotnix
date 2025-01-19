@@ -32,12 +32,13 @@ rec {
     # };
 
     stylix.url = "github:danth/stylix";
-    hyprland.url = "github:hyprwm/Hyprland";
 
+    hyprland.url = "github:hyprwm/Hyprland";
     hyprland-contrib = {
       url = "github:hyprwm/contrib";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
     pre-commit-hooks.url = "github:cachix/git-hooks.nix";
   };
@@ -52,41 +53,47 @@ rec {
     ...
   } @ inputs: let
     inherit (self) outputs;
-    inherit (inputs.nixpkgs.lib) attrValues;
 
-    system = "x86_64-linux";
-
-    supportedSystems = ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
-    forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
-
-    overlays = {
-      nixpkgs.overlays = with inputs; [
-        neovim-nightly-overlay.overlays.default
-      ];
+    systems = {
+      x86_64-linux = "x86_64-linux";
+      aarch64-linux = "aarch64-linux";
+      x86_64-darwin = "x86_64-darwin";
+      aarch64-darwin = "aarch64-darwin";
     };
 
+    supportedSystems = builtins.attrNames systems;
+    forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
+
+    overlays = {nixpkgs.overlays = with inputs; [neovim-nightly-overlay.overlays.default];};
+
+    stateVersion = "24.05";
+    /*
+    WARN: Do not change,
+     Everything BREAKS,
+     So much PTSD, headache and tears. Almost made me quit nix, not related to `nix --version`
+    */
   in {
     nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
 
     nixosConfigurations = let
-      specialArgs = {
-        inherit inputs nixpkgs-stable;
-      };
-      mkSystem = extra_modules:
+      mkSystem = system: extra_modules:
         nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
-
+          specialArgs = {
+            inherit inputs outputs;
+            pkgs-stable = nixpkgs-stable.legacyPackages.${system};
+          };
           modules =
             [{nix.settings = nixConfig;} overlays stylix.nixosModules.stylix]
             ++ extra_modules;
         };
+      mkSystemLinux64 = mkSystem systems.x86_64-linux;
     in {
-      nixiso = mkSystem [
+      nixiso = mkSystemLinux64 [
         home-manager.nixosModules.home-manager
         ./hosts/nixiso/configuration.nix
       ];
 
-      wslnix = mkSystem [
+      wslnix = mkSystemLinux64 systems.x86_64-linux [
         nixos-wsl.nixosModules.default
         ./hosts/wslnix/configuration.nix
       ];
@@ -95,6 +102,7 @@ rec {
       #   home-manager.nixosModules.home-manager
       #   ./hosts/kazuha/configuration.nix
       # ];
+
       # jinwoo = mkSystem [
       #   home-manager.nixosModules.home-manager
       #   ./hosts/jinwoo/configuration.nix
@@ -111,24 +119,29 @@ rec {
         home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages.${system};
 
-          extraSpecialArgs = {inherit inputs outputs ;};
+          extraSpecialArgs = {
+            inherit inputs outputs;
+            pkgs-stable = nixpkgs-stable.legacyPackages.${system};
+          };
 
           modules = [
             overlays
             stylix.homeManagerModules.stylix
             {
               home = rec {
-                inherit username;
+                inherit username stateVersion;
                 homeDirectory = "/home/${username}";
-                stateVersion = "24.05";
               };
             }
             ./homes/${os}/home.nix
           ];
         };
+      mkHomeLinux64 = mkHome systems.x86_64-linux;
     in {
-      "shawn@wslnix" = mkHome system "wslnix" "shawn";
-      # "shawn@kazuha" = mkHome "kazuha" "shawn"; # TODO: New system
+      "shawn@wslnix" = mkHomeLinux64 "wslnix" "shawn";
+      # "shawn@kazuha" = mkHomeLinux64 "kazuha" "shawn"; # TODO: New system
+      # "shawn@jinwoo" = mkHomeLinux64 "jinwoo" "shawn"; # TODO: New system
+      # "shawn@herta" = mkHomeDarwin "herta" "shawn"; # TODO: New system
     };
 
     checks = forAllSystems (system: {
