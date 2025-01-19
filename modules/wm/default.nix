@@ -6,7 +6,7 @@
 }: {
   environment = {
     systemPackages = with pkgs; [
-      (writeShellScriptBin "check_git_status.sh" ''${builtins.readFile ../../../bin/check_git_status.sh}'')
+      # (writeShellScriptBin "check_git_status.sh" ''${builtins.readFile ../../../bin/check_git_status.sh}'')
       dunst
       libnotify
 

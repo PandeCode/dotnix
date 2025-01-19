@@ -93,7 +93,7 @@ rec {
         ./hosts/nixiso/configuration.nix
       ];
 
-      wslnix = mkSystemLinux64 systems.x86_64-linux [
+      wslnix = mkSystemLinux64 [
         nixos-wsl.nixosModules.default
         ./hosts/wslnix/configuration.nix
       ];

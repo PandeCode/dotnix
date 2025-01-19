@@ -4,9 +4,9 @@
   config,
   ...
 }: let
-  cfg = config.module;
+  cfg = config.dwm;
 in {
-  options.module.enable = lib.mkEnableOption "enable module";
+  options.dwm.enable = lib.mkEnableOption "enable dwm";
 
   config = lib.mkIf cfg.enable {
     services.xserver.windowManager.dwm = {
@@ -22,6 +22,13 @@ in {
     };
 
     environment.systemPackages = with pkgs; [
+      picom-pijulius
+      haskellPackages.greenclip
+      xflux
+      kdePackages.kdeconnect-kde
+      sxhkd
+      # barrier
+
       (st.overrideAttrs (oldAttrs: {
         src = pkgs.fetchFromGitHub {
           owner = "pandecode";
@@ -30,6 +37,15 @@ in {
           sha256 = "xkmE9mJDYHdtroegjff9zwEYnKT9zSoOS65BhA2iOQI=";
         };
         buildInputs = oldAttrs.buildInputs ++ [harfbuzz];
+      }))
+      (dwmblocks.overrideAttrs (oldAttrs: {
+        src = pkgs.fetchFromGitHub {
+          owner = "pandecode";
+          repo = "dwmblocks";
+          rev = "30ab13f5a928c9b6d890be2960332821e73601a0";
+          sha256 = "9YB56rBbEs5AEe5mkn0k7QhA6uNONmdwzX3XsvvfsFM=";
+        };
+        inherit (oldAttrs) buildInputs;
       }))
     ];
   };

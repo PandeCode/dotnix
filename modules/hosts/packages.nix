@@ -15,6 +15,7 @@ in {
       gnupg
       pinentry
 
+      nix-prefetch-github
       nix-output-monitor
       deadnix
       statix
