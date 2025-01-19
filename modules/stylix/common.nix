@@ -10,22 +10,14 @@
     };
     # polarity = "dark";
 
-    fonts = {
-      serif = {
-        package = pkgs.dejavu_fonts;
-
-        name = "dejavu serif";
-      };
-
-      sansSerif = {
-        package = pkgs.dejavu_fonts;
-        name = "dejavu sans";
-      };
-
+    fonts = rec {
       monospace = {
         package = pkgs.nerd-fonts.fantasque-sans-mono;
         name = "fantasque sans mono";
       };
+
+      serif = monospace;
+      sansSerif = monospace;
 
       emoji = {
         package = pkgs.noto-fonts-emoji;

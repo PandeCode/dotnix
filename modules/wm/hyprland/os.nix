@@ -3,6 +3,7 @@
   lib,
   config,
   inputs,
+  utils,
   ...
 }: let
   cfg = config.hyprland_os;
@@ -40,6 +41,13 @@ in {
         # swaybg
         # wpaperd
         # mpvpaper
+
+        (
+          writeShellScriptBin "rofi-wifi-menu" (fetchurl {
+            url = "https://raw.githubusercontent.com/zbaylin/rofi-wifi-menu/refs/heads/master/rofi-wifi-menu.sh";
+            hash = "0gilv2q4l7synn1labwzw3bm4xy4h1z2l7kh1jhjyfxn3xpx7fnc";
+          })
+        )
       ];
     };
   };

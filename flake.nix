@@ -31,24 +31,6 @@ rec {
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
 
-    # pyproject-nix = {
-    #   url = "github:pyproject-nix/pyproject.nix";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-    #
-    # uv2nix = {
-    #   url = "github:pyproject-nix/uv2nix";
-    #   inputs.pyproject-nix.follows = "pyproject-nix";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-    #
-    # pyproject-build-systems = {
-    #   url = "github:pyproject-nix/build-system-pkgs";
-    #   inputs.pyproject-nix.follows = "pyproject-nix";
-    #   inputs.uv2nix.follows = "uv2nix";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-
     stylix.url = "github:danth/stylix";
     hyprland.url = "github:hyprwm/Hyprland";
 
@@ -67,9 +49,6 @@ rec {
     home-manager,
     nixos-wsl,
     stylix,
-    # uv2nix,
-    # pyproject-nix,
-    # pyproject-build-systems,
     ...
   } @ inputs: let
     inherit (self) outputs;
@@ -78,7 +57,6 @@ rec {
     system = "x86_64-linux";
 
     supportedSystems = ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
-
     forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
     overlays = {
@@ -86,45 +64,41 @@ rec {
         neovim-nightly-overlay.overlays.default
       ];
     };
-    settings = {
-      nix.settings = nixConfig;
-    };
+
   in {
     nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
-    # nix.settings = nixConfig;
 
-    nixosConfigurations = {
-      nixiso = nixpkgs.lib.nixosSystem {
-        inherit system;
-
-        specialArgs = {
-          inherit inputs;
-          inherit nixpkgs-stable;
-        };
-        modules = [
-          settings
-          overlays
-          home-manager.nixosModules.home-manager
-          stylix.nixosModules.stylix
-          ./hosts/nixiso/configuration.nix
-        ];
+    nixosConfigurations = let
+      specialArgs = {
+        inherit inputs nixpkgs-stable;
       };
+      mkSystem = extra_modules:
+        nixpkgs.lib.nixosSystem {
+          inherit system specialArgs;
 
-      wslnix = nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = {
-          inherit nixpkgs-stable;
-          inherit inputs;
+          modules =
+            [{nix.settings = nixConfig;} overlays stylix.nixosModules.stylix]
+            ++ extra_modules;
         };
-        modules = [
-          nixos-wsl.nixosModules.default
-          overlays
-          settings
+    in {
+      nixiso = mkSystem [
+        home-manager.nixosModules.home-manager
+        ./hosts/nixiso/configuration.nix
+      ];
 
-          stylix.nixosModules.stylix
-          ./hosts/wslnix/configuration.nix
-        ];
-      };
+      wslnix = mkSystem [
+        nixos-wsl.nixosModules.default
+        ./hosts/wslnix/configuration.nix
+      ];
+
+      # kazuha = mkSystem [
+      #   home-manager.nixosModules.home-manager
+      #   ./hosts/kazuha/configuration.nix
+      # ];
+      # jinwoo = mkSystem [
+      #   home-manager.nixosModules.home-manager
+      #   ./hosts/jinwoo/configuration.nix
+      # ];
 
       # darwinConfigurations."«hostname»" = darwin.lib.darwinSystem {
       #   system = "aarch64-darwin";
@@ -133,27 +107,28 @@ rec {
     };
 
     homeConfigurations = let
-      username = "shawn";
-      os = "wslnix";
+      mkHome = system: os: username:
+        home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.${system};
+
+          extraSpecialArgs = {inherit inputs outputs ;};
+
+          modules = [
+            overlays
+            stylix.homeManagerModules.stylix
+            {
+              home = rec {
+                inherit username;
+                homeDirectory = "/home/${username}";
+                stateVersion = "24.05";
+              };
+            }
+            ./homes/${os}/home.nix
+          ];
+        };
     in {
-      "${username}@${os}" = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.${system};
-
-        extraSpecialArgs = {inherit inputs outputs;};
-
-        modules = [
-          overlays
-          stylix.homeManagerModules.stylix
-          {
-            home = rec {
-              inherit username;
-              homeDirectory = "/home/${username}";
-              stateVersion = "24.05";
-            };
-          }
-          ./homes/${os}/home.nix
-        ];
-      };
+      "shawn@wslnix" = mkHome system "wslnix" "shawn";
+      # "shawn@kazuha" = mkHome "kazuha" "shawn"; # TODO: New system
     };
 
     checks = forAllSystems (system: {

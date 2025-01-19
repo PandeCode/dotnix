@@ -95,7 +95,7 @@ in {
           # waybar.enable = true; RightBackColors
           # wezterm.enable = true;
           wob.enable = true;
-          # wofi.enable = true;
+          wofi.enable = true;
           wpaperd.enable = true;
           # xfce.enable = true;
           xresources.enable = true;

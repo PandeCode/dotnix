@@ -10,6 +10,11 @@ in {
 
   config = lib.mkIf cfg.enable {
     environment.systemPackages = with pkgs; [
+      pass
+      qtpass
+      gnupg
+      pinentry
+
       nix-output-monitor
       deadnix
       statix

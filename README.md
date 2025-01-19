@@ -40,6 +40,11 @@ cat INSTALL_ISO_PART_* > nixiso.iso
 - The tooling on Windows is absoulte trash, compared to linux, especially for development.
 - WSL provides a more familiar Linux-like environment.
 
-I built this, brick by brick
+# System Names
 
-nix run nixpkgs#nixos-generators -- --format iso --flake ~/dotnix#nixiso -o result
+- `shawn` is the default username on all systems
+- `wslnix` is the windows config
+- `nixiso` is the portable iso config
+- `kazuha` is the laptop configuration _TODO_
+- `jinwoo` is the PC configuration _TODO_
+- `herta` is the Darwin configuration _TODO_

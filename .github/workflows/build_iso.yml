@@ -14,20 +14,14 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Cache Nix Store
-        uses: actions/cache@v4
-        with:
-          path: /nix
-          key: nix-store
+      - uses: nixbuild/nix-quick-install-action@v27
 
-      - name: Cache HomeNix Store
-        uses: actions/cache@v4
+      - name: Restore and cache Nix store
+        uses: nix-community/cache-nix-action@v5
         with:
-          path: ~/nix
-          key: nix-store
-
-      - name: Install Nix
-        uses: cachix/install-nix-action@v20
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          purge: false
 
       - name: Build ISO
         run: |
@@ -74,14 +68,20 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Install Nix
-        uses: cachix/install-nix-action@v20
+      - uses: nixbuild/nix-quick-install-action@v27
 
-      - name: Cache Nix Store
-        uses: actions/cache@v4
+      - name: Restore and cache Nix store
+        uses: nix-community/cache-nix-action@v5
         with:
-          path: /nix/store
-          key: nix-store
+          # restore and save a cache using this key
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix') }}
+          # if there's no cache hit, restore a cache by this prefix
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          # collect garbage until Nix store size (in bytes) is at most this number
+          # before trying to save a new cache
+          gc-max-store-size-linux: 1073741824
+          # do purge caches
+          purge: false
 
       - name: Build ISO
         run: |

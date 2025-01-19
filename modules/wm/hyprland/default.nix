@@ -20,6 +20,7 @@
 
       gparted
       blueman
+      networkmanager
       networkmanagerapplet
       pavucontrol
     ];
