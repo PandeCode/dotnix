@@ -30,9 +30,6 @@ jobs:
         run: |
           ISO_PATH=$(NIX_BUILD_CORES=6 nix run nixpkgs#nixos-generators -- --format iso --flake .#nixiso -o result)
           echo "$ISO_PATH : $(du -h $ISO_PATH)"
-
-      - name: Split File
-        run: |
           split $ISO_PATH -b 1900000000 ISO_PART_
 
       - name: Generate sha256
@@ -77,9 +74,6 @@ jobs:
           ISO_PATH=$(NIX_BUILD_CORES=6 nix run nixpkgs#nixos-generators -- --format install-iso --flake .#nixiso -o result)
           echo "$ISO_PATH : $(du -h $ISO_PATH)"
           echo "ISO_PATH=$ISO_PATH" >> $GITHUB_ENV
-
-      - name: Split File
-        run: |
           split $ISO_PATH -b 1900000000 INSTALL_ISO_PART_
 
       - name: Generate sha256
