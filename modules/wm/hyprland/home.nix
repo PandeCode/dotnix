@@ -37,7 +37,7 @@ in {
 
       pkgs.${browser}
       pkgs.${terminal}
-      pkgs.${media_player}
+      # pkgs.${media_player} # handled by spicetify
       (writeShellScriptBin "_tool_media_info" ''${builtins.readFile ../../../bin/_tool_media_info}'')
     ];
     wayland.windowManager.hyprland = {
