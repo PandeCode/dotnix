@@ -7,42 +7,49 @@ on:
 
 jobs:
   build-iso:
+    # Only trigger on commit messages starting with 'build-iso'
     if: startsWith(github.event.head_commit.message, 'build-iso')
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout code
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # Step 2: Generate a tag name based on current date and time
       - name: Generate Tag Name
         run: |
           echo "TAG_NAME=$(date +"iso-%Y%m%d-%H%M%S")" >> $GITHUB_ENV
 
-      - uses: nixbuild/nix-quick-install-action@v27
+      # Step 3: Install Nix
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v27
 
-      - name: Restore and cache Nix store
+      # Step 4: Cache Nix store
+      - name: Cache Nix Store
         uses: nix-community/cache-nix-action@v5
         with:
           primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix') }}
           restore-prefixes-first-match: nix-${{ runner.os }}-
 
+      # Step 5: Build ISO and split into parts
       - name: Build ISO
         run: |
           ISO_PATH=$(NIX_BUILD_CORES=6 nix run nixpkgs#nixos-generators -- --format iso --flake .#nixiso -o result)
           echo "$ISO_PATH : $(du -h $ISO_PATH)"
 
-      - name: Split File
-        run: |
+          echo $ISO_PATh > iso_path
+
+          # Split ISO into 1.9GB parts
           split $ISO_PATH -b 1900000000 ISO_PART_
 
-      - name: Generate sha256
-        run: |
+          # Generate SHA256 checksums for each part
           for PART in ISO_PART_*; do
-            SHA256_PART_FILE="sha256_${PART}"
-            sha256sum $PART > $SHA256_PART_FILE
+            sha256sum $PART > "sha256_${PART}"
           done
 
-      - name: Create Release Tag
+      # Step 6: Create a GitHub release and upload artifacts
+      - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           prerelease: true
@@ -51,3 +58,13 @@ jobs:
           files: |
             ISO_PART_*
             sha256_*
+
+      # Step 7: Clean up Nix store
+      - name: Clean Up Nix Store
+        run: |
+          sudo nix store delete --ignore-liveness $(cat iso_path) || echo "No store path to clean"
+
+      # Step 8: Clean up temporary files
+      - name: Clean Up Temporary Files
+        run: |
+          sudo rm -rf ISO_PART_* sha256_*

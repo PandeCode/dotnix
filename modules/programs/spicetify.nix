@@ -7,6 +7,9 @@
 }: let
   cfg = config.spicetify;
 in {
+  imports = [
+    inputs.spicetify-nix.homeManagerModules.default
+  ];
   options.spicetify.enable = lib.mkEnableOption "enable spicetify";
 
   config = lib.mkIf cfg.enable {

@@ -92,7 +92,10 @@ rec {
         };
       mkSystemLinux64 = mkSystem systems.x86_64-linux;
     in {
-      nixiso = mkSystemLinux64 "nixiso" [home-manager.nixosModules.home-manager];
+      nixiso = mkSystemLinux64 "nixiso" [
+        home-manager.nixosModules.home-manager
+        inputs.spicetify-nix.nixosModules.default
+      ];
       wslnix = mkSystemLinux64 "wslnix" [inputs.nixos-wsl.nixosModules.default];
 
       # kazuha = mkSystemLinux64 "kazuha" [];
