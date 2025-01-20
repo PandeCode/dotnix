@@ -13,7 +13,6 @@ in {
   options.spicetify.enable = lib.mkEnableOption "enable spicetify";
 
   config = lib.mkIf cfg.enable {
-    home.packages = [pkgs.spotify];
     programs.spicetify = let
       spicePkgs = inputs.spicetify-nix.legacyPackages.${pkgs.system};
     in {
