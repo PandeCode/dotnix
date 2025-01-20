@@ -45,6 +45,7 @@ cat INSTALL_ISO_PART_* > nixiso.iso
 - `shawn` is the default username on all systems
 - `wslnix` is the windows config
 - `nixiso` is the portable iso config
+
 - `kazuha` is the laptop configuration _TODO_
 - `jinwoo` is the PC configuration _TODO_
 - `herta` is the Darwin configuration _TODO_
