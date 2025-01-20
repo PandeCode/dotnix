@@ -31,6 +31,8 @@ rec {
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
 
+    pre-commit-hooks.url = "github:cachix/git-hooks.nix";
+
     stylix.url = "github:danth/stylix";
 
     hyprland.url = "github:hyprwm/Hyprland";
@@ -39,8 +41,12 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    spicetify-nix = {
+      url = "github:Gerg-L/spicetify-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
-    pre-commit-hooks.url = "github:cachix/git-hooks.nix";
   };
 
   outputs = {
@@ -48,8 +54,6 @@ rec {
     nixpkgs,
     nixpkgs-stable,
     home-manager,
-    nixos-wsl,
-    stylix,
     ...
   } @ inputs: let
     inherit (self) outputs;
@@ -76,64 +80,53 @@ rec {
     nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
 
     nixosConfigurations = let
-      mkSystem = system: extra_modules:
+      mkSystem = system: sys_name: extra_modules:
         nixpkgs.lib.nixosSystem {
           specialArgs = {
-            inherit inputs outputs;
+            inherit inputs outputs system sys_name;
             pkgs-stable = nixpkgs-stable.legacyPackages.${system};
           };
           modules =
-            [{nix.settings = nixConfig;} overlays stylix.nixosModules.stylix]
+            [{nix.settings = nixConfig;} overlays inputs.stylix.nixosModules.stylix ./hosts/${sys_name}/configuration.nix]
             ++ extra_modules;
         };
       mkSystemLinux64 = mkSystem systems.x86_64-linux;
     in {
-      nixiso = mkSystemLinux64 [
-        home-manager.nixosModules.home-manager
-        ./hosts/nixiso/configuration.nix
-      ];
+      nixiso = mkSystemLinux64 "nixiso" [home-manager.nixosModules.home-manager];
+      wslnix = mkSystemLinux64 "wslnix" [inputs.nixos-wsl.nixosModules.default];
 
-      wslnix = mkSystemLinux64 [
-        nixos-wsl.nixosModules.default
-        ./hosts/wslnix/configuration.nix
-      ];
-
-      # kazuha = mkSystem [
-      #   home-manager.nixosModules.home-manager
-      #   ./hosts/kazuha/configuration.nix
-      # ];
-
-      # jinwoo = mkSystem [
-      #   home-manager.nixosModules.home-manager
-      #   ./hosts/jinwoo/configuration.nix
-      # ];
-
-      # darwinConfigurations."«hostname»" = darwin.lib.darwinSystem {
-      #   system = "aarch64-darwin";
-      #   modules = [stylix.darwinModules.stylix ./configuration.nix];
-      # };
+      # kazuha = mkSystemLinux64 "kazuha" [];
+      # jinwoo = mkSystemLinux64 "jinwoo " [];
     };
 
+    # darwinConfigurations = {
+    #   herta = darwin.lib.darwinSystem {
+    #     system = "aarch64-darwin";
+    #     modules = [stylix.darwinModules.stylix ./configuration.nix];
+    #   };
+    # };
+
     homeConfigurations = let
-      mkHome = system: os: username:
+      mkHome = system: sys_name: username:
         home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages.${system};
 
           extraSpecialArgs = {
-            inherit inputs outputs;
+            inherit inputs outputs system sys_name username;
             pkgs-stable = nixpkgs-stable.legacyPackages.${system};
           };
 
           modules = [
             overlays
-            stylix.homeManagerModules.stylix
+            inputs.spicetify-nix.homeManagerModules.default
+            inputs.stylix.homeManagerModules.stylix
             {
               home = rec {
                 inherit username stateVersion;
                 homeDirectory = "/home/${username}";
               };
             }
-            ./homes/${os}/home.nix
+            ./homes/${sys_name}/home.nix
           ];
         };
       mkHomeLinux64 = mkHome systems.x86_64-linux;

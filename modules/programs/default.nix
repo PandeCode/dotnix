@@ -14,11 +14,15 @@
     ../../modules/programs/mpls.nix
     ../../modules/programs/codelldb.nix
     ../../modules/programs/cpptools.nix
+    ../../modules/programs/spicetify.nix
+    ../../modules/programs/wezterm.nix
 
     ../../modules/programs/git.nix
   ];
   disabledModules = [
   ];
+
+  wezterm.enable = true;
 
   bin.enable = true;
   git.enable = true;
@@ -47,6 +51,7 @@
 
     packages = with pkgs; [
       gcc
+      progress
 
       pscircle
       xdg-utils
@@ -102,6 +107,7 @@
       difftastic
       just
       duf
+      dust
       hurl
       xh
       hyperfine

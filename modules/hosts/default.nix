@@ -17,6 +17,11 @@
     isLaptop = false;
   };
 
+  # allowUnfreePredicate = pkg:
+  #   builtins.elem (lib.getName pkg) [
+  #     "spotify"
+  #     "obsidian"
+  #   ];
   nixpkgs = {
     config.allowUnfree = true;
     hostPlatform = "x86_64-linux";

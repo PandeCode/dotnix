@@ -14,6 +14,7 @@ in {
   ];
 
   hyprland_home.enable = true;
+  spicetify.enable = true;
 
   stylix_home = {
     enable = true;
