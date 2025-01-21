@@ -8,16 +8,19 @@
   cfg = config.hyprland_home;
   browser = "google-chrome";
   terminal = "wezterm";
-  media_player = "spotify";
+  explorer = "nautilus";
+  music_player = "spotify";
 in {
   imports = [
     ../../programs/waybar.nix
+    ../../programs/dunst.nix
   ];
 
   options.hyprland_home.enable = lib.mkEnableOption "enable hyprland home level";
 
   config = lib.mkIf cfg.enable {
     waybar.enable = true;
+    dunst.enable = true;
 
     nix.settings = {
       substituters = ["https://hyprland.cachix.org"];
@@ -28,16 +31,26 @@ in {
     programs.alacritty.enable = true;
 
     home.packages = with pkgs; [
+      obsidian
       grimblast
       light
       brightnessctl
       wl-clipboard
+      cliphist
+      xdg-utils
       slurp
       grim
 
+      hyprpicker
+      hyprlock
+      hyprsunset
+      hyprpolkitagent
+      # hyprsysteminfo
+
+      pkgs.${explorer}
       pkgs.${browser}
       pkgs.${terminal}
-      # pkgs.${media_player} # handled by spicetify
+      # pkgs.${music_player} # handled by spicetify
       (writeShellScriptBin "_tool_media_info" ''${builtins.readFile ../../../bin/_tool_media_info}'')
     ];
     wayland.windowManager.hyprland = {
@@ -47,15 +60,29 @@ in {
       settings = {
         "$mod" = "SUPER";
         "$browser" = browser;
-        "$media_player" = media_player;
+        "$music_player" = music_player;
         "$terminal" = terminal;
+        "$explorer" = explorer;
+
         gestures = {
           workspace_swipe = true;
           workspace_swipe_fingers = 3;
         };
-        monitor = "DP-1,1920x1080@144,0x0,1";
+        monitor = "eDP-1,1920x1080@144,0x0,1";
 
-        exec-once = ["waybar" "wezterm"];
+        exec-once = [
+          "waybar"
+          "$terminal"
+          "nm-applet --indicator"
+          "blueman-applet"
+          "wl-paste --type text --watch cliphist store" # Stores only text data
+          "wl-paste --type image --watch cliphist store" # Stores only image data
+          "systemctl --user start hyprpolkitagent"
+          # "wl-paste --watch cliphist store"
+        ];
+        input = {
+          kb_options = "ctrl:nocaps";
+        };
 
         windowrule = [
           "animation popin, kitty" # sets the animation style for kitty
@@ -76,37 +103,42 @@ in {
         ];
 
         bindm = [
-          "$mod,               mouse:272,             movewindow"
-          "$mod,               mouse:273,             resizewindow"
+          "$mod,        mouse:272, movewindow"
+          "$mod,        mouse:273, resizewindow"
         ];
         bind =
           [
-            ", keyboard_brightness_up_shortcut, exec, brightnessctl -d *::kbd_backlight set +33%"
-            ", keyboard_brightness_down_shortcut, exec, brightnessctl -d *::kbd_backlight set 33%-"
+            "alt,       space,     exec,             rofi -show drun"
+            "$mod,      v,         exec,             rofi -modi clipboard:cliphist-rofi-img -show clipboard -show-icons"
+            "ALT,       Tab,       cyclenext,        "
+            "ALT,       Tab,       bringactivetotop, "
+            # "Alt Shift, Tab,       cycleprevious,"
 
-            "$mod,             q,                     reload,"
-            "$mod Shift,       q,                     restart,"
+            "$mod,             q,                     exec, hyprctl reload"
 
             "$mod,             Return,                exec,            $terminal"
-            "$mod,             b,                     exec,            $browser"
-            "$mod,             s,                     exec,            $media_player"
+            "$mod,             e,                     exec,            $explorer"
+            "$mod,             c,                     exec,            hyprpicker -a"
+            "$mod,             l,                     exec,            hyprlock"
+            # "$mod,             l,                     exec,            hyprsysteminfo"
 
             ",                 Print,                 exec,            grimblast copy area"
 
             "ALT,              F4,                    killactive,      "
-            # stick window
-            "$MOD SHIFT,       a,                     pin,             "
+            "$mod Shift,       a,                     pin,             "
           ]
           ++ [
-            '',                XF86AudioRaiseVolume,  exec,            "pactl set-sink-volume @DEFAULT_SINK@ 10%; dunstify 'Vol' -h int:value:$(pamixer --get-volume)"''
-            '',                XF86AudioLowerVolume,  exec,            "pactl set-sink-volume @DEFAULT_SINK@ -10%; dunstify 'Vol' -h int:value:$(pamixer --get-volume)"''
-            '',                XF86AudioMute,         exec,            "pactl set-sink-mute   @DEFAULT_SINK@ toggle; dunstify 'Mute' -h int:value:$(pamixer --get-volume)"''
-            '',                XF86AudioMicMute,      exec,            "pactl set-source-mute @DEFAULT_SOURCE@ toggle; dunstify 'Mic Mute' -h int:value:$(pamixer --get-volume)"''
-            '',                XF86MonBrightnessUp,   exec,            "light -A 5;dunstify 'Light:' -h int:value:$(light)"''
-            '',                XF86MonBrightnessDown, exec,            "light -U 5;dunstify 'Light:' -h int:value:$(light)"''
-            '',                XF86AudioPlay,         exec,            "playerctl play-pause; dunstify $(_tool_media_info)"''
-            '',                XF86AudioNext,         exec,            "playerctl next;       dunstify $(_tool_media_info)"''
-            '',                XF86AudioPrev,         exec,            "playerctl previous;   dunstify $(_tool_media_info)"''
+            ",  keyboard_brightness_up_shortcut,   exec, brightnessctl -d *::kbd_backlight set +33%"
+            ",  keyboard_brightness_down_shortcut, exec, brightnessctl -d *::kbd_backlight set 33%-"
+            '', XF86AudioRaiseVolume,              exec, "pactl set-sink-volume @DEFAULT_SINK@ 10%     ; dunstify 'Vol' -h int:value:$(pamixer --get-volume)"''
+            '', XF86AudioLowerVolume,              exec, "pactl set-sink-volume @DEFAULT_SINK@ -10%    ; dunstify 'Vol' -h int:value:$(pamixer --get-volume)"''
+            '', XF86AudioMute,                     exec, "pactl set-sink-mute   @DEFAULT_SINK@ toggle  ; dunstify 'Mute' -h int:value:$(pamixer --get-volume)"''
+            '', XF86AudioMicMute,                  exec, "pactl set-source-mute @DEFAULT_SOURCE@ toggle; dunstify 'Mic Mute' -h int:value:$(pamixer --get-volume)"''
+            '', XF86MonBrightnessUp,               exec, "light -A 5                                   ;dunstify 'Light:' -h int:value:$(light)"''
+            '', XF86MonBrightnessDown,             exec, "light -U 5                                   ;dunstify 'Light:' -h int:value:$(light)"''
+            '', XF86AudioPlay,                     exec, "playerctl play-pause                         ; dunstify $(_tool_media_info)"''
+            '', XF86AudioNext,                     exec, "playerctl next                               ;       dunstify $(_tool_media_info)"''
+            '', XF86AudioPrev,                     exec, "playerctl previous                           ;   dunstify $(_tool_media_info)"''
           ]
           ++ (
             # workspaces

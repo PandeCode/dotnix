@@ -22,8 +22,6 @@
   disabledModules = [
   ];
 
-  wezterm.enable = true;
-
   bin.enable = true;
   git.enable = true;
   tools.enable = true;
@@ -61,12 +59,8 @@
       nh
       statix
 
-      # (nerdfonts.override {fonts = ["FantasqueSansMono"];})
-
       # spotify-player # Terminal spotify player that has feature parity with the official client https://github.com/aome510/spotify-player
       # spotifyd # Open source Spotify client running as a UNIX daemon https://spotifyd.rs/
-
-      # mdbook # Create books from MarkDown https://github.com/rust-lang/mdBook
 
       # silicon # Create beautiful image of your source code https://github.com/Aloxaf/silicon
       # glow # Render markdown on the CLI, with pizzazz! https://github.com/charmbracelet/glow

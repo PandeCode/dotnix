@@ -52,6 +52,7 @@ in {
       xclip
       btop
       fzf
+      television
 
       # Version control
       git

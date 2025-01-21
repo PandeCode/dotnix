@@ -12,71 +12,78 @@
     fzf.enable = true;
 
     programs = let
-      inherit (pkgs.lib) mergeAttrs;
       enable_shells = {
         enable = true;
         enableBashIntegration = true;
         enableFishIntegration = true;
         enableNushellIntegration = true;
       };
-      sharedShellAliases = {
-        df = "duf";
-        du = "dust";
-        ls = "eza";
-        sl = "eza";
-        l = "eza -la";
-        j = "z";
+      sharedShellAliases =
+        {
+          df = "duf";
+          du = "dust";
+          ls = "eza";
+          sl = "eza";
+          l = "eza -la";
+          j = "z";
 
-        mkdir = "mkdir";
-        mkdri = "mkdir";
-        mkidr = "mkdir";
-        mdkir = "mkdir";
-        dmkir = "mkdir";
-        cp = "cp -ir";
-        free = "free -m";
-        sizeof = "du -h --max-depth=0";
-        tree = "tre";
+          mkdir = "mkdir";
+          mkdri = "mkdir";
+          mkidr = "mkdir";
+          mdkir = "mkdir";
+          dmkir = "mkdir";
+          cp = "cp -ir";
+          free = "free -m";
+          sizeof = "bash -c 'du -h --max-depth=0'";
+          tree = "tre";
 
-        win = "cd /mnt/c/Users/pande";
-        windev = "cd /mnt/c/Users/pande/dev";
-        windl = "cd /mnt/c/Users/pande/Downloads";
+          win = "cd /mnt/c/Users/pande";
+          windev = "cd /mnt/c/Users/pande/dev";
+          windl = "cd /mnt/c/Users/pande/Downloads";
 
-        cs = "xclip -selection clipboard";
-        cso = "xclip -selection clipboard -o";
-        clonec = "xclip -selection clipboard -o | xargs git clone --depth 1";
-        wgetc = "xclip -selection clipboard -o | xargs wget -c ";
+          cs = "xclip -selection clipboard";
+          cso = "xclip -selection clipboard -o";
+          clonec = "xclip -selection clipboard -o | xargs git clone --depth 1";
+          wgetc = "xclip -selection clipboard -o | xargs wget -c ";
 
-        # Git operations
-        pre = "pre-commit";
-        commit = "cz commit";
-        gti = "git";
-        add = "git add";
-        psuh = "git push";
-        push = "git push";
+          # Git operations
+          pre = "pre-commit";
+          commit = "cz commit";
+          gti = "git";
+          add = "git add";
+          psuh = "git push";
+          push = "git push";
 
-        # Shell commands
-        ":e" = "nvim";
-        e = "nvim";
-        ff = "nvim (fzf)";
-        ":q" = "exit";
-        eixt = "exit";
-        f = "fuck";
-        neovide = "neovide.exe --wsl";
-        nivm = "nvim";
-        np = "nano -w PKGBUILD";
-        ns = "nix-shell shell.nix --command 'fish'";
-        nsp = "nix-shell --command 'fish' -p";
-        pwsh = "pwsh.exe";
-        py = "python3";
-        wsl = "wsl.exe";
+          # Shell commands
+          ":e" = "nvim";
+          e = "nvim";
+          ff = "nvim (fzf)";
+          ":q" = "exit";
+          eixt = "exit";
+          f = "fuck";
+          nivm = "nvim";
+          np = "nano -w PKGBUILD";
+          ns = "nix-shell shell.nix --command 'fish'";
+          nsp = "nix-shell --command 'fish' -p";
+          py = "python3";
 
-        cls = "clear";
-        tls = "clear";
-        cmb = "cmake --build Debug/";
-        cmc = "rm -fr CMakeCache.txt CMakeFiles Debug/ compile_commands.json";
-        taskkill = "taskkill.exe /F /IM";
-        winget = "winget.exe";
-      };
+          cls = "clear";
+          tls = "clear";
+          cmb = "cmake --build Debug/";
+          cmc = "rm -fr CMakeCache.txt CMakeFiles Debug/ compile_commands.json";
+        }
+        # // (
+        #   if config.wsl.enable
+        #   then {
+        #     pwsh = "pwsh.exe";
+        #     wsl = "wsl.exe";
+        #     neovide = "neovide.exe --wsl";
+        #     taskkill = "taskkill.exe /F /IM";
+        #     winget = "winget.exe";
+        #   }
+        #   else {}
+        # )
+        ;
     in {
       bat = {
         enable = true;
@@ -116,7 +123,6 @@
             	eval {mkdir,cd}\ $argv\;
             end
           '';
-        # ${builtins.readFile (builtins.fetchurl { url = "https://raw.githubusercontent.com/folke/tokyonight.nvim/78cc1ae48a26990dd028f4098892a5d6c041e194/extras/fish/tokyonight_night.fish"; sha256 = "0a35f4a2d2b05520afd7bda03a88b6548929e05961f9d1054945fd0bc05b9dba"; })}
       };
 
       bash = {
@@ -142,8 +148,8 @@
       };
 
       starship =
-        mergeAttrs enable_shells
-        {
+        enable_shells
+        // {
           settings = {
             add_newline = true;
             character = {

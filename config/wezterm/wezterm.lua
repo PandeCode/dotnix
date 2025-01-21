@@ -13,7 +13,7 @@ config.disable_default_key_bindings = true
 
 config.window_padding = { left = 0, right = 0, top = 0, bottom = 0 }
 config.window_close_confirmation = "NeverPrompt"
-config.window_decorations = "NONE | RESIZE"
+config.window_decorations = "NONE"
 config.window_background_opacity = GET_OPACITY() or 0.92
 
 -- config.animation_fps = 1

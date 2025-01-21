@@ -25,6 +25,7 @@ in {
       sessionVariables = {
         # WLR_NO_HARDWARE_CURSORS = "1"; # invisible cursor protection
         NIXOS_OZONE_WL = "1";
+        XKB_DEFAULT_OPTIONS = "caps:escape";
       };
 
       systemPackages = with pkgs; [

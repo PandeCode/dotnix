@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   imports = [
     ./nix.nix
     ./neovim.nix
@@ -17,13 +21,14 @@
     isLaptop = false;
   };
 
-  # allowUnfreePredicate = pkg:
-  #   builtins.elem (lib.getName pkg) [
-  #     "spotify"
-  #     "obsidian"
-  #   ];
   nixpkgs = {
     config.allowUnfree = true;
     hostPlatform = "x86_64-linux";
+    # config.allowUnfreePredicate = pkg:
+    #   builtins.elem (lib.getName pkg) [
+    #     "google-chrome"
+    #     "spotify"
+    #     "obsidian"
+    #   ];
   };
 }

@@ -70,7 +70,7 @@ rec {
 
     overlays = {nixpkgs.overlays = with inputs; [neovim-nightly-overlay.overlays.default];};
 
-    stateVersion = "24.05";
+    stateVersion = "24.11";
     /*
     WARN: Do not change,
      Everything BREAKS,
@@ -98,7 +98,9 @@ rec {
       ];
       wslnix = mkSystemLinux64 "wslnix" [inputs.nixos-wsl.nixosModules.default];
 
-      # kazuha = mkSystemLinux64 "kazuha" [];
+      kazuha =
+        mkSystemLinux64 "kazuha" [
+        ];
       # jinwoo = mkSystemLinux64 "jinwoo " [];
     };
 
@@ -121,9 +123,9 @@ rec {
 
           modules = [
             overlays
-            inputs.spicetify-nix.homeManagerModules.default
             inputs.stylix.homeManagerModules.stylix
             {
+              nix.package = nixpkgs.legacyPackages.${system}.nix;
               home = rec {
                 inherit username stateVersion;
                 homeDirectory = "/home/${username}";
@@ -135,6 +137,7 @@ rec {
       mkHomeLinux64 = mkHome systems.x86_64-linux;
     in {
       "shawn@wslnix" = mkHomeLinux64 "wslnix" "shawn";
+      "shawn@kazuha" = mkHomeLinux64 "kazuha" "shawn";
       # "shawn@kazuha" = mkHomeLinux64 "kazuha" "shawn"; # TODO: New system
       # "shawn@jinwoo" = mkHomeLinux64 "jinwoo" "shawn"; # TODO: New system
       # "shawn@herta" = mkHomeDarwin "herta" "shawn"; # TODO: New system
