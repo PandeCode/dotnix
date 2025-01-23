@@ -30,11 +30,19 @@ in {
 
   config = lib.mkIf cfg.enable {
     environment.systemPackages = with pkgs; [catppuccin-sddm-corners];
-    services.displayManager = {
-      sddm = {
-        theme = "catppuccin-sddm-corners";
-        wayland.enable = true;
+
+    services = {
+      xserver.displayManager.autoLogin = {
         enable = true;
+        user = "shawn";
+      };
+
+      displayManager = {
+        sddm = {
+          theme = "catppuccin-sddm-corners";
+          wayland.enable = true;
+          enable = true;
+        };
       };
     };
   };

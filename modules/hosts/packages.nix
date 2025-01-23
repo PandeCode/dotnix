@@ -16,6 +16,9 @@ in {
       pinentry
 
       nix-prefetch-github
+      nix-init
+      nurl
+
       nix-output-monitor
       deadnix
       statix
@@ -37,6 +40,7 @@ in {
       expect # unbuffer command
       tree-sitter
       jq
+      htmlq
       p7zip
       gdb
       appimage-run
@@ -58,18 +62,14 @@ in {
       git
       subversion
 
+      pywal
+      hellwal
+
       # Python packages
       (pkgs.python3.withPackages (python-pkgs:
         with python-pkgs; [
-          python-lsp-server
-          python-lsp-ruff
-          python-lsp-black
-          pyls-memestra
-          pylsp-rope
-
           fire
           pygments
-          pywal
           requests
           # Physics Stuff
           pandas

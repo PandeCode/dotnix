@@ -35,11 +35,14 @@ rec {
 
     stylix.url = "github:danth/stylix";
 
+    zen-browser.url = "github:MarceColl/zen-browser-flake";
+
     hyprland.url = "github:hyprwm/Hyprland";
     hyprland-contrib = {
       url = "github:hyprwm/contrib";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    hyprswitch.url = "github:h3rmt/hyprswitch/release";
 
     spicetify-nix = {
       url = "github:Gerg-L/spicetify-nix";

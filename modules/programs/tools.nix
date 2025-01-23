@@ -27,6 +27,7 @@ in {
 
   config = lib.mkIf cfg.enable {
     home.packages = [
+      (mkToolC "_tool_ctrl")
       # (mkToolC "strdist")
       # (mkToolRust "zellij_ping")
     ];

@@ -29,6 +29,7 @@ in {
       };
 
       systemPackages = with pkgs; [
+        inputs.hyprswitch.packages.${pkgs.stdenv.hostPlatform.system}.default
         rofi-wayland
         bemenu
         kitty

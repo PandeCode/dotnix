@@ -15,7 +15,7 @@
   hyprland_home.enable = true;
   spicetify.enable = true;
   wezterm.enable = true;
-  gaming.enable = true;
+  gaming.enable = false;
 
   stylix_home = {
     enable = true;
@@ -24,6 +24,10 @@
 
   home = {
     stateVersion = "24.11";
+    packages = with pkgs; [
+      obsidian
+      discord
+    ];
   };
 
   nixpkgs = {

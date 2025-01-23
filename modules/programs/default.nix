@@ -106,6 +106,8 @@
       xh
       hyperfine
 
+      socat
+
       # Eye Candy
       fastfetch
       imgcat

@@ -9,15 +9,11 @@
 # in
 {
   # imports = [./mangohud];
-  options.gaming.enable = lib.mkOption {
-    type = lib.types.bool;
-    default = false;
-    description = "Enable gaming packages and configuration.";
-  };
+  options.gaming.enable = lib.mkEnableOption "enable gaming packages and configuration.";
 
   config = {
-    home.packages =
-      with pkgs; [
+    home.packages = with pkgs; let
+      a = [
         (prismlauncher.override {
           # use temurin, they're better
           jdks = [
@@ -34,11 +30,11 @@
         wine-staging
 
         linux-wallpaperengine
-      ]
-      # ++ [
-      #   nixpkgs-olympus.olympus
-      #   nixpkgs-sgdboop.sgdboop
-      # ]
-      ;
+      ];
+    in [];
+    # ++ [
+    #   nixpkgs-olympus.olympus
+    #   nixpkgs-sgdboop.sgdboop
+    # ]
   };
 }
