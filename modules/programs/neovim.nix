@@ -37,6 +37,8 @@ in {
             pylsp-rope
           ]))
 
+          		haskell-language-server
+
         chafa
         dwt1-shell-color-scripts
         pokemon-colorscripts-mac

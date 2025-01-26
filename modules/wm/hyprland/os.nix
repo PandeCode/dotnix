@@ -16,6 +16,10 @@ in {
         xwayland.enable = true;
         package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
       };
+      ydotool = {
+        enable = true;
+        group = "users";
+      };
     };
     hardware = {
       graphics.enable = true;

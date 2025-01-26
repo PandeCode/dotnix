@@ -4,6 +4,7 @@
   config,
   inputs,
   system,
+  pkgs-stable,
   ...
 }: let
   cfg = config.hyprland_home;
@@ -11,20 +12,17 @@
   terminal = "wezterm";
   explorer = "nautilus";
   music_player = "spotify";
-
-  notify-send-py =
-    import ../../../derivations/notify-send-py.nix
-    (with pkgs; {inherit lib python3 fetchPypi;});
 in {
   imports = [
     ../../programs/waybar.nix
-    # ../../programs/beatprints.nix
+    ../../programs/rofi.nix
   ];
 
   options.hyprland_home.enable = lib.mkEnableOption "enable hyprland home level";
 
   config = lib.mkIf cfg.enable {
     waybar.enable = true;
+    rofi.enable = true;
     # beatprints.enable = true;
 
     services.swaync.enable = true;
@@ -35,16 +33,20 @@ in {
       kitty.enable = true;
       alacritty.enable = true;
       hyprlock.enable = true;
-      rofi = {
-        enable = true;
-        package = pkgs.rofi-wayland;
-      };
     };
 
     home.packages = with pkgs; [
       inputs.zen-browser.packages."${system}".default
 
-      notify-send-py
+      # (import ../../../derivations/beatprints.nix {
+      # inherit lib pkgs;
+      # pkgs = pkgs-stable;
+      # })
+
+      python3Packages.pygobject3
+      (import ../../../derivations/notify-send-py.nix {inherit lib pkgs;})
+
+      translate-shell
 
       woomer
       grimblast
@@ -69,6 +71,9 @@ in {
       pkgs.${terminal}
       # pkgs.${music_player} # handled by spicetify
       (writeShellScriptBin "_tool_media_info" ''${builtins.readFile ../../../bin/_tool_media_info}'')
+      (writeShellScriptBin "_tool_riot" ''${builtins.readFile ../../../bin/_tool_riot}'')
+      (writeShellScriptBin "_tool_search" ''${builtins.readFile ../../../bin/_tool_search}'')
+      (writeShellScriptBin "_tool_menu" ''${builtins.readFile ../../../bin/_tool_menu}'')
     ];
     wayland.windowManager.hyprland = {
       enable = true; # enable Hyprland
@@ -151,52 +156,67 @@ in {
         ];
 
         bindm = [
-          "$mod,        mouse:272, movewindow"
-          "$mod,        mouse:273, resizewindow"
+          "$mod,          mouse:272, movewindow"
+          "$mod,          mouse:273, resizewindow"
         ];
         bind =
           [
-            " $mod, tab, exec, $bin gui --mod-key $mod --key $key --max-switch-offset 9"
+            "$mod,            f, exec, hyprctl dispatch fullscreen"
+            "$mod alt,        f, exec, hyprctl dispatch fakefullscreen"
+
+            "$mod,            p, exec, hyprctl dispatch pin"
+
+            "$mod shift,      f, exec, hyprctl dispatch togglefloating"
+            "$mod ctrl ,      f, exec, _tool_riot"
+
+            "$mod,       tab,                               exec,       $bin gui --mod-key $mod --key $key --max-switch-offset 9"
 
             # Keyboard workspace Monito
-            "alt,         tab, exec, hyprswitch gui --mod-key alt_l --key tab --close mod-key-release --reverse-key=mod=shift && hyprswitch dispatch"
-            "alt shift,   tab, exec, hyprswitch gui --mod-key alt_l --key tab --close mod-key-release --reverse-key=mod=shift && hyprswitch dispatch -r"
-            "super,       tab, exec, hyprswitch gui --mod-key super_l --key tab --close mod-key-release --reverse-key=mod=shift --switch-workspaces --filter-current-monitor && hyprswitch dispatch"
-            "super shift, tab, exec, hyprswitch gui --mod-key super_l --key tab --close mod-key-release --reverse-key=mod=shift --switch-workspaces --filter-current-monitor && hyprswitch dispatch -r"
+            "alt,         tab,                               exec,       hyprswitch gui --mod-key alt_l --key tab --close mod-key-release --reverse-key=mod=shift && hyprswitch dispatch"
+            "alt shift,   tab,                               exec,       hyprswitch gui --mod-key alt_l --key tab --close mod-key-release --reverse-key=mod=shift && hyprswitch dispatch -r"
+            "super,       tab,                               exec,       hyprswitch gui --mod-key super_l --key tab --close mod-key-release --reverse-key=mod=shift --switch-workspaces --filter-current-monitor && hyprswitch dispatch"
+            "super shift, tab,                               exec,       hyprswitch gui --mod-key super_l --key tab --close mod-key-release --reverse-key=mod=shift --switch-workspaces --filter-current-monitor && hyprswitch dispatch -r"
 
-            "alt,       space,     exec,             rofi -show drun"
-            "$mod,      v,         exec,             rofi -modi clipboard:cliphist-rofi-img -show clipboard -show-icons"
+            "$mod,         n,                             	exec,      swaync-client -t -sw"
 
-            "$mod,             q,                     exec, hyprctl reload"
+            "$mod,        s,                             exec,       _tool_search"
 
-            "$mod, space, layoutmsg, cyclenext"
+            "alt,         space,                             exec,       rofi -show drun -show-icons"
+            "alt shift,   space,                             exec,       rofi -show run -show-icons"
+
+            "$mod,        v,                                 exec,       rofi -modi clipboard:cliphist-rofi-img -show clipboard -show-icons"
+            "$mod shift,  v,                                 exec,       bash -c \"cliphist list | rofi -dmenu | cliphist decode | xargs -I '{}' ydotool type '{}'\""
+
+            "$mod,        q,                                 exec,       hyprctl reload"
+
+            "$mod,        space,                             layoutmsg,  cyclenext"
             # behaves like xmonads promote feature (https://hackage.haskell.org/package/xmonad-contrib-0.17.1/docs/XMonad-Actions-Promote.html)
-            "$mod shift, space, layoutmsg, swapwithmaster master"
+            "$mod shift,  space,                             layoutmsg,  swapwithmaster master"
 
-            "$mod,             Return,                exec,            $terminal"
-            "$mod,             z,                exec,            woomer"
-            "$mod,             e,                     exec,            $explorer"
-            "$mod,             c,                     exec,            hyprpicker -a"
-            "$mod,             l,                     exec,            hyprlock"
-            #"$mod,             l,                     exec,            hyprsysteminfo"
+            "$mod,        Return,                            exec,       $terminal"
+            "$mod,        z,                                 exec,       woomer"
+            "$mod,        e,                                 exec,       $explorer"
+            "$mod,        c,                                 exec,       hyprpicker -a"
+            "$mod,        l,                                 exec,       hyprlock"
+            #"$mod,       l,                                 exec,       hyprsysteminfo"
 
-            ",                 Print,                 exec,            grimblast copy area"
+            ",            Print,                             exec,       grimblast copy area"
 
-            "ALT,              F4,                    killactive,"
-            "$mod Shift,       a,                     pin,"
+            "ALT,         F4,                                killactive, "
+            "$mod Shift,  a,                                 pin,        "
 
-            ", keyboard_brightness_up_shortcut,   exec, _tool_ctrl key up"
-            ", keyboard_brightness_down_shortcut, exec, _tool_ctrl key down"
-            ", XF86AudioMute,                     exec, _tool_ctrl vol toggle"
-            ", XF86AudioPlay,                     exec, _tool_ctrl media toggle"
+            ",            keyboard_brightness_up_shortcut,   exec,       _tool_ctrl key up"
+            ",            keyboard_brightness_down_shortcut, exec,       _tool_ctrl key down"
+            ",            XF86AudioMute,                     exec,       _tool_ctrl vol toggle"
+            ",            XF86AudioPlay,                     exec,       _tool_ctrl media toggle"
 
-            "$mod, F1, exec, _tool_ctrl vol toggle"
-            "$mod, F9, exec, _tool_ctrl media toggle"
+            "$mod,        F1,                                exec,       _tool_ctrl vol toggle"
+            "$mod,        F9,                                exec,       _tool_ctrl media toggle"
 
-            ", XF86AudioNext,                     exec, _tool_ctrl media next"
-            ", XF86AudioPrev,                     exec, _tool_ctrl media prev"
-            "$mod, F10, exec, _tool_ctrl media next"
-            "$mod, F11, exec, _tool_ctrl media prev"
+            ",            XF86AudioNext,                     exec,       _tool_ctrl media next"
+            ",            XF86AudioPrev,                     exec,       _tool_ctrl media prev"
+            "$mod,        F10,                               exec,       _tool_ctrl media next"
+            "$mod,        F11,                               exec,       _tool_ctrl media prev"
           ]
           ++ (
             # workspaces

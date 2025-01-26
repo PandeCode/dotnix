@@ -1,0 +1,12 @@
+#!/bin/sh
+
+data=$(slurp -f "%x %y %w %h")
+
+X=$(echo "$data" | awk '{ print($1) }')
+Y=$(echo "$data" | awk '{ print($2) }')
+WIDTH=$(echo "$data" | awk '{ print($3) }')
+HEIGHT=$(echo "$data" | awk '{ print($4) }')
+
+hyprctl dispatch setfloating
+hyprctl dispatch resizeactive exact "$WIDTH" "$HEIGHT"
+hyprctl dispatch moveactive exact "$X" "$Y"

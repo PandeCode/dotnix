@@ -21,14 +21,19 @@
 
     ../../modules/hosts/stylix.nix
   ];
-  hyprland_os.enable = true;
-  gaming_os.enable = false;
-  sddm.enable = true;
   plymouth.enable = true;
+  sddm.enable = true;
+  hyprland_os.enable = true;
 
   stylix_os = {
     enable = true;
     boot.enable = lib.mkForce true;
+  };
+
+  gaming_os.enable = false;
+
+  zramSwap = {
+    enable = true;
   };
 
   # services = {
@@ -41,19 +46,19 @@
   boot = {
     kernelPackages = pkgs.linuxPackages_zen;
     loader = {
-      systemd-boot.enable = true;
-      systemd-boot.windows = {
-        "11" = {
-          title = "Windows 11";
-          efiDeviceHandle = "/dev/nvme0n1p2";
-        };
-      };
-      # grub = {
-      #   enable = true;
-      #   useOSProber = true;
-      #   device = "/dev/nvme0n1np4";
-      #   efiSupport = true;
+      # systemd-boot.enable = true;
+      # systemd-boot.windows = {
+      #   "11" = {
+      #     title = "Windows 11";
+      #     efiDeviceHandle = "/dev/nvme0n1p2";
+      #   };
       # };
+      grub = {
+        enable = true;
+        useOSProber = true;
+        device = "nodev";
+        efiSupport = true;
+      };
 
       efi.canTouchEfiVariables = true;
     };
@@ -143,4 +148,15 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "24.11"; # Did you read the comment?
+
+  programs.kdeconnect.enable = true;
+  networking.firewall = rec {
+    allowedTCPPortRanges = [
+      {
+        from = 1714;
+        to = 1764;
+      }
+    ];
+    allowedUDPPortRanges = allowedTCPPortRanges;
+  };
 }

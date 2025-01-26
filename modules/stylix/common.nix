@@ -13,7 +13,7 @@
     fonts = rec {
       monospace = {
         package = pkgs.nerd-fonts.fantasque-sans-mono;
-        name = "fantasque sans mono";
+        name = "FantasqueSansM Nerd Font Mono";
       };
 
       serif = monospace;

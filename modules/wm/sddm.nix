@@ -32,12 +32,11 @@ in {
     environment.systemPackages = with pkgs; [catppuccin-sddm-corners];
 
     services = {
-      xserver.displayManager.autoLogin = {
-        enable = true;
-        user = "shawn";
-      };
-
       displayManager = {
+        autoLogin = {
+          enable = true;
+          user = "shawn";
+        };
         sddm = {
           theme = "catppuccin-sddm-corners";
           wayland.enable = true;

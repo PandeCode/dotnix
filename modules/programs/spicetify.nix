@@ -22,6 +22,15 @@ in {
         lyricsPlus
         marketplace
         ncsVisualizer
+        {
+          src = pkgs.fetchFromGitHub {
+            owner = "Pithaya";
+            repo = "spicetify-apps-dist";
+            rev = "ab6d4440bcbf0ad0060c5a19581b43605720f113";
+            hash = "sha256-4P8wHBvjzjRvzhBTU8zVD+2QCZAw5A9BgmYiG59UcQA=";
+          };
+          name = "eternal-jukebox";
+        }
       ];
       enabledExtensions = with spicePkgs.extensions; [
         adblock

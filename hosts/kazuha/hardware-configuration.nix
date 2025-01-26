@@ -28,6 +28,11 @@
     options = ["fmask=0077" "dmask=0077"];
   };
 
+  fileSystems."/mnt/win" = {
+    device = "/dev/nvme0n1p3";
+    fsType = "ntfs";
+  };
+
   # fileSystems."/swap" = {
   #   device = "";
   #   fsType = "ext4";
@@ -36,7 +41,7 @@
   swapDevices = [
     {
       device = "/dev/nvme0n1p5";
-      size = 8956; # MB
+      # size = 8956; # MB
     }
   ];
 

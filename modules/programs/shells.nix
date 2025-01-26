@@ -111,14 +111,22 @@
         ];
 
         interactiveShellInit =
-          /*
-          fish
-          */
+          # fish
           ''
             set fish_greeting
+
             set -g fish_emoji_width 1
             set -g fish_ambiguous_width 1
             set -gx GPG_TTY (tty)
+
+
+            set fish_cursor_default block
+            set fish_cursor_insert line
+            set fish_cursor_replace_one underscore
+            set fish_cursor_visual block
+
+            fish_vi_key_bindings
+
             function cmd
             	eval {mkdir,cd}\ $argv\;
             end
@@ -129,6 +137,7 @@
         enable = true;
         shellAliases = sharedShellAliases;
       };
+
       nushell = {
         enable = true;
         shellAliases = sharedShellAliases;
@@ -139,6 +148,8 @@
       atuin = enable_shells;
       carapace = enable_shells;
       zoxide = enable_shells;
+      nix-index = builtins.removeAttrs enable_shells ["enableNushellIntegration"];
+      command-not-found.enable = false;
 
       direnv = {
         enable = true;

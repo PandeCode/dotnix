@@ -2,6 +2,7 @@ rec {
   description = "nix config";
 
   nixConfig = rec {
+    trusted-users = ["root" "shawn"];
     extra-substituters = [
       "https://nix-community.cachix.org"
       "https://cache.nixos.org/"
@@ -19,7 +20,7 @@ rec {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.11";
 
-    nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
+    # nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
 
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -95,11 +96,11 @@ rec {
         };
       mkSystemLinux64 = mkSystem systems.x86_64-linux;
     in {
-      nixiso = mkSystemLinux64 "nixiso" [
-        home-manager.nixosModules.home-manager
-        inputs.spicetify-nix.nixosModules.default
-      ];
-      wslnix = mkSystemLinux64 "wslnix" [inputs.nixos-wsl.nixosModules.default];
+      # nixiso = mkSystemLinux64 "nixiso" [
+      #   home-manager.nixosModules.home-manager
+      #   inputs.spicetify-nix.nixosModules.default
+      # ];
+      # wslnix = mkSystemLinux64 "wslnix" [inputs.nixos-wsl.nixosModules.default];
 
       kazuha =
         mkSystemLinux64 "kazuha" [
@@ -139,7 +140,7 @@ rec {
         };
       mkHomeLinux64 = mkHome systems.x86_64-linux;
     in {
-      "shawn@wslnix" = mkHomeLinux64 "wslnix" "shawn";
+      # "shawn@wslnix" = mkHomeLinux64 "wslnix" "shawn";
       "shawn@kazuha" = mkHomeLinux64 "kazuha" "shawn";
       # "shawn@kazuha" = mkHomeLinux64 "kazuha" "shawn"; # TODO: New system
       # "shawn@jinwoo" = mkHomeLinux64 "jinwoo" "shawn"; # TODO: New system

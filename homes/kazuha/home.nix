@@ -1,21 +1,22 @@
 {
-  config,
-  osConfig,
   pkgs,
-  lib,
+  osConfig,
   ...
 }: {
   imports = [
     ../../modules/programs/default.nix
     ../../modules/wm/hyprland/home.nix
     ../../modules/homes/stylix.nix
-    ../../modules/gaming/default.nix
+    ../../modules/gaming/home.nix
   ];
 
   hyprland_home.enable = true;
   spicetify.enable = true;
   wezterm.enable = true;
-  gaming.enable = false;
+
+  programs.btop.enable = true;
+
+  gaming.enable = osConfig.config.gaming_os.enable or false;
 
   stylix_home = {
     enable = true;
@@ -26,17 +27,14 @@
     stateVersion = "24.11";
     packages = with pkgs; [
       obsidian
-      discord
+      vesktop
+      vscodium
     ];
   };
 
   nixpkgs = {
     config.allowUnfree = true;
-    # config.allowUnfreePredicate = pkg:
-    #   builtins.elem (lib.getName pkg) [
-    #     "google-chrome"
-    #     "spotify"
-    #     "obsidian"
-    #   ];
   };
+
+  services.kdeconnect.enable = true;
 }

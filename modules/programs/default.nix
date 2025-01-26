@@ -5,19 +5,19 @@
   ...
 }: {
   imports = [
-    ../../modules/programs/shells.nix
-    ../../modules/programs/zellij.nix
-    ../../modules/programs/bin.nix
-    ../../modules/programs/tools.nix
+    ./shells.nix
+    ./zellij.nix
+    ./bin.nix
+    ./tools.nix
 
-    ../../modules/programs/neovim.nix
-    ../../modules/programs/mpls.nix
-    ../../modules/programs/codelldb.nix
-    ../../modules/programs/cpptools.nix
-    ../../modules/programs/spicetify.nix
-    ../../modules/programs/wezterm.nix
+    ./neovim.nix
+    ./mpls.nix
+    ./codelldb.nix
+    ./cpptools.nix
+    ./spicetify.nix
+    ./wezterm.nix
 
-    ../../modules/programs/git.nix
+    ./git.nix
   ];
   disabledModules = [
   ];
@@ -35,10 +35,17 @@
   shells.enable = lib.mkDefault true;
   zellij.enable = lib.mkDefault true;
 
-  home = {
+  home = rec {
     sessionVariables = {
       PYTHONPYCACHEPREFIX = "/home/${config.home.username}/.cache/__pycache__";
+      GOPATH = "/home/${config.home.username}/go";
     };
+
+    sessionPath = [
+      "$HOME/.local/bin"
+      ".git/safe/../../bin"
+      "${sessionVariables.GOPATH}/bin"
+    ];
 
     file = {
       ".gdbinit".source = builtins.fetchurl {
@@ -48,6 +55,8 @@
     };
 
     packages = with pkgs; [
+      qbittorrent-enhanced-nox
+
       gcc
       progress
 

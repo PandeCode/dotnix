@@ -29,6 +29,8 @@ in {
       # Editors
       neovim
 
+      # nvtop
+
       # Build tools
       gnumake
 
@@ -54,7 +56,6 @@ in {
       starship
       atuin
       xclip
-      btop
       fzf
       television
 
