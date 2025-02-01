@@ -37,7 +37,11 @@ in {
             pylsp-rope
           ]))
 
-          		haskell-language-server
+        (import ../../derivations/mpls.nix {inherit pkgs lib;})
+        (import ../../derivations/codelldb.nix {inherit pkgs;})
+        (import ../../derivations/cpptools.nix {inherit pkgs;})
+
+        haskell-language-server
 
         chafa
         dwt1-shell-color-scripts
@@ -51,6 +55,7 @@ in {
         lua-language-server
         neocmakelsp
         nixd
+        nil
         nodePackages.bash-language-server
         pylyzer
         tailwindcss-language-server

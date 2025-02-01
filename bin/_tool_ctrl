@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+
+tmp=/tmp/_tool_ctrl
+
+LIGHT_NOT() {
+	light=$(light)
+	light=${light%.*}
+	if [ -f $tmp ]; then
+		notify-send.py Light "$1 $light" --hint "int:value:$light" -r "$(cat $tmp)" >"$tmp"
+	else
+		notify-send.py Light "$1 $light" --hint "int:value:$light" >"$tmp"
+	fi
+}
+
+VOL_NOT() {
+	vol=$(pamixer --get-volume)
+	if [ -f $tmp ]; then
+		notify-send.py Vol "$1" --hint "int:value:$vol" -r "$(cat $tmp)" >"$tmp"
+	else
+		notify-send.py Vol "$1" --hint "int:value:$vol" >"$tmp"
+	fi
+}
+
+case "$1" in
+key)
+	case "$2" in
+	up) brightnessctl -d *::kbd_backlight set +33% ;;
+	down) brightnessctl -d *::kbd_backlight set 33%- ;;
+	*) exit 1 ;;
+	esac
+	;;
+vol)
+	case "$2" in
+	up)
+		pactl set-sink-volume @DEFAULT_SINK@ +10%
+		VOL_NOT Up
+		;;
+	down)
+		pactl set-sink-volume @DEFAULT_SINK@ -10%
+		VOL_NOT Down
+		;;
+	toggle)
+		pactl set-sink-mute @DEFAULT_SINK@ toggle
+		VOL_NOT Mute
+		;;
+	*) exit 1 ;;
+	esac
+	;;
+mic)
+	case "$2" in
+	mute)
+		pactl set-source-mute @DEFAULT_SOURCE@ toggle
+		notify-send.py "Mic Mute"
+		;;
+	*) exit 1 ;;
+	esac
+	;;
+light)
+	case "$2" in
+	up)
+		light -A 5
+		LIGHT_NOT "up"
+		;;
+	down)
+		light -U 5
+		LIGHT_NOT "down"
+		;;
+	*) exit 1 ;;
+	esac
+	;;
+media)
+	case "$2" in
+	toggle)
+		playerctl play-pause
+		_tool_media_info
+		;;
+	next)
+		playerctl next
+		_tool_media_info
+		;;
+	prev)
+		playerctl previous
+		_tool_media_info
+		;;
+	*) exit 1 ;;
+	esac
+	;;
+*) exit 1 ;;
+esac

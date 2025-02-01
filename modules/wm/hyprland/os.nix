@@ -5,54 +5,26 @@
   inputs,
   ...
 }: let
-  cfg = config.hyprland_os;
+  cfg = config.hyprland;
 in {
-  options.hyprland_os.enable = lib.mkEnableOption "enable hyprland os level";
+  imports = [
+    ../wayland/os.nix
+  ];
+  options.hyprland.enable = lib.mkEnableOption "enable hyprland os level";
 
   config = lib.mkIf cfg.enable {
+    wayland.enable = true;
+
     programs = {
       hyprland = {
         enable = true;
         xwayland.enable = true;
         package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
       };
-      ydotool = {
-        enable = true;
-        group = "users";
-      };
     };
-    hardware = {
-      graphics.enable = true;
-    };
-
     environment = {
-      sessionVariables = {
-        # WLR_NO_HARDWARE_CURSORS = "1"; # invisible cursor protection
-        NIXOS_OZONE_WL = "1";
-        XKB_DEFAULT_OPTIONS = "caps:escape";
-      };
-
       systemPackages = with pkgs; [
         inputs.hyprswitch.packages.${pkgs.stdenv.hostPlatform.system}.default
-        rofi-wayland
-        bemenu
-        kitty
-
-        waybar
-
-        swww
-        # linux-wallpaperengine
-        # hyprpaper
-        # swaybg
-        # wpaperd
-        # mpvpaper
-
-        (
-          writeShellScriptBin "rofi-wifi-menu" ''${builtins.readFile (builtins.fetchurl {
-              url = "https://raw.githubusercontent.com/zbaylin/rofi-wifi-menu/refs/heads/master/rofi-wifi-menu.sh";
-              sha256 = "0gilv2q4l7synn1labwzw3bm4xy4h1z2l7kh1jhjyfxn3xpx7fnc";
-            })}''
-        )
       ];
     };
   };

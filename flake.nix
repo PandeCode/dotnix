@@ -39,11 +39,20 @@ rec {
     zen-browser.url = "github:MarceColl/zen-browser-flake";
 
     hyprland.url = "github:hyprwm/Hyprland";
-    hyprland-contrib = {
-      url = "github:hyprwm/contrib";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     hyprswitch.url = "github:h3rmt/hyprswitch/release";
+    hyprland-plugins = {
+      url = "github:hyprwm/hyprland-plugins";
+      inputs.hyprland.follows = "hyprland";
+    };
+    hypr-dynamic-cursors = {
+      url = "github:VirtCode/hypr-dynamic-cursors";
+      inputs.hyprland.follows = "hyprland";
+    };
+
+    xmonad-contexts = {
+      url = "github:Procrat/xmonad-contexts";
+      flake = false;
+    };
 
     spicetify-nix = {
       url = "github:Gerg-L/spicetify-nix";
@@ -74,6 +83,19 @@ rec {
 
     overlays = {nixpkgs.overlays = with inputs; [neovim-nightly-overlay.overlays.default];};
 
+    # created to emulate osConfig with home_manager
+    sharedConfig = {
+      gaming.enable = false;
+
+      hyprland.enable = true;
+      sway.enable = true;
+      i3.enable = true;
+      dwm.enable = true;
+      xmonad.enable = true;
+      awesomewm.enable = true;
+      bspwm.enable = true;
+    };
+
     stateVersion = "24.11";
     /*
     WARN: Do not change,
@@ -87,7 +109,7 @@ rec {
       mkSystem = system: sys_name: extra_modules:
         nixpkgs.lib.nixosSystem {
           specialArgs = {
-            inherit inputs outputs system sys_name;
+            inherit inputs outputs system sys_name sharedConfig;
             pkgs-stable = nixpkgs-stable.legacyPackages.${system};
           };
           modules =
@@ -121,7 +143,7 @@ rec {
           pkgs = nixpkgs.legacyPackages.${system};
 
           extraSpecialArgs = {
-            inherit inputs outputs system sys_name username;
+            inherit inputs outputs system sys_name username sharedConfig;
             pkgs-stable = nixpkgs-stable.legacyPackages.${system};
           };
 

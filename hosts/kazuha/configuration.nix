@@ -5,6 +5,7 @@
   lib,
   config,
   pkgs,
+  sharedConfig,
   ...
 }: {
   imports = [
@@ -14,16 +15,31 @@
     ../../modules/hosts/default.nix
     ../../modules/gaming/os.nix
 
-    ../../modules/wm/default.nix
     ../../modules/wm/sddm.nix
     ../../modules/wm/plymouth.nix
+
     ../../modules/wm/hyprland/os.nix
+    ../../modules/wm/sway/os.nix
+
+    ../../modules/wm/awesomewm/os.nix
+    ../../modules/wm/bspwm/os.nix
+    ../../modules/wm/dwm/os.nix
+    ../../modules/wm/i3/os.nix
+    ../../modules/wm/xmonad/os.nix
 
     ../../modules/hosts/stylix.nix
   ];
   plymouth.enable = true;
   sddm.enable = true;
-  hyprland_os.enable = true;
+
+  hyprland.enable = sharedConfig.hyprland.enable;
+  sway.enable = sharedConfig.sway.enable;
+
+  awesomewm.enable = sharedConfig.awesomewm.enable;
+  bspwm.enable = sharedConfig.bspwm.enable;
+  dwm.enable = true;
+  i3.enable = sharedConfig.i3.enable;
+  xmonad.enable = sharedConfig.xmonad.enable;
 
   stylix_os = {
     enable = true;
@@ -36,13 +52,15 @@
     enable = true;
   };
 
-  # services = {
-  # qemuGuest.enable = true;
-  # openssh.settings.PermitRootLogin = lib.mkForce "yes";
-  # };
+  services = {
+    # qemuGuest.enable = true;
+    openssh.settings.PermitRootLogin = lib.mkForce "yes";
+  };
 
   networking.hostName = "kazuha";
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  networking.networkmanager.enable = true;
+  time.timeZone = "America/Costa_Rica";
+
   boot = {
     kernelPackages = pkgs.linuxPackages_zen;
     loader = {
@@ -65,17 +83,6 @@
     supportedFilesystems = lib.mkForce ["btrfs" "reiserfs" "vfat" "f2fs" "xfs" "ntfs" "cifs"];
   };
 
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
-  # Enable networking
-  networking.networkmanager.enable = true;
-
-  # Set your time zone.
-  time.timeZone = "America/Costa_Rica";
-
-  # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
 
   i18n.extraLocaleSettings = {
@@ -90,32 +97,24 @@
     LC_TIME = "es_CR.UTF-8";
   };
 
-  # Enable the X11 windowing system.
-  # services.xserver.enable = true;
-
-  # Enable the XFCE Desktop Environment.
-  # services.xserver.displayManager.lightdm.enable = true;
-  # services.xserver.desktopManager.xfce.enable = true;
-
-  # Configure keymap in X11
-  # services.xserver.xkb = {
-  #   layout = "us";
-  #   variant = "";
-  # };
-
-  # Enable CUPS to print documents.
   # services.printing.enable = true;
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.shawn = {
     isNormalUser = true;
-
     description = "shawn";
-    extraGroups = ["networkmanager" "wheel"];
-    # packages = with pkgs; [ ];
+    extraGroups = ["networkmanager" "wheel" "video"];
   };
 
   nixpkgs.config.allowUnfree = true;
+
+  security.pam.loginLimits = [
+    {
+      domain = "@users";
+      item = "rtprio";
+      type = "-";
+      value = 1;
+    }
+  ];
 
   programs = {
     nix-ld = {
@@ -133,7 +132,7 @@
   # };
 
   # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
+  services.openssh.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
@@ -141,12 +140,6 @@
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
 
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It‘s perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "24.11"; # Did you read the comment?
 
   programs.kdeconnect.enable = true;

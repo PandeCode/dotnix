@@ -49,7 +49,6 @@ in {
 
       # Shells and terminal tools
       fish
-      nushell
       zellij
       zoxide
       carapace
@@ -57,6 +56,7 @@ in {
       atuin
       xclip
       fzf
+      gum
       television
 
       # Version control
@@ -82,15 +82,12 @@ in {
           # pwntools
         ]))
 
-      # Node.js
       nodejs
 
-      # Multimedia
       pulseaudio
       ffmpeg
-      # install mpv to ensure display manager gets installed as a dependency
       mpv
-      sxiv # Simple X Image Viewer https://github.com/muennich/sxiv
+      nsxiv
     ];
   };
 }

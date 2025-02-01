@@ -11,9 +11,6 @@
     ./tools.nix
 
     ./neovim.nix
-    ./mpls.nix
-    ./codelldb.nix
-    ./cpptools.nix
     ./spicetify.nix
     ./wezterm.nix
 
@@ -28,10 +25,6 @@
 
   neovim.enable = lib.mkDefault true;
 
-  mpls.enable = lib.mkIf config.neovim.enable true;
-  cpptools.enable = false; # lib.mkIf config.neovim.enable true;
-  codelldb.enable = lib.mkIf config.neovim.enable true;
-
   shells.enable = lib.mkDefault true;
   zellij.enable = lib.mkDefault true;
 
@@ -39,9 +32,11 @@
     sessionVariables = {
       PYTHONPYCACHEPREFIX = "/home/${config.home.username}/.cache/__pycache__";
       GOPATH = "/home/${config.home.username}/go";
+      DOTFILES = "/home/${config.home.username}/dotnix";
     };
 
     sessionPath = [
+      "$DOTFILES/bin"
       "$HOME/.local/bin"
       ".git/safe/../../bin"
       "${sessionVariables.GOPATH}/bin"
@@ -55,8 +50,6 @@
     };
 
     packages = with pkgs; [
-      qbittorrent-enhanced-nox
-
       gcc
       progress
 
@@ -122,7 +115,6 @@
       imgcat
       hub
       bonsai
-      cava
       cmatrix
 
       # Calculators

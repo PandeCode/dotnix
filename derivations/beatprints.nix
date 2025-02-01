@@ -2,8 +2,8 @@
   pkgs,
   lib,
 }: let
-  python3 = pkgs.python3;
-  fetchPypi = pkgs.fetchPypi;
+  inherit (pkgs) python3;
+  inherit (pkgs) fetchPypi;
 in
   python3.pkgs.buildPythonApplication rec {
     pname = "beatprints";

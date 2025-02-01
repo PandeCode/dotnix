@@ -17,7 +17,7 @@
     ../../modules/hosts/stylix.nix
   ];
 
-  hyprland_os.enable = true;
+  hyprland.enable = true;
   sddm.enable = true;
   plymouth.enable = true;
 

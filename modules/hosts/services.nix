@@ -56,16 +56,6 @@ in {
     # '';
 
     systemd.services = {
-      autostart = {
-        description = "Backlight and kernel settings configuration";
-        script = ''
-          sudo -E chmod 777 /sys/class/backlight/intel_backlight/brightness
-          # sudo sysctl dev.i915.perf_stream_paranoid=0
-          # sudo sysctl -w abi.vsyscall32=0
-        '';
-        wantedBy = ["multi-user.target"];
-      };
-
       journal-resume = {
         description = "Service description here";
         wantedBy = ["post-resume.target"];

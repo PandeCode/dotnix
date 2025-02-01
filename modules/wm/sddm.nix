@@ -34,7 +34,7 @@ in {
     services = {
       displayManager = {
         autoLogin = {
-          enable = true;
+          enable = false;
           user = "shawn";
         };
         sddm = {

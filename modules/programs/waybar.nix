@@ -17,6 +17,13 @@ in {
       python3Packages.pygobject3
     ];
 
+    home.file.".config/cava/cava_waybar.conf".text = ''
+      data_format = ascii
+      ascii_max_range = 9
+      noise_reduction = 0.77
+      bars = 12
+    '';
+
     programs.waybar = {
       enable = true;
       style = let
@@ -34,7 +41,6 @@ in {
           @define-color color8 #${c.base08}; @define-color color9 #${c.base09}; @define-color color10 #${c.base10}; @define-color color11 #${c.base11};
           @define-color color12 #${c.base12}; @define-color color13 #${c.base13}; @define-color color14 #${c.base14}; @define-color color15 #${c.base15};
           * { font-size: 15px; font-family: "${font}"; }
-
 
           ${builtins.readFile ../../config/waybar/style.css}
         '';
@@ -54,6 +60,11 @@ in {
             "custom/lyric"
           ];
           modules-right = [
+            "cava"
+            "custom/prev"
+            "custom/play"
+            "custom/next"
+
             "group/expand"
             "bluetooth"
             "network"
@@ -61,6 +72,21 @@ in {
             "battery"
             "clock"
           ];
+
+          "cava" = {};
+
+          "custom/prev" = {
+            format = " ⏮ ";
+            on-click = "playerctl previous";
+          };
+          "custom/play" = {
+            format = "⏯ ";
+            on-click = "playerctl play-pause";
+          };
+          "custom/next" = {
+            format = "⏭ ";
+            on-click = "playerctl next";
+          };
 
           "image#album-art" = {
             exec = "~/dotnix/bin/album_art.sh";
@@ -71,12 +97,12 @@ in {
           "custom/lyric" = {
             format = "{}";
             interval = 1;
-            exec = "curl -s localhost:8888/line";
+            exec = "curl -s localhost:8888/line | sed 's/&/&amp;/'";
             tooltip = false;
           };
 
           "hyprland/workspaces" = {
-            "format" = "<sub>{icon}</sub>{windows}";
+            "format" = "{icon}";
             format-icons = {
               active = "";
               default = "";
@@ -85,27 +111,10 @@ in {
             persistent-workspaces = {
               "*" = [1 2 3 4 5];
             };
-            format-window-separator = " ";
-            window-rewrite-default = "";
-            window-rewrite = {
-              "title<.*youtube.*>" = ""; #Windowswhosetitlescontain"youtube"
-              "class<firefox>" = ""; #Windowswhoseclassesare"firefox"
-              "title<.*github.*>" = ""; #Windowswhoseclassis"firefox"andtitlecontains"github".Notethat"class"alwayscomesfirst.
-              wezterm = "";
-              code = "󰨞";
-            };
           };
           "hyprland/language" = {
             format-en = "🦅";
             format-es = "🌮";
-          };
-
-          "hyprland/window" = {
-            rewrite = {
-              "(.*)—MozillaFirefox" = "🌎$1";
-              "(.*)-fish" = ">[$1]";
-            };
-            separate-outputs = true;
           };
 
           "custom/notification" = {

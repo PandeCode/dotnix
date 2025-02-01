@@ -20,6 +20,11 @@
       };
       sharedShellAliases =
         {
+          gamescopehdr = "DXVK_HDR=1 gamescope -f --hdr-enabled -- ";
+          steamhdr = "ENABLE_HDR_WSI=1 DXVK_HDR=1 DISPLAY= ";
+          winehdr = "ENABLE_HDR_WSI=1 DXVK_HDR=1 DISPLAY= wine ";
+          mpvhdr = "ENABLE_HDR_WSI=1 mpv --vo=gpu-next --target-colorspace-hint --gpu-api=vulkan --gpu-context=waylandvk ";
+
           df = "duf";
           du = "dust";
           ls = "eza";
@@ -169,6 +174,20 @@
             };
           };
         };
+
+      btop = {
+        enable = true;
+        settings = {
+          proc_tree = true;
+          truecolor = true;
+          proc_sorting = "memory";
+          proc_aggregate = true;
+        };
+      };
+
+      cava = {
+        enable = true;
+      };
     };
   };
 }
