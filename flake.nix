@@ -8,6 +8,7 @@ rec {
       "https://cache.nixos.org/"
       "https://aseipp-nix-cache.global.ssl.fastly.net"
       "https://hyprland.cachix.org"
+      "https://niri.cachix.org"
     ];
     extra-trusted-substituters = extra-substituters;
     extra-trusted-public-keys = [
@@ -22,21 +23,43 @@ rec {
 
     # nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
 
-    home-manager = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # darwin = {
     #   url = "github:LnL7/nix-darwin";
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
 
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # nix-matlab = {
+    #   # nix-matlab's Nixpkgs input follows Nixpkgs' nixos-unstable branch. However
+    #   # your Nixpkgs revision might not follow the same branch. You'd want to
+    #   # match your Nixpkgs and nix-matlab to ensure fontconfig related
+    #   # compatibility.
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    #   url = "gitlab:doronbehar/nix-matlab";
+    # };
+    # add module       nix-matlab.overlay
+    # then pkg matlab, will be avalible
+
     pre-commit-hooks.url = "github:cachix/git-hooks.nix";
 
     stylix.url = "github:danth/stylix";
 
-    zen-browser.url = "github:MarceColl/zen-browser-flake";
+    zen-browser.url = "github:0xc000022070/zen-browser-flake";
+
+    niri.url = "github:sodiboo/niri-flake";
+
+    # astal = {
+    #   url = "github:aylur/astal";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+    # ags = {
+    #   url = "github:aylur/ags";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
 
     hyprland.url = "github:hyprwm/Hyprland";
     hyprswitch.url = "github:h3rmt/hyprswitch/release";
@@ -49,23 +72,30 @@ rec {
       inputs.hyprland.follows = "hyprland";
     };
 
-    xmonad-contexts = {
-      url = "github:Procrat/xmonad-contexts";
+    hyprscroller = {
+      url = "github:dawsers/hyprscroller";
       flake = false;
     };
+
+    # hy3 = {
+    #   url = "github:outfoxxed/hy3";
+    #   inputs.hyprland.follows = "hyprland";
+    # };
+
+    # xmonad-contexts = {
+    #   url = "github:Procrat/xmonad-contexts";
+    #   flake = false;
+    # };
 
     spicetify-nix = {
       url = "github:Gerg-L/spicetify-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
   };
 
   outputs = {
     self,
     nixpkgs,
-    nixpkgs-stable,
     home-manager,
     ...
   } @ inputs: let
@@ -81,19 +111,27 @@ rec {
     supportedSystems = builtins.attrNames systems;
     forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
-    overlays = {nixpkgs.overlays = with inputs; [neovim-nightly-overlay.overlays.default];};
+    overlays = {nixpkgs.overlays = with inputs; [];};
 
     # created to emulate osConfig with home_manager
-    sharedConfig = {
-      gaming.enable = false;
+    sharedConfig_kazuha = {
+      hostName = "kazuha";
+      userName = "shawn";
 
-      hyprland.enable = true;
-      sway.enable = true;
-      i3.enable = true;
-      dwm.enable = true;
-      xmonad.enable = true;
-      awesomewm.enable = true;
-      bspwm.enable = true;
+      gaming.enable = true;
+      virt_manager.enable = true;
+      osx-kvm.enable = true;
+
+      wms = {
+        hyprland.enable = true;
+        sway.enable = true;
+        i3.enable = true;
+        niri.enable = true;
+        # dwm.enable = true;
+        # xmonad.enable = true;
+        # bspwm.enable = true;
+        # awesomewm.enable = true;
+      };
     };
 
     stateVersion = "24.11";
@@ -102,16 +140,20 @@ rec {
      Everything BREAKS,
      So much PTSD, headache and tears. Almost made me quit nix, not related to `nix --version`
     */
+
+    dotutils = import ./utils/default.nix nixpkgs;
   in {
     nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
 
     nixosConfigurations = let
-      mkSystem = system: sys_name: extra_modules:
+      mkSystem = system: sys_name: extra_modules: args:
         nixpkgs.lib.nixosSystem {
-          specialArgs = {
-            inherit inputs outputs system sys_name sharedConfig;
-            pkgs-stable = nixpkgs-stable.legacyPackages.${system};
-          };
+          specialArgs =
+            {
+              inherit inputs outputs system sys_name dotutils;
+              pkgs-stable = inputs.nixpkgs-stable.legacyPackages.${system};
+            }
+            // args;
           modules =
             [{nix.settings = nixConfig;} overlays inputs.stylix.nixosModules.stylix ./hosts/${sys_name}/configuration.nix]
             ++ extra_modules;
@@ -126,13 +168,14 @@ rec {
 
       kazuha =
         mkSystemLinux64 "kazuha" [
-        ];
+        ] {sharedConfig = sharedConfig_kazuha;};
       # jinwoo = mkSystemLinux64 "jinwoo " [];
     };
 
     # darwinConfigurations = {
-    #   herta = darwin.lib.darwinSystem {
+    #   herta = darwin.lib.darwinSystem {/
     #     system = "aarch64-darwin";
+
     #     modules = [stylix.darwinModules.stylix ./configuration.nix];
     #   };
     # };
@@ -143,8 +186,9 @@ rec {
           pkgs = nixpkgs.legacyPackages.${system};
 
           extraSpecialArgs = {
-            inherit inputs outputs system sys_name username sharedConfig;
-            pkgs-stable = nixpkgs-stable.legacyPackages.${system};
+            inherit inputs outputs system sys_name username dotutils;
+            sharedConfig = sharedConfig_kazuha;
+            pkgs-stable = inputs.nixpkgs-stable.legacyPackages.${system};
           };
 
           modules = [
@@ -161,13 +205,15 @@ rec {
           ];
         };
       mkHomeLinux64 = mkHome systems.x86_64-linux;
-    in {
-      # "shawn@wslnix" = mkHomeLinux64 "wslnix" "shawn";
-      "shawn@kazuha" = mkHomeLinux64 "kazuha" "shawn";
-      # "shawn@kazuha" = mkHomeLinux64 "kazuha" "shawn"; # TODO: New system
-      # "shawn@jinwoo" = mkHomeLinux64 "jinwoo" "shawn"; # TODO: New system
-      # "shawn@herta" = mkHomeDarwin "herta" "shawn"; # TODO: New system
-    };
+      mkHomesLinux64 = names: nixpkgs.lib.genAttrs names (name: let idx = builtins.elemAt (builtins.split "@" name); in mkHomeLinux64 (idx 2) (idx 0));
+    in
+      mkHomesLinux64 ["shawn@kazuha"];
+    # {
+    #   # "shawn@wslnix" = mkHomeLinux64 "wslnix" "shawn";
+    #   "shawn@kazuha" = mkHomeLinux64 "kazuha" "shawn";
+    #   # "shawn@jinwoo" = mkHomeLinux64 "jinwoo" "shawn"; # TODO: New system
+    #   # "shawn@herta" = mkHomeDarwin "herta" "shawn"; # TODO: New system
+    # }j
 
     checks = forAllSystems (system: {
       pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
@@ -194,6 +240,19 @@ rec {
 
     devShells = forAllSystems (system: {
       default = nixpkgs.legacyPackages.${system}.mkShell {
+        buildInputs = with nixpkgs.legacyPackages.${system}; [
+          nh
+          statix
+          nixd
+          nix-init
+          nix-index
+          nix-fast-build
+
+          ghc
+        ];
+      };
+
+      pre-commit = nixpkgs.legacyPackages.${system}.mkShell {
         inherit (self.checks.${system}.pre-commit-check) shellHook;
         buildInputs = self.checks.${system}.pre-commit-check.enabledPackages;
       };

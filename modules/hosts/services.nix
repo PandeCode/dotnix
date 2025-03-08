@@ -7,11 +7,24 @@
   cfg = config.services;
 in {
   options = {
-    services.enable = lib.mkEnableOption "enables services";
     services.isLaptop = lib.mkEnableOption "enables services";
   };
-  config = lib.mkIf cfg.enable {
+  config = {
     services = {
+      avahi = {
+        enable = true;
+        nssmdns4 = true; # printing
+        publish = {
+          addresses = true;
+          workstation = true;
+          userServices = true;
+        };
+      };
+
+      openssh.enable = true;
+      printing.enable = true;
+      qemuGuest.enable = true;
+      openssh.settings.PermitRootLogin = lib.mkForce "yes";
       tlp = lib.mkIf cfg.isLaptop {
         enable = true;
         settings = {

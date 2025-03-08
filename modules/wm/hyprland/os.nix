@@ -10,22 +10,18 @@ in {
   imports = [
     ../wayland/os.nix
   ];
-  options.hyprland.enable = lib.mkEnableOption "enable hyprland os level";
 
-  config = lib.mkIf cfg.enable {
-    wayland.enable = true;
-
-    programs = {
-      hyprland = {
-        enable = true;
-        xwayland.enable = true;
-        package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
-      };
+  programs = {
+    hyprland = {
+      enable = true;
+      xwayland.enable = true;
+      package = pkgs.hyprland;
+      # package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
     };
-    environment = {
-      systemPackages = with pkgs; [
-        inputs.hyprswitch.packages.${pkgs.stdenv.hostPlatform.system}.default
-      ];
-    };
+  };
+  environment = {
+    systemPackages = with pkgs; [
+      inputs.hyprswitch.packages.${pkgs.stdenv.hostPlatform.system}.default
+    ];
   };
 }

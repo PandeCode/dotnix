@@ -7,82 +7,81 @@
 }: let
   cfg = config.neovim;
 in {
-  options = {
-    neovim.enable = lib.mkEnableOption "enables neovim";
+  home = let
+    win_user = "pande";
+  in {
+    sessionVariables = {
+      NVIM_ASCII_DIR = "/home/${config.home.username}/.config/nvim/startup_images";
+      NVIM_IMG_DIR = "/mnt/c/Users/${win_user}/Pictures/nvim";
+    };
   };
-  config = lib.mkIf cfg.enable {
-    home = let
-      win_user = "pande";
-    in {
-      sessionVariables = {
-        NVIM_ASCII_DIR = "/home/${config.home.username}/.config/nvim/startup_images";
-        NVIM_IMG_DIR = "/mnt/c/Users/${win_user}/Pictures/nvim";
-      };
-    };
 
-    programs.neovim = {
-      enable = true;
-      viAlias = true;
-      vimAlias = true;
-      vimdiffAlias = true;
-      package = inputs.neovim-nightly-overlay.packages.${pkgs.system}.default;
+  programs.neovim = {
+    enable = true;
+    viAlias = true;
+    vimAlias = true;
+    vimdiffAlias = true;
+    # package = inputs.neovim-nightly-overlay.packages.${pkgs.system}.default;
 
-      extraPackages = with pkgs; [
-        (pkgs.python3.withPackages (python-pkgs:
-          with python-pkgs; [
-            python-lsp-server
-            python-lsp-ruff
-            python-lsp-black
-            pyls-memestra
-            pylsp-rope
-          ]))
+    extraPackages = with pkgs; [
+      (pkgs.python3.withPackages (python-pkgs:
+        with python-pkgs; [
+          python-lsp-server
+          python-lsp-ruff
+          python-lsp-black
+          pyls-memestra
+          pylsp-rope
+        ]))
 
-        (import ../../derivations/mpls.nix {inherit pkgs lib;})
-        (import ../../derivations/codelldb.nix {inherit pkgs;})
-        (import ../../derivations/cpptools.nix {inherit pkgs;})
+      (import ../../derivations/mpls.nix {inherit pkgs lib;})
+      (import ../../derivations/codelldb.nix {inherit pkgs;})
+      (import ../../derivations/cpptools.nix {inherit pkgs;})
 
-        haskell-language-server
+      haskell-language-server
+      tex-fmt
 
-        chafa
-        dwt1-shell-color-scripts
-        pokemon-colorscripts-mac
+      chafa
+      dwt1-shell-color-scripts
+      pokemon-colorscripts-mac
 
-        # Language Servers
-        basedpyright
-        emmet-ls
-        glsl_analyzer
-        gopls
-        lua-language-server
-        neocmakelsp
-        nixd
-        nil
-        nodePackages.bash-language-server
-        pylyzer
-        tailwindcss-language-server
-        texlab
-        vim-language-server
-        vscode-langservers-extracted
-        yaml-language-server
+      ghostscript_headless
 
-        # Formatters
-        alejandra
-        black
-        nodePackages.prettier
-        prettierd
-        shfmt
-        stylua
+      # Language Servers
+      # basedpyright
+      emmet-ls
+      glsl_analyzer
+      gopls
+      lua-language-server
+      neocmakelsp
+      nixd
+      clang-tools
+      nil
+      nodePackages.bash-language-server
+      pylyzer
+      tailwindcss-language-server
+      texlab
+      # vim-language-server
+      vscode-langservers-extracted
+      yaml-language-server
 
-        # Linters
-        markdownlint-cli
+      # Formatters
+      alejandra
+      black
+      nodePackages.prettier
+      prettierd
+      shfmt
+      stylua
 
-        # Utilities
-        aspell
-        ctags
-        lazygit
-        ra-multiplex
-        tree-sitter
-        xxd
-      ];
-    };
+      # Linters
+      markdownlint-cli
+
+      # Utilities
+      aspell
+      ctags
+      lazygit
+      ra-multiplex
+      tree-sitter
+      xxd
+    ];
   };
 }

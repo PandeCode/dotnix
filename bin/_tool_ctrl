@@ -2,22 +2,27 @@
 
 tmp=/tmp/_tool_ctrl
 
+N() {
+	notify-send.py -u low "$@" -a "Tool Ctrl"
+	return
+}
+
 LIGHT_NOT() {
 	light=$(light)
 	light=${light%.*}
 	if [ -f $tmp ]; then
-		notify-send.py Light "$1 $light" --hint "int:value:$light" -r "$(cat $tmp)" >"$tmp"
+		notify-send.py -u low "$@" -a "Tool Ctrl" Light "$1 $light" --hint "int:value:$light" -r "$(cat $tmp | tr "\n" " ")" >"$tmp" || rm -f $tmp
 	else
-		notify-send.py Light "$1 $light" --hint "int:value:$light" >"$tmp"
+		N Light "$1 $light" --hint "int:value:$light" >"$tmp"
 	fi
 }
 
 VOL_NOT() {
 	vol=$(pamixer --get-volume)
 	if [ -f $tmp ]; then
-		notify-send.py Vol "$1" --hint "int:value:$vol" -r "$(cat $tmp)" >"$tmp"
+		notify-send.py -u low "$@" -a "Tool Ctrl" Vol "$1" --hint "int:value:$vol" -r "$(cat $tmp | tr '\n' " ")" >"$tmp" || rm -f $tmp
 	else
-		notify-send.py Vol "$1" --hint "int:value:$vol" >"$tmp"
+		N Vol "$1" --hint "int:value:$vol" >"$tmp"
 	fi
 }
 

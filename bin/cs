@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+input=$(cat)
+
+if [[ $XDG_SESSION_TYPE == "x11" ]]; then
+	echo "$input" | xclip -sel clip
+elif [[ $XDG_SESSION_TYPE == "wayland" ]]; then
+	echo "$input" | wl-copy
+fi

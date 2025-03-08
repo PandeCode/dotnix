@@ -94,7 +94,7 @@ class PlayerManager:
             # if none are playing, show the first one
             return players[0]
         else:
-            logger.debug("No players found")
+            logger.debug("No players found.")
             return None
 
     def show_most_important_player(self):

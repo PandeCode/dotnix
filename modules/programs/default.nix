@@ -7,8 +7,6 @@
   imports = [
     ./shells.nix
     ./zellij.nix
-    ./bin.nix
-    ./tools.nix
 
     ./neovim.nix
     ./spicetify.nix
@@ -18,15 +16,6 @@
   ];
   disabledModules = [
   ];
-
-  bin.enable = true;
-  git.enable = true;
-  tools.enable = true;
-
-  neovim.enable = lib.mkDefault true;
-
-  shells.enable = lib.mkDefault true;
-  zellij.enable = lib.mkDefault true;
 
   home = rec {
     sessionVariables = {
@@ -61,8 +50,12 @@
       nh
       statix
 
-      # spotify-player # Terminal spotify player that has feature parity with the official client https://github.com/aome510/spotify-player
-      # spotifyd # Open source Spotify client running as a UNIX daemon https://spotifyd.rs/
+      spotify-player
+      spotifyd
+      spotify-qt
+      spot
+      ncspot
+      # psst
 
       # silicon # Create beautiful image of your source code https://github.com/Aloxaf/silicon
       # glow # Render markdown on the CLI, with pizzazz! https://github.com/charmbracelet/glow
@@ -81,9 +74,14 @@
       # yazi
 
       tre-command
-      libresprite
       ast-grep
       ripgrep
+      fd
+
+      		proselint
+
+			gobang
+    sqlite
 
       nix-search-cli
 
@@ -121,6 +119,10 @@
       numbat
       kalker
       # sc-im
+
+      openbabel
+
+      languagetool
     ];
   };
 }

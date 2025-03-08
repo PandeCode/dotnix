@@ -4,7 +4,6 @@
   config,
   ...
 }: let
-  cfg = config.x;
   _bind = mod: key: exec: {inherit mod key exec;};
   mod = _bind "super";
   nomod = _bind "";
@@ -17,12 +16,9 @@ in {
   ];
 
   options.x = {
-    enable = lib.mkEnableOption "enable x";
     shared = lib.mkOption {
-      default = rec {
-        inherit (config.wm.shared) terminal;
-        explorer = config.wm.shared.terminal;
-        inherit (config.wm.shared) workspace_rules;
+      default = {
+        inherit (config.wm.shared) terminal workspace_rules explorer;
         startup =
           config.wm.shared.startup
           ++ [
@@ -30,6 +26,7 @@ in {
             "greenclip daemon"
             "xflux"
             "lastbg.sh"
+            "alttab"
           ];
         bindexec =
           config.wm.shared.bindexec
@@ -45,8 +42,7 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
-    wm.enable = true;
+  config = {
     greenclip.enable = true;
     picom.enable = true;
 
@@ -61,6 +57,7 @@ in {
       xorg.xmodmap
       picom-pijulius
       xflux
+      alttab
       feh
     ];
   };

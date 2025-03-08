@@ -23,15 +23,27 @@ fi
 
 function setbg() {
 	img=$1
+	save_img=$1
 	mes=""
 
 	if [[ -n ${GO_WALL} ]]; then
-		if [[ -n ${GO_WALL_INVERT} ]]; then
-			gowall invert "$img"
-			mes+=inverted
-		fi
 		gowall convert "$img" -t "${GO_WALL:-nix}"
 		mes+=" $GO_WALL "
+		img="$HOME/Pictures/gowall/$(basename "$img")"
+	fi
+	if [[ -n ${GO_WALL_INVERT} ]]; then
+		gowall invert "$img"
+		mes+=" inverted "
+		img="$HOME/Pictures/gowall/$(basename "$img")"
+	fi
+	if [[ -n ${GO_WALL_PIXELATE} ]]; then
+		gowall pixelate "$img" -s "$GO_WALL_PIXELATE"
+		mes+=" pixelated($GO_WALL_PIXELATE) "
+		img="$HOME/Pictures/gowall/$(basename "$img")"
+	fi
+	if [[ -n ${GO_WALL_EFFECT} ]]; then
+		gowall effect "$GO_WALL_EFFECT" "$img"
+		mes+=" effect ($GO_WALL_EFFECT) "
 		img="$HOME/Pictures/gowall/$(basename "$img")"
 	fi
 
@@ -68,7 +80,7 @@ function setbg() {
 		fi
 
 		echo "$img"
-		echo "$img" >>$img_log_file
+		echo "$save_img" >>$img_log_file
 
 		if [[ -n ${bg_id} ]]; then
 			notify-send "Set bg" "$mes $img" --icon "$img" -p -r "$bg_id" >"$bg_id_file"
@@ -77,6 +89,6 @@ function setbg() {
 		fi
 
 	else
-		echo "No XDG_SESSION_TYPE:'$XDG_SESSION_TYPE'"
+		notify-send -u critical "No XDG_SESSION_TYPE:'$XDG_SESSION_TYPE'"
 	fi
 }

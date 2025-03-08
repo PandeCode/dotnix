@@ -10,18 +10,14 @@ in
     imports = [
       ../home.nix
       ../../programs/waybar.nix
+      ../../programs/swaync.nix
+      # ../../programs/astal.nix
     ];
 
     options.wayland = {
-      wm.enable = true;
-
-      enable = lib.mkEnableOption "enable wayland";
-
       shared = mkOption {
         default = rec {
-          inherit (config.wm.shared) terminal;
-          explorer = config.wm.shared.terminal;
-          inherit (config.wm.shared) workspace_rules;
+          inherit (config.wm.shared) terminal workspace_rules explorer;
           startup = [
             "swww-daemon"
             "systemctl --user start hyprpolkitagent"
@@ -36,10 +32,13 @@ in
             config.wm.shared.bindexec
             ++ [
               (mod "z" "woomer")
-              (mod "c" "hyprpicker -a")
-              (mod "l" "hyprlock")
+              (_bind "super shift" "c" "hyprpicker -a")
+              (_bind "super shift" "l" "hyprlock")
 
               (nomod "Print" "grimblast copy area")
+
+              (_bind "super shift" "b" "toggle_waybar.sh")
+              (_bind "super shift" "r" "wayrec.sh")
 
               (mod "v" "rofi -modi clipboard:cliphist-rofi-img -show clipboard -show-icons")
               (_bind "super shift" "v" "bash -c \"cliphist list | rofi -dmenu | cliphist decode | xargs -I '{}' ydotool type '{}'\"")
@@ -49,22 +48,18 @@ in
       };
     };
 
-    config = lib.mkIf cfg.enable {
-      rofi.enable = true;
-      waybar.enable = true;
-
-      services = {
-        swaync = {
-          enable = true;
-          settings = {
-          };
-        };
-      };
+    config = {
+      programs.hyprlock.enable = true;
 
       home.packages = with pkgs; [
+        wlprop
+
+        (import ../../../derivations/notify-send-py.nix {inherit lib pkgs;})
         hyprpicker
         hyprlock
         hyprsunset
+
+        wayvnc # TODO: own file
       ];
     };
   }

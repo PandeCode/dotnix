@@ -225,6 +225,7 @@
     };
   };
 in {
+
   options.rofi.enable = lib.mkEnableOption "enable rofi";
 
   config = lib.mkIf cfg.enable {
@@ -243,7 +244,7 @@ in {
         package = rofi-wayland;
         plugins = [rofi-emoji rofi-calc rofi-games rofi-power-menu rofi-mpd];
         cycle = true;
-        terminal = "kitty";
+        terminal = "wezterm";
         # theme = windows-11-list;
         theme = macos;
       };

@@ -13,44 +13,23 @@
     ./hardware-configuration.nix
 
     ../../modules/hosts/default.nix
+
     ../../modules/gaming/os.nix
+
+    ../../modules/wm/default.os.nix
 
     ../../modules/wm/sddm.nix
     ../../modules/wm/plymouth.nix
 
-    ../../modules/wm/hyprland/os.nix
-    ../../modules/wm/sway/os.nix
-
-    ../../modules/wm/awesomewm/os.nix
-    ../../modules/wm/bspwm/os.nix
-    ../../modules/wm/dwm/os.nix
-    ../../modules/wm/i3/os.nix
-    ../../modules/wm/xmonad/os.nix
-
     ../../modules/hosts/stylix.nix
+
+    ../../modules/hosts/virt_manager.nix
+    ../../modules/hosts/osx-kvm.nix
   ];
-  plymouth.enable = true;
-  sddm.enable = true;
 
-  hyprland.enable = sharedConfig.hyprland.enable;
-  sway.enable = sharedConfig.sway.enable;
+  # gaming_os.enable = false;
 
-  awesomewm.enable = sharedConfig.awesomewm.enable;
-  bspwm.enable = sharedConfig.bspwm.enable;
-  dwm.enable = true;
-  i3.enable = sharedConfig.i3.enable;
-  xmonad.enable = sharedConfig.xmonad.enable;
-
-  stylix_os = {
-    enable = true;
-    boot.enable = lib.mkForce true;
-  };
-
-  gaming_os.enable = false;
-
-  zramSwap = {
-    enable = true;
-  };
+  zramSwap.enable = true;
 
   services = {
     # qemuGuest.enable = true;
@@ -102,36 +81,59 @@
   users.users.shawn = {
     isNormalUser = true;
     description = "shawn";
-    extraGroups = ["networkmanager" "wheel" "video"];
+    extraGroups = ["networkmanager" "wheel" "video" "libvirtd"];
   };
 
   nixpkgs.config.allowUnfree = true;
 
-  security.pam.loginLimits = [
-    {
-      domain = "@users";
-      item = "rtprio";
-      type = "-";
-      value = 1;
-    }
-  ];
+  security = {
+    sudo = {
+      enable = true;
+      extraRules = [
+        {
+          commands =
+            map (command: {
+              inherit command;
+              options = ["NOPASSWD"];
+            })
+            [
+              "${pkgs.systemd}/bin/systemctl suspend"
+              "${pkgs.systemd}/bin/reboot"
+              "${pkgs.systemd}/bin/poweroff"
+            ];
+          groups = ["wheel"];
+        }
+      ];
+      extraConfig = with pkgs; ''
+        Defaults timestamp_timeout=-1
+        Defaults insults
+        Defaults passwd_tries=5
+        Defaults:picloud secure_path="${lib.makeBinPath [
+          systemd
+        ]}:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin"
+      '';
+    };
+    pam.loginLimits = [
+      {
+        domain = "@users";
+        item = "rtprio";
+        type = "-";
+        value = 1;
+      }
+    ];
+  };
 
   programs = {
     nix-ld = {
       enable = true;
-      libraries = with pkgs; [gtk3];
+      libraries = with pkgs; [gtk3 fuse3];
+    };
+    mtr.enable = true;
+    gnupg.agent = {
+      enable = true;
+      enableSSHSupport = true;
     };
   };
-
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
-
-  # Enable the OpenSSH daemon.
   services.openssh.enable = true;
 
   # Open ports in the firewall.
@@ -140,9 +142,30 @@
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
 
-  system.stateVersion = "24.11"; # Did you read the comment?
+  system.stateVersion = "24.11";
 
   programs.kdeconnect.enable = true;
+  programs.localsend.enable = true;
+  # services.syncthing = {
+  #   enable = true;
+  #   openDefaultPorts = true;
+  #
+  #   settings = {
+  #     devices = {
+  #       "device" = {id = "DEVICE-ID-GOES-HERE";};
+  #       "chaos" = {id = "DEVICE-ID-GOES-HERE";};
+  #     };
+  #     folders = {
+  #       "School" = {
+  #         path = "/home/${sharedConfig.username}/Vaults/School";
+  #         devices = ["device" "chaos"];
+  #         ignorePerms = false;
+  #       };
+  #     };
+  #   };
+  # };
+  # systemd.services.syncthing.environment.STNODEFAULTFOLDER = "true";
+
   networking.firewall = rec {
     allowedTCPPortRanges = [
       {

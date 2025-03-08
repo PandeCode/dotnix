@@ -8,8 +8,6 @@
   cfg = config.gaming;
 in {
   options.gaming = {
-    enable = lib.mkEnableOption "Enable gaming packages and configuration.";
-
     epic = lib.mkEnableOption "Enable Heroic Games Launcher (Epic Games).";
     minecraft = lib.mkEnableOption "Enable Minecraft.";
     osu = lib.mkEnableOption "Enable osu!.";
@@ -19,7 +17,7 @@ in {
     wii = lib.mkEnableOption "Enable Wii emulation.";
   };
 
-  config = lib.mkIf (cfg.enable && osConfig.gaming_os.enable) {
+  config = {
     home.packages = with pkgs; let
       enable_if = var: list:
         if cfg.${var}
@@ -36,6 +34,7 @@ in {
       [
         lutris
         wine-staging
+        winetricks
 
         mangohud
         gamescope

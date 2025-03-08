@@ -6,19 +6,18 @@
   imports = [
     ./nix.nix
     ./neovim.nix
+    ./networking.nix
     ./services.nix
     ./packages.nix
+    ./security.nix
   ];
-
-  packages.enable = true;
 
   environment.sessionVariables = {
     NIX_BUILD_CORES = 6;
   };
 
   services = {
-    enable = true;
-    isLaptop = false;
+    isLaptop = true;
   };
 
   nixpkgs = {

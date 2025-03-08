@@ -4,7 +4,6 @@
   config,
   ...
 }: let
-  cfg = config.sddm;
   # image = pkgs.fetchurl {
   #   url = "https://raw.githubusercontent.com/dharmx/walls/refs/heads/main/architecture/a_bridge_with_lights_on_it.jpg";
   #   sha256 = "465390cba5d4fa1861f2948b59fabe399bd2d7d53ddd6c896b0739bee4eca2c8";
@@ -25,23 +24,36 @@
   #     cp -r ${image} $out/Background.jpg
   #   '';
   # };
+  sddm-astronaut = pkgs.sddm-astronaut.override {
+    embeddedTheme = "hyprland_kath";
+    # themeConfig = {
+    #   AccentColor = "#746385";
+    #   FormPosition = "left";
+    #
+    #   ForceHideCompletePassword = true;
+    # };
+  };
 in {
-  options.sddm.enable = lib.mkEnableOption "enable sddm";
+  environment.systemPackages = [
+    sddm-astronaut
+  ];
 
-  config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [catppuccin-sddm-corners];
+  services = {
+    xserver.enable = true;
 
-    services = {
-      displayManager = {
-        autoLogin = {
-          enable = false;
-          user = "shawn";
-        };
-        sddm = {
-          theme = "catppuccin-sddm-corners";
-          wayland.enable = true;
-          enable = true;
-        };
+    displayManager = {
+      sddm = {
+        wayland.enable = true;
+        enable = true;
+        package = pkgs.kdePackages.sddm;
+
+        theme = "sddm-astronaut-theme";
+
+        extraPackages = [sddm-astronaut];
+      };
+      autoLogin = {
+        enable = false;
+        user = "shawn";
       };
     };
   };

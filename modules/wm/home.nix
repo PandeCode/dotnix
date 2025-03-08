@@ -2,19 +2,19 @@
   pkgs,
   lib,
   config,
+  inputs,
   ...
 }: let
-  cfg = config.wm;
   _bind = mod: key: exec: {inherit mod key exec;};
   mod = _bind "super";
   nomod = _bind "";
 in {
   imports = [
     ../programs/rofi.nix
+    # ../programs/swhkd.nix
   ];
 
   options.wm = {
-    enable = lib.mkEnableOption "enable wm";
     shared = lib.mkOption {
       default = rec {
         terminal = "wezterm";
@@ -39,9 +39,33 @@ in {
           terminal
           "nm-applet --indicator"
         ];
+        bindings = {
+          cycle_layout = ["super" "space"];
+
+          show_all_ws = ["super" "tab"];
+
+          toggle_bar = ["super" "shift" "b"];
+
+          pin_active = ["super" "p"];
+
+          fullscreen_active = ["super" "f"];
+          fake_fullscreen_active = ["super ctrl" "f"];
+
+          floating_active = ["super shift" "f"];
+          select_floating_active = ["super alt" "f"];
+
+          kill_active_window = ["alt" "f4"];
+          restart_wm = ["super" "q"];
+          kill_wm = ["super" "shift" "f4"];
+
+          alt_tab = ["alt" "tab"];
+          shift_alt_tab = ["shift" "alt" "tab"];
+        };
         bindexec = [
           (mod "Return" "${terminal}")
           (mod "e" "${explorer}")
+
+          (_bind "super shift" "g" "find ~/Pictures/gifs/ -type f | shuf -n 1 | xargs -I{} pqiv -c -c -i '{}'")
 
           (nomod "XF86AudioMute" "_tool_ctrl vol toggle")
           (nomod "XF86AudioPlay" "_tool_ctrl media toggle")
@@ -53,10 +77,11 @@ in {
           (_bind "super ctrl" "f" "_tool_riot")
           (mod "n" "swaync-client -t -sw")
           (mod "s" "_tool_search")
-          (mod "c" "rofi -show calc")
 
-          (_bind "alt" "space" "rofi -show drun -show-icons")
-          (_bind "alt shift" "space" "rofi -show run -show-icons")
+          (_bind "super shift" "c" "rofi-calc.sh")
+
+          (_bind "alt" "space" "rofi-run.sh")
+          (_bind "alt shift" "space" "rofi-run-pr.sh")
         ];
         bindexec_el = [
           (nomod "XF86AudioRaiseVolume" "_tool_ctrl vol up")
@@ -69,8 +94,10 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = {
     rofi.enable = true;
+    # swhkd.enable = true;
+
     programs = {
       kitty.enable = true;
       alacritty.enable = true;
@@ -81,6 +108,12 @@ in {
       # inherit lib pkgs;
       # pkgs = pkgs-stable;
       # })
+
+      ghostty
+
+      pscircle
+
+      		sageWithDoc
 
       (import ../../derivations/httptap.nix {inherit lib pkgs;})
 

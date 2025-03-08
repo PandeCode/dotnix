@@ -10,33 +10,29 @@ in {
   imports = [
     inputs.spicetify-nix.homeManagerModules.default
   ];
-  options.spicetify.enable = lib.mkEnableOption "enable spicetify";
-
-  config = lib.mkIf cfg.enable {
-    programs.spicetify = let
-      spicePkgs = inputs.spicetify-nix.legacyPackages.${pkgs.system};
-    in {
-      enable = lib.mkForce true;
-      enabledCustomApps = with spicePkgs.apps; [
-        newReleases
-        lyricsPlus
-        marketplace
-        ncsVisualizer
-        {
-          src = pkgs.fetchFromGitHub {
-            owner = "Pithaya";
-            repo = "spicetify-apps-dist";
-            rev = "ab6d4440bcbf0ad0060c5a19581b43605720f113";
-            hash = "sha256-4P8wHBvjzjRvzhBTU8zVD+2QCZAw5A9BgmYiG59UcQA=";
-          };
-          name = "eternal-jukebox";
-        }
-      ];
-      enabledExtensions = with spicePkgs.extensions; [
-        adblock
-        hidePodcasts
-        shuffle # shuffle+ (special characters are sanitized out of extension names)
-      ];
-    };
+  programs.spicetify = let
+    spicePkgs = inputs.spicetify-nix.legacyPackages.${pkgs.system};
+  in {
+    enable = lib.mkForce true;
+    enabledCustomApps = with spicePkgs.apps; [
+      newReleases
+      lyricsPlus
+      marketplace
+      ncsVisualizer
+      {
+        src = pkgs.fetchFromGitHub {
+          owner = "Pithaya";
+          repo = "spicetify-apps-dist";
+          rev = "ab6d4440bcbf0ad0060c5a19581b43605720f113";
+          hash = "sha256-4P8wHBvjzjRvzhBTU8zVD+2QCZAw5A9BgmYiG59UcQA=";
+        };
+        name = "eternal-jukebox";
+      }
+    ];
+    enabledExtensions = with spicePkgs.extensions; [
+      adblock
+      hidePodcasts
+      shuffle # shuffle+ (special characters are sanitized out of extension names)
+    ];
   };
 }

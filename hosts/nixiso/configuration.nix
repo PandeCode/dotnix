@@ -17,10 +17,6 @@
     ../../modules/hosts/stylix.nix
   ];
 
-  hyprland.enable = true;
-  sddm.enable = true;
-  plymouth.enable = true;
-
   system.stateVersion = "24.05";
 
   stylix_os = {
