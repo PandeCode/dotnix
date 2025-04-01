@@ -1,14 +1,15 @@
 {
   pkgs,
   lib,
+  ...
 }:
-pkgs.stdenv.mkDerivation {
+pkgs.stdenv.mkDerivation rec {
   pname = "mpls";
-  version = "0.8.4";
+  version = "0.12.1";
 
   src = pkgs.fetchurl {
-    url = "https://github.com/mhersson/mpls/releases/download/v0.8.4/mpls_0.8.4_linux_amd64.tar.gz";
-    sha256 = "0ms2hb534fhcg4yz7mwgsa0vf8cm8q2g7k7lziv0j6pv50cnp3vd";
+    url = "https://github.com/mhersson/mpls/releases/download/v${version}/mpls_${version}_linux_amd64.tar.gz";
+    sha256 = "1zjg4kwa0amq6jk4dlg8jpbqidfpf11a44j4202mliplyi9lpwp3";
   };
 
   phases = ["unpackPhase" "installPhase"];

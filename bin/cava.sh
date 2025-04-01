@@ -1,11 +1,34 @@
 #!/usr/bin/env bash
 
-is_cava_ServerExist=$(ps -ef|grep -m 1 cava|grep -cv "grep"|wc -l)
-if [ "$is_cava_ServerExist" = "0" ]; then
-	echo "cava_server not found" > /dev/null 2>&1
-#	exit;
-elif [ "$is_cava_ServerExist" = "1" ]; then
-  killall cava
-fi
+# Define character sets
+chars1='▁▂▃▄▅▆▇█'
+chars2='⠁⠃⠇⡆⡇⣇⣧⣿'
+chars3=' .:-=+*#%'
+chars4=' ▏▎▍▌▋▊▉█'
 
-exec cava -p ~/.config/cava/shell | sed -u 's/;//g;s/0/▁/g;s/1/▂/g;s/2/▃/g;s/3/▄/g;s/4/▅/g;s/5/▆/g;s/6/▇/g;s/7/█/g;'
+default=$chars1
+
+# Select character set based on argument
+case "$1" in
+    "set1")
+        chars="$chars1"
+        ;;
+    "set2")
+        chars="$chars2"
+        ;;
+    "set3")
+        chars="$chars3"
+        ;;
+    "set4")
+        chars="$chars4"
+        ;;
+    *)
+        chars="$default"
+        ;;
+esac
+
+# Convert characters to sed expression
+sed_expr=$(echo "$chars" | awk '{for(i=0;i<length;i++) printf "s/%d/%s/g;", i, substr($0,i+1,1)}')
+
+# Run cava with the selected character set
+cava -p ~/.config/cava/shell | sed -u "s/;//g;$sed_expr"

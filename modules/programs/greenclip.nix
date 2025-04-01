@@ -6,8 +6,6 @@
 }: let
   cfg = config.greenclip;
 in {
-  imports = [./rofi.nix];
-
   options.greenclip = {
     enable = lib.mkEnableOption "enable greenclip";
     commands = lib.mkOption {
@@ -20,8 +18,6 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    rofi.enable = true;
-
     home = {
       packages = [pkgs.haskellPackages.greenclip pkgs.xdotool];
 

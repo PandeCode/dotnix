@@ -1,94 +1,160 @@
 #!/usr/bin/env bash
 
-tmp=/tmp/_tool_ctrl
+NOTIFICATION_ID_FILE="/tmp/tool_ctrl_notification_id"
+APP_NAME="Tool Ctrl"
+NOTIFICATION_URGENCY="low"
 
-N() {
-	notify-send.py -u low "$@" -a "Tool Ctrl"
-	return
-}
+send_notification() {
+	local title="$1"
+	local message="$2"
+	local value="$3"
+	local hint=""
 
-LIGHT_NOT() {
-	light=$(light)
-	light=${light%.*}
-	if [ -f $tmp ]; then
-		notify-send.py -u low "$@" -a "Tool Ctrl" Light "$1 $light" --hint "int:value:$light" -r "$(cat $tmp | tr "\n" " ")" >"$tmp" || rm -f $tmp
+	if [[ -n "$value" ]]; then
+		hint="--hint int:value:$value"
+	fi
+
+	if [[ -f "$NOTIFICATION_ID_FILE" ]]; then
+		local replace_id=$(cat "$NOTIFICATION_ID_FILE")
+		notify-send.py -u "$NOTIFICATION_URGENCY" -a "$APP_NAME" "$title" "$message" $hint -r "$replace_id"
 	else
-		N Light "$1 $light" --hint "int:value:$light" >"$tmp"
+		notify-send.py -u "$NOTIFICATION_URGENCY" -a "$APP_NAME" "$title" "$message" $hint >"$NOTIFICATION_ID_FILE"
 	fi
 }
 
-VOL_NOT() {
-	vol=$(pamixer --get-volume)
-	if [ -f $tmp ]; then
-		notify-send.py -u low "$@" -a "Tool Ctrl" Vol "$1" --hint "int:value:$vol" -r "$(cat $tmp | tr '\n' " ")" >"$tmp" || rm -f $tmp
-	else
-		N Vol "$1" --hint "int:value:$vol" >"$tmp"
-	fi
-}
+handle_keyboard_backlight() {
+	local action="$1"
+	local change=""
 
-case "$1" in
-key)
-	case "$2" in
-	up) brightnessctl -d *::kbd_backlight set +33% ;;
-	down) brightnessctl -d *::kbd_backlight set 33%- ;;
-	*) exit 1 ;;
+	case "$action" in
+	up) change="+33%" ;;
+	down) change="33%-" ;;
+	*)
+		echo "Invalid keyboard backlight action: $action"
+		exit 1
+		;;
 	esac
-	;;
-vol)
-	case "$2" in
+
+	brightnessctl -d *::kbd_backlight set "$change"
+	send_notification "Keyboard" "$action"
+}
+
+handle_volume() {
+	local action="$1"
+
+	case "$action" in
 	up)
-		pactl set-sink-volume @DEFAULT_SINK@ +10%
-		VOL_NOT Up
+		pactl set-sink-volume @DEFAULT_SINK@ +5%
+		local volume=$(pamixer --get-volume)
+		send_notification "Volume" "Up ($volume%)" "$volume"
 		;;
 	down)
-		pactl set-sink-volume @DEFAULT_SINK@ -10%
-		VOL_NOT Down
+		pactl set-sink-volume @DEFAULT_SINK@ -5%
+		local volume=$(pamixer --get-volume)
+		send_notification "Volume" "Down ($volume%)" "$volume"
 		;;
-	toggle)
+	mute)
 		pactl set-sink-mute @DEFAULT_SINK@ toggle
-		VOL_NOT Mute
+		local status=$(pamixer --get-mute && echo "Muted" || echo "Unmuted")
+		local volume=$(pamixer --get-volume)
+		send_notification "Volume" "$status" "$volume"
 		;;
-	*) exit 1 ;;
+	*)
+		echo "Invalid volume action: $action"
+		exit 1
+		;;
 	esac
-	;;
-mic)
-	case "$2" in
+}
+
+# Function to handle microphone
+handle_microphone() {
+	local action="$1"
+
+	case "$action" in
 	mute)
 		pactl set-source-mute @DEFAULT_SOURCE@ toggle
-		notify-send.py "Mic Mute"
+		local status=$(pamixer --get-mute --source 0 && echo "Muted" || echo "Unmuted")
+		send_notification "Microphone" "$status"
 		;;
-	*) exit 1 ;;
+	*)
+		echo "Invalid microphone action: $action"
+		exit 1
+		;;
 	esac
-	;;
-light)
-	case "$2" in
+}
+
+# Function to handle screen brightness
+handle_brightness() {
+	local action="$1"
+
+	case "$action" in
 	up)
 		light -A 5
-		LIGHT_NOT "up"
+		local brightness=$(light | cut -d. -f1)
+		send_notification "Brightness" "Up ($brightness%)" "$brightness"
 		;;
 	down)
 		light -U 5
-		LIGHT_NOT "down"
+		local brightness=$(light | cut -d. -f1)
+		send_notification "Brightness" "Down ($brightness%)" "$brightness"
 		;;
-	*) exit 1 ;;
+	*)
+		echo "Invalid brightness action: $action"
+		exit 1
+		;;
 	esac
-	;;
-media)
-	case "$2" in
+}
+
+# Function to handle media controls
+handle_media() {
+	local action="$1"
+	local script_dir=$(dirname "$0")
+
+	case "$action" in
 	toggle)
 		playerctl play-pause
-		_tool_media_info
+		"$script_dir/media_info"
 		;;
 	next)
 		playerctl next
-		_tool_media_info
+		"$script_dir/media_info"
 		;;
-	prev)
+	prev | previous)
 		playerctl previous
-		_tool_media_info
+		"$script_dir/media_info"
 		;;
-	*) exit 1 ;;
+
+	ctrl)
+		rofi
+		;;
+	*)
+		echo "Invalid media action: $action"
+		exit 1
+		;;
 	esac
+}
+
+# Main execution block
+if [[ $# -lt 2 ]]; then
+	echo "Usage: $0 <category> <action>"
+	echo "Categories: key, vol, mic, light, media"
+	exit 1
+fi
+
+category="$1"
+action="$2"
+
+case "$category" in
+key) handle_keyboard_backlight "$action" ;;
+vol) handle_volume "$action" ;;
+mic) handle_microphone "$action" ;;
+light) handle_brightness "$action" ;;
+media) handle_media "$action" ;;
+*)
+	echo "Invalid category: $category"
+	echo "Available categories: key, vol, mic, light, media"
+	exit 1
 	;;
-*) exit 1 ;;
 esac
+
+exit 0

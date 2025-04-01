@@ -35,8 +35,8 @@ in {
           pin = ["title:Picture-in-picture"];
         };
         startup = [
-          #"blueman-applet"
           terminal
+          "blueman-applet"
           "nm-applet --indicator"
         ];
         bindings = {
@@ -75,7 +75,6 @@ in {
           (mod "t" "translate-clip.sh")
           (_bind "super shift" "t" "translate-img.sh")
           (_bind "super ctrl" "f" "_tool_riot")
-          (mod "n" "swaync-client -t -sw")
           (mod "s" "_tool_search")
 
           (_bind "super shift" "c" "rofi-calc.sh")
@@ -95,31 +94,37 @@ in {
   };
 
   config = {
-    rofi.enable = true;
-    # swhkd.enable = true;
-
     programs = {
-      kitty.enable = true;
+      kitty = {
+        enable = true;
+        shellIntegration = {
+          enableBashIntegration = true;
+          enableFishIntegration = true;
+          enableZshIntegration = true;
+        };
+      };
+      ghostty = {
+        enable = true;
+        enableBashIntegration = true;
+        enableFishIntegration = true;
+      };
       alacritty.enable = true;
     };
 
-    home.packages = with pkgs; [
-      # (import ../../../derivations/beatprints.nix {
-      # inherit lib pkgs;
-      # pkgs = pkgs-stable;
-      # })
-
-      ghostty
-
-      pscircle
-
-      		sageWithDoc
-
-      (import ../../derivations/httptap.nix {inherit lib pkgs;})
-
-      (tesseract.override {
-        enableLanguages = ["eng"];
-      })
+    home.packages = [
+      pkgs.spatial-shell
     ];
+
+    xdg.configFile = {
+      "spatial/config-waybar".text = ''
+        status_bar_name "waybar"
+      '';
+      "spatial/config-sway".text = ''
+        status_bar_name "i3blocks"
+      '';
+      "spatial/config-i3".text = ''
+        status_bar_name "i3blocks"
+      '';
+    };
   };
 }

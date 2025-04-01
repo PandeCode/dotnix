@@ -1,38 +1,56 @@
 {pkgs, ...}: {
-  security = {
-    sudo = {
-      enable = true;
-      extraRules = [
-        {
-          commands =
-            map (command: {
-              inherit command;
-              options = ["NOPASSWD"];
-            })
-            [
-              "${pkgs.systemd}/bin/systemctl suspend"
-              "${pkgs.systemd}/bin/reboot"
-              "${pkgs.systemd}/bin/poweroff"
+    security = {
+        sudo = {
+            enable = true;
+            extraRules = [
+                {
+                    commands =
+                        map (command: {
+                            inherit command;
+                            options = ["NOPASSWD"];
+                        })
+                        [
+                            "${pkgs.systemd}/bin/systemctl suspend"
+                            "${pkgs.systemd}/bin/reboot"
+                            "${pkgs.systemd}/bin/poweroff"
+                        ];
+                    groups = ["wheel"];
+                }
             ];
-          groups = ["wheel"];
-        }
-      ];
-      extraConfig = with pkgs; ''
+            extraConfig = with pkgs; ''
         Defaults timestamp_timeout=-1
         Defaults insults
         Defaults passwd_tries=5
         Defaults:picloud secure_path="${lib.makeBinPath [
-          systemd
-        ]}:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin"
-      '';
-    };
-    pam.loginLimits = [
+                    systemd
+                ]}:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin"
+            '';
+        };
+        pam.loginLimits = [
+            {
+                domain = "@users";
+                item = "rtprio";
+                type = "-";
+                value = 1;
+            }
+        ];
+
+        polkit.extraConfig = /*js*/''
+    polkit.addRule(function(action, subject) {
+      if (
+        subject.isInGroup("users")
+          && (
+            action.id == "org.freedesktop.login1.reboot" ||
+            action.id == "org.freedesktop.login1.reboot-multiple-sessions" ||
+            action.id == "org.freedesktop.login1.power-off" ||
+            action.id == "org.freedesktop.login1.power-off-multiple-sessions"
+          )
+        )
       {
-        domain = "@users";
-        item = "rtprio";
-        type = "-";
-        value = 1;
+        return polkit.Result.YES;
       }
-    ];
-  };
+    });
+        '';
+
+    };
 }

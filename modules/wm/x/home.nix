@@ -22,11 +22,14 @@ in {
         startup =
           config.wm.shared.startup
           ++ [
+             "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
             "xmodmap ~/.Xmodmap"
             "greenclip daemon"
             "xflux"
             "lastbg.sh"
             "alttab"
+            "dunst"
+            "picom -b --backend glx"
           ];
         bindexec =
           config.wm.shared.bindexec
@@ -46,19 +49,27 @@ in {
     greenclip.enable = true;
     picom.enable = true;
 
-    # CapsLock to Control, and Shift+CapsLock to CapsLock:
-    home.file.".Xmodmap".text = ''
-      clear lock
-      clear control
-      add control = Caps_Lock Control_L Control_R
-      keycode 66 = Control_L Caps_Lock NoSymbol NoSymbol
-    '';
-    home.packages = with pkgs; [
-      xorg.xmodmap
-      picom-pijulius
-      xflux
-      alttab
-      feh
-    ];
+    home = {
+      # CapsLock to Control, and Shift+CapsLock to CapsLock:
+      file.".Xmodmap".text = ''
+        clear lock
+        clear control
+        add control = Caps_Lock Control_L Control_R
+        keycode 66 = Control_L Caps_Lock NoSymbol NoSymbol
+
+        # Natural Scrolling
+        # pointer = 1 2 3 5 4 7 6 8 9 10 11 12
+      '';
+      packages = with pkgs; [
+        xorg.xmodmap
+        picom-pijulius
+        xflux
+        alttab
+        feh
+        slop
+        paperview
+        xtitle
+      ];
+    };
   };
 }

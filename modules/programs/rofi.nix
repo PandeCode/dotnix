@@ -1,10 +1,8 @@
 {
-  lib,
   pkgs,
   config,
   ...
 }: let
-  cfg = config.rofi;
   inherit (config.lib.formats.rasi) mkLiteral;
   l = mkLiteral;
   font = config.stylix.fonts.sansSerif.name;
@@ -225,35 +223,30 @@
     };
   };
 in {
+  home.packages = [
+    (
+      pkgs.writeShellScriptBin "rofi-wifi-menu" (builtins.readFile (builtins.fetchurl {
+        url = "https://raw.githubusercontent.com/zbaylin/rofi-wifi-menu/refs/heads/master/rofi-wifi-menu.sh";
+        sha256 = "0gilv2q4l7synn1labwzw3bm4xy4h1z2l7kh1jhjyfxn3xpx7fnc";
+      }))
+    )
+  ];
 
-  options.rofi.enable = lib.mkEnableOption "enable rofi";
+  programs = {
+    rofi = with pkgs; {
+      enable = true;
+      package = rofi-wayland;
+      plugins = [rofi-emoji rofi-calc rofi-games rofi-power-menu rofi-mpd];
+      cycle = true;
+      terminal = "wezterm";
+      # theme = windows-11-list;
+      theme = macos;
+    };
 
-  config = lib.mkIf cfg.enable {
-    home.packages = [
-      (
-        pkgs.writeShellScriptBin "rofi-wifi-menu" (builtins.readFile (builtins.fetchurl {
-          url = "https://raw.githubusercontent.com/zbaylin/rofi-wifi-menu/refs/heads/master/rofi-wifi-menu.sh";
-          sha256 = "0gilv2q4l7synn1labwzw3bm4xy4h1z2l7kh1jhjyfxn3xpx7fnc";
-        }))
-      )
-    ];
-
-    programs = {
-      rofi = with pkgs; {
-        enable = true;
-        package = rofi-wayland;
-        plugins = [rofi-emoji rofi-calc rofi-games rofi-power-menu rofi-mpd];
-        cycle = true;
-        terminal = "wezterm";
-        # theme = windows-11-list;
-        theme = macos;
-      };
-
-      rbw = {
-        enable = true;
-        settings.email = config.programs.git.userEmail;
-        package = pkgs.rofi-rbw-wayland;
-      };
+    rbw = {
+      enable = true;
+      settings.email = config.programs.git.userEmail;
+      package = pkgs.rofi-rbw-wayland;
     };
   };
 }

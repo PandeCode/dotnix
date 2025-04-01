@@ -2,24 +2,28 @@ rec {
   description = "nix config";
 
   nixConfig = rec {
-    trusted-users = ["root" "shawn"];
     extra-substituters = [
+      "https://aseipp-nix-cache.global.ssl.fastly.net"
       "https://nix-community.cachix.org"
       "https://cache.nixos.org/"
-      "https://aseipp-nix-cache.global.ssl.fastly.net"
-      "https://hyprland.cachix.org"
+      # "https://hyprland.cachix.org"
       "https://niri.cachix.org"
+            "https://app.cachix.org/cache/nix-community"
     ];
-    extra-trusted-substituters = extra-substituters;
     extra-trusted-public-keys = [
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-      "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+      # "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
     ];
   };
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.11";
+
+            neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
+
+    # nix-software-center.url = "github:snowfallorg/nix-software-center";
+    # nixos-conf-editor.url = "github:snowfallorg/nixos-conf-editor";
 
     # nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
 
@@ -61,21 +65,20 @@ rec {
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
 
-    hyprland.url = "github:hyprwm/Hyprland";
-    hyprswitch.url = "github:h3rmt/hyprswitch/release";
-    hyprland-plugins = {
-      url = "github:hyprwm/hyprland-plugins";
-      inputs.hyprland.follows = "hyprland";
-    };
-    hypr-dynamic-cursors = {
-      url = "github:VirtCode/hypr-dynamic-cursors";
-      inputs.hyprland.follows = "hyprland";
-    };
-
-    hyprscroller = {
-      url = "github:dawsers/hyprscroller";
-      flake = false;
-    };
+    # hyprland.url = "github:hyprwm/Hyprland";
+    # hyprswitch.url = "github:h3rmt/hyprswitch/release";
+    # hyprland-plugins = {
+    #   url = "github:hyprwm/hyprland-plugins";
+    #   inputs.hyprland.follows = "hyprland";
+    # };
+    # hypr-dynamic-cursors = {
+    #   url = "github:VirtCode/hypr-dynamic-cursors";
+    #   inputs.hyprland.follows = "hyprland";
+    # };
+    # hyprscroller = {
+    #   url = "github:dawsers/hyprscroller";
+    #   flake = false;
+    # };
 
     # hy3 = {
     #   url = "github:outfoxxed/hy3";
@@ -118,12 +121,22 @@ rec {
       hostName = "kazuha";
       userName = "shawn";
 
-      gaming.enable = true;
-      virt_manager.enable = true;
-      osx-kvm.enable = true;
+      gaming = {
+        enable = false;
+        epic = false;
+        minecraft = false;
+        osu = false;
+        ps2 = false;
+        switch = false;
+        wallpaperengine = false;
+        wii = false;
+      };
+
+      virt_manager.enable = false;
+      osx-kvm.enable = false;
 
       wms = {
-        hyprland.enable = true;
+        hyprland.enable = false;
         sway.enable = true;
         i3.enable = true;
         niri.enable = true;
@@ -155,7 +168,12 @@ rec {
             }
             // args;
           modules =
-            [{nix.settings = nixConfig;} overlays inputs.stylix.nixosModules.stylix ./hosts/${sys_name}/configuration.nix]
+            [
+              # {nix.settings = nixConfig;}
+              overlays
+              inputs.stylix.nixosModules.stylix
+              ./hosts/${sys_name}/configuration.nix
+            ]
             ++ extra_modules;
         };
       mkSystemLinux64 = mkSystem systems.x86_64-linux;

@@ -20,7 +20,7 @@ in
           inherit (config.wm.shared) terminal workspace_rules explorer;
           startup = [
             "swww-daemon"
-            "systemctl --user start hyprpolkitagent"
+            "systemctl --user start ${pkgs.hyprpolkitagent}/libexec/hyprpolkitagent"
             "wl-paste --type text --watch cliphist store" # Stores only text data
             "wl-paste --type image --watch cliphist store" # Stores only image data
           ];
@@ -31,7 +31,9 @@ in
           bindexec =
             config.wm.shared.bindexec
             ++ [
+              (mod "n" "swaync-client -t -sw")
               (mod "z" "woomer")
+
               (_bind "super shift" "c" "hyprpicker -a")
               (_bind "super shift" "l" "hyprlock")
 

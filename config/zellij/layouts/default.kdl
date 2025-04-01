@@ -73,10 +73,10 @@ layout {
                 command_git_branch_interval    "10"
                 command_git_branch_rendermode  "static"
 
-        		// command_music_command     "bash -c ~/.config/zellij/shell/song.sh cider" /*pass player name as argument*/
-        		// command_music_format      "{stdout}"
-        		// command_music_interval    "3"
-        		// command_music_rendermode  "static"
+        		command_music_command     "lyrics-line.sh"
+        		command_music_format      "{stdout}"
+        		command_music_interval    "2"
+        		command_music_rendermode  "static"
 
         		datetime        "#[fg=#6C7086,bold] {format} "
         		datetime_format "%a %d %b %H:%M"

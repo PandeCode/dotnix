@@ -1,11 +1,6 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
 {
   lib,
-  config,
   pkgs,
-  sharedConfig,
   ...
 }: {
   imports = [
@@ -14,7 +9,7 @@
 
     ../../modules/hosts/default.nix
 
-    ../../modules/gaming/os.nix
+    ../../modules/toolsets/gaming/os.nix
 
     ../../modules/wm/default.os.nix
 
@@ -26,8 +21,6 @@
     ../../modules/hosts/virt_manager.nix
     ../../modules/hosts/osx-kvm.nix
   ];
-
-  # gaming_os.enable = false;
 
   zramSwap.enable = true;
 
@@ -144,35 +137,4 @@
 
   system.stateVersion = "24.11";
 
-  programs.kdeconnect.enable = true;
-  programs.localsend.enable = true;
-  # services.syncthing = {
-  #   enable = true;
-  #   openDefaultPorts = true;
-  #
-  #   settings = {
-  #     devices = {
-  #       "device" = {id = "DEVICE-ID-GOES-HERE";};
-  #       "chaos" = {id = "DEVICE-ID-GOES-HERE";};
-  #     };
-  #     folders = {
-  #       "School" = {
-  #         path = "/home/${sharedConfig.username}/Vaults/School";
-  #         devices = ["device" "chaos"];
-  #         ignorePerms = false;
-  #       };
-  #     };
-  #   };
-  # };
-  # systemd.services.syncthing.environment.STNODEFAULTFOLDER = "true";
-
-  networking.firewall = rec {
-    allowedTCPPortRanges = [
-      {
-        from = 1714;
-        to = 1764;
-      }
-    ];
-    allowedUDPPortRanges = allowedTCPPortRanges;
-  };
 }

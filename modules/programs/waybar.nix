@@ -62,14 +62,17 @@
         "custom/prev" = {
           format = " ⏮ ";
           on-click = "_tool_ctrl media prev";
+          on-click-right = "_tool_ctrl media ctrl";
         };
         "custom/play" = {
           format = "⏯ ";
           on-click = "_tool_ctrl media toggle";
+          on-click-right = "_tool_ctrl media ctrl";
         };
         "custom/next" = {
           format = "⏭ ";
           on-click = "_tool_ctrl media next";
+          on-click-right = "_tool_ctrl media ctrl";
         };
 
         "image#album-art" = {

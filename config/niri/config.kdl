@@ -462,7 +462,7 @@ binds {
     // Mod+Period { switch-layout "prev"; }
 
     Print { screenshot; }
-    Ctrl+Print { screenshot-screen; }
+    // Ctrl+Print { screenshot-screen; }
     Alt+Print { screenshot-window; }
 
     Ctrl+Alt+Delete { quit; }

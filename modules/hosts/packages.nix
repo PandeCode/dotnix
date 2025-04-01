@@ -1,7 +1,17 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  inputs,
+  ...
+}: {
   nixpkgs.config.allowUnfree = true;
 
   programs = {
+    coolercontrol = {
+      enable = true;
+      nvidiaSupport = true;
+    };
+
+    light.enable = true;
     nix-ld = {
       enable = true;
       libraries = with pkgs; [gtk3 fuse3];
@@ -14,6 +24,9 @@
   };
 
   environment.systemPackages = with pkgs; [
+    # inputs.nix-software-center.packages.${system}.nix-software-center
+    # inputs.nixos-conf-editor.packages.${system}.nixos-conf-editor
+
     pass
     qtpass
     gnupg
@@ -91,6 +104,8 @@
         matplotlib
         uncertainties
         sympy
+
+        youtube-transcript-api
         # pwntools
       ]))
 

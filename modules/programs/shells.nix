@@ -19,6 +19,22 @@
     };
     sharedShellAliases =
       {
+        ns = "nix-shell shell.nix --command 'fish'";
+        nsp = "nix-shell --command 'fish' -p";
+
+        nix-del = "nix-store --delete";
+        nix-q = "nix-store --query --referrers";
+        nix-qr = "nix-store --query --roots";
+
+        nh-h = "nh home switch ~/dotnix -- --show-trace";
+        nh-o = "nh os switch   ~/dotnix  -- --show-trace";
+
+        nh-hl = "nh home switch ~/dotnix -v -- --show-trace -vL";
+        nh-ol = "nh os switch   ~/dotnix -v -- --show-trace -vL";
+
+        nfu = "nix flake update";
+           update = "sudo : ; cd ~/dotnix && nix flake update && nh-ol && nh-hl";
+
         gamescopehdr = "DXVK_HDR=1 gamescope -f --hdr-enabled -- ";
         steamhdr = "ENABLE_HDR_WSI=1 DXVK_HDR=1 DISPLAY= ";
         winehdr = "ENABLE_HDR_WSI=1 DXVK_HDR=1 DISPLAY= wine ";
@@ -64,9 +80,6 @@
         eixt = "exit";
         f = "fuck";
         nivm = "nvim";
-        np = "nano -w PKGBUILD";
-        ns = "nix-shell shell.nix --command 'fish'";
-        nsp = "nix-shell --command 'fish' -p";
         py = "python3";
 
         cls = "clear";

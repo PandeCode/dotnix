@@ -1,12 +1,10 @@
 {
   pkgs,
   config,
-  inputs,
   lib,
+inputs,
   ...
-}: let
-  cfg = config.neovim;
-in {
+}: {
   home = let
     win_user = "pande";
   in {
@@ -21,7 +19,7 @@ in {
     viAlias = true;
     vimAlias = true;
     vimdiffAlias = true;
-    # package = inputs.neovim-nightly-overlay.packages.${pkgs.system}.default;
+    package = inputs.neovim-nightly-overlay.packages.${pkgs.system}.default;
 
     extraPackages = with pkgs; [
       (pkgs.python3.withPackages (python-pkgs:

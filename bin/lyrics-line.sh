@@ -6,9 +6,22 @@
 # pip install youtube-transcript-api # also present in nixpkgs by the same name
 
 PLAYER="${1:-spotify}"
-
+FIREFOX=~/.zen/hbvavekk.School/sessionstore-backups/recovery.jsonlz4
 CACHE_DIR=$HOME/.cache/lyrics
+LOCK_DIR=$HOME/.cache/lyrics/locks
 mkdir -p "$CACHE_DIR"
+mkdir -p "$LOCK_DIR"
+
+get_id() {
+	url=$(dejsonlz4 "$FIREFOX" | jq -r ".windows[0].tabs | sort_by(.lastAccessed)[-1] | .entries[.index-1] | .url")
+
+	if [[ "$url" =~ ^https://www\.youtube\.com/watch\?v= ]]; then
+		echo "$url" | perl -pe 's|https:\/\/www\.youtube\.com\/watch\?v=||'
+	else
+		echo "Error: The URL is not from YouTube." >&2
+		return 1
+	fi
+}
 
 trim() {
 	local var="$*"
@@ -21,28 +34,91 @@ hash() {
 	echo -n "$1" | md5sum | awk '{print $1}'
 }
 
+# Function to acquire lock
+acquire_lock() {
+	local lock_name="$1"
+	local lock_file="$LOCK_DIR/$lock_name.lock"
+	local max_wait=30 # Maximum wait time in seconds
+	local waited=0
+
+	# Try to create the lock file
+	while ! mkdir "$lock_file" 2>/dev/null; do
+		# Check if we've waited too long
+		if [ $waited -ge $max_wait ]; then
+			echo "Timeout waiting for lock: $lock_name" >&2
+			return 1
+		fi
+
+		# Wait a bit before retrying
+		sleep 0.5
+		waited=$((waited + 1))
+	done
+
+	# Store the PID in the lock file
+	echo $$ >"$lock_file/pid"
+
+	# Set trap to release lock on exit
+	trap "rm -rf '$lock_file' 2>/dev/null || true" EXIT
+
+	return 0
+}
+
+# Function to release lock
+release_lock() {
+	local lock_name="$1"
+	local lock_file="$LOCK_DIR/$lock_name.lock"
+
+	rm -rf "$lock_file" 2>/dev/null || true
+
+	# Remove the specific trap for this lock
+	trap - EXIT
+}
+
 fetch_with_cache() {
 	uri="$1"
+	lock_name=$(hash "$uri")
 	file_path="$CACHE_DIR/$(hash "$uri")"
 
 	if [ -f "$file_path" ]; then
 		res=$(cat "$file_path")
 		echo "$res"
 	else
+		# Acquire lock before fetching
+		if ! acquire_lock "$lock_name"; then
+			# If we couldn't get the lock, check if the file appeared while waiting
+			if [ -f "$file_path" ]; then
+				res=$(cat "$file_path")
+				echo "$res"
+				return 0
+			fi
+			return 1
+		fi
+
+		# Double-check if another process created the file while we were waiting for the lock
+		if [ -f "$file_path" ]; then
+			res=$(cat "$file_path")
+			echo "$res"
+			release_lock "$lock_name"
+			return 0
+		fi
 
 		res=$(curl -s "$1")
 
 		if [[ -z "$res" ]]; then
+			release_lock "$lock_name"
 			return 1
 		fi
 
 		echo "$res" >"$file_path"
 		echo "$res"
+
+		# Release the lock
+		release_lock "$lock_name"
 	fi
 }
 
 get_title_artists() {
-	playerctl -p $PLAYER metadata --format "{{title}} {{artist}}" | jq -sRr @uri
+	playerctl -p "$PLAYER" metadata --format "{{title}} {{artist}}" | jq -sRr @uri
 }
 
 lrclib() {
@@ -56,7 +132,7 @@ netease() {
 }
 
 get_position() {
-	playerctl -p $PLAYER metadata --format "{{position}}"
+	playerctl -p "$PLAYER" metadata --format "{{position}}"
 }
 
 convert_to_microseconds() {
@@ -100,18 +176,36 @@ current_line() {
 			prev=$content
 		fi
 	done
-
 }
 
 youtube() {
 	id=$1
-
-	file_path=$CACHE_DIR/$id
+	lock_name="youtube_$id"
+	file_path="$CACHE_DIR/$id"
 
 	if [ -f "$file_path" ]; then
 		res=$(cat "$file_path")
 		echo "$res"
 	else
+		# Acquire lock before fetching
+		if ! acquire_lock "$lock_name"; then
+			# If we couldn't get the lock, check if the file appeared while waiting
+			if [ -f "$file_path" ]; then
+				res=$(cat "$file_path")
+				echo "$res"
+				return 0
+			fi
+			return 1
+		fi
+
+		# Double-check if another process created the file while we were waiting for the lock
+		if [ -f "$file_path" ]; then
+			res=$(cat "$file_path")
+			echo "$res"
+			release_lock "$lock_name"
+			return 0
+		fi
+
 		res=$(
 			python3 <<EOF
 from youtube_transcript_api import YouTubeTranscriptApi
@@ -136,25 +230,38 @@ t = YouTubeTranscriptApi.get_transcript('$id')
 print(convert_json_to_timestamp_format(t), end='\n')
 EOF
 		)
-		echo "$res" >"$file_path"
-		echo "res $res"
+		if [ $? -eq 0 ]; then
+			echo "$res" >"$file_path"
+		fi
+
+		# Release the lock
+		release_lock "$lock_name"
+		echo "$res"
 	fi
 }
 
-# (lrclib || netease) | current_line "$(playerctl -p "$PLAYER" metadata --format '{{ position }}')"
-
-if [ "$PLAYER" == "youtube" ]; then
-	youtube lQ2raQCSJRE | current_line $(playerctl -p chromium metadata --format '{{ position }}')
-else
-	if pgrep -x "spotify" >/dev/null; then
-		lrclib | current_line "$(playerctl -p spotify metadata --format '{{ position }}')"
+if pgrep -x "spotify" >/dev/null || pgrep -x ".spotify-wrappe" >/dev/null; then
+	lrclib | current_line "$(playerctl -p spotify metadata --format '{{ position }}')"
+elif pgrep -fx "google-chrome-stable" >/dev/null; then
+	album=$(playerctl -p chromium metadata xesam:album | tr -d '\n')
+	PLAYER=chromium
+	if [ -z "$album" ]; then
+		playerctl -p $PLAYER metadata --format "{{title}} {{artist}}"
 	else
-		album=$(playerctl -p chromium metadata xesam:album | tr -d '\n')
-		PLAYER=chromium
-		if [ -z "$album" ]; then
-			playerctl -p $PLAYER metadata --format "{{title}} {{artist}}"
+		lrclib | current_line "$(playerctl -p chromium metadata --format '{{ position }}')"
+	fi
+elif pgrep -x "firefox" >/dev/null || pgrep -x ".zen-wrapped" >/dev/null; then
+	album=$(playerctl -p firefox metadata xesam:album | tr -d '\n')
+	PLAYER=firefox
+	if [ -z "$album" ]; then
+		id=$(get_id)
+		if [ $? -eq 0 ]; then
+			subs=$(youtube "$id")
+			echo "$subs" | current_line "$(playerctl -p firefox metadata --format '{{ position }}')"
 		else
-			lrclib | current_line "$(playerctl -p chromium metadata --format '{{ position }}')"
+			echo FAIL
 		fi
+	else
+		lrclib | current_line "$(playerctl -p firefox metadata --format '{{ position }}')"
 	fi
 fi

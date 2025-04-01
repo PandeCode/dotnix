@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-album_art=$(playerctl -p spotify metadata mpris:artUrl)
+album_art=$(playerctl -p spotify metadata mpris:artUrl 2>/dev/null)
 
 set() {
 	echo "$1"
@@ -8,12 +8,20 @@ set() {
 }
 
 if [[ -z $album_art ]]; then
-	album_art=$(playerctl -p spotify_player metadata mpris:artUrl 2> /dev/null)
+	album_art=$(playerctl -p spotify_player metadata mpris:artUrl 2>/dev/null)
 
 	if [[ -z $album_art ]]; then
-		album_art=$(playerctl -p chromium metadata mpris:artUrl 2> /dev/null)
+		album_art=$(playerctl -p chromium metadata mpris:artUrl 2>/dev/null)
 
 		if [[ -z $album_art ]]; then
+			album_art=$(playerctl -p firefox metadata mpris:artUrl 2>/dev/null)
+			if [[ -z $album_art ]]; then
+				exit
+			else
+				set $(echo "$album_art" | sed "s/file...//")
+				exit
+			fi
+
 			exit
 		else
 			set $(echo "$album_art" | sed "s/file...//")

@@ -14,8 +14,6 @@
 
     ./git.nix
   ];
-  disabledModules = [
-  ];
 
   home = rec {
     sessionVariables = {
@@ -78,10 +76,12 @@
       ripgrep
       fd
 
-      		proselint
+      dejsonlz4
 
-			gobang
-    sqlite
+      proselint
+
+      gobang
+      sqlite
 
       nix-search-cli
 
@@ -123,6 +123,21 @@
       openbabel
 
       languagetool
+
+      # (import ../../../derivations/beatprints.nix {
+      # inherit lib pkgs;
+      # pkgs = pkgs-stable;
+      # })
+
+      ghostty
+      pscircle
+      # sageWithDoc
+
+      (import ../../derivations/httptap.nix {inherit lib pkgs;})
+
+      (tesseract.override {
+        enableLanguages = ["eng"];
+      })
     ];
   };
 }

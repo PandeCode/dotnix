@@ -3,10 +3,6 @@
   inputs,
   ...
 }: {
-  programs = {
-    light.enable = true;
-  };
-
   # nixpkgs.config.permittedInsecurePackages = [
   # "adobe-reader-9.5.5"
   # ];
@@ -14,46 +10,30 @@
   xdg.portal.enable = true;
   xdg.portal.extraPortals = [pkgs.xdg-desktop-portal-gtk];
 
-  networking = {
-    firewall = {
-      enable = true;
-      allowedTCPPorts = [7000 7100 5900];
-      allowedUDPPorts = [6000 6001 7011 5900];
-      allowedTCPPortRanges = [
-        {
-          from = 30000;
-          to = 60000;
-        }
-      ];
-      allowedUDPPortRanges = [
-        {
-          from = 30000;
-          to = 60000;
-        }
-      ];
-    };
-    # networkmanager = {
-    #   enable = true;
-    #   dns = "none";
-    #   # wifi.powersave = true;
-    # };
-
-    nameservers = [
-      "1.1.1.1"
-      "1.0.0.1"
-      "8.8.8.8"
-      "8.8.4.4"
-    ];
-  };
-
   security.rtkit.enable = true;
 
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-    jack.enable = true;
+  services = {
+    pipewire = {
+      enable = true;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+      pulse.enable = true;
+      jack.enable = true;
+    };
+
+    libinput = {
+      enable = true;
+      touchpad = {
+        middleEmulation = true;
+        disableWhileTyping = true;
+        tapping = true;
+
+        additionalOptions = ''
+          Option "PalmDetection" "on"
+          Option "TappingButtonMap" "lmr"
+        '';
+      };
+    };
   };
 
   hardware = {

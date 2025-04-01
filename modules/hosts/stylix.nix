@@ -1,14 +1,11 @@
-# This file is for defining targets
 {
   pkgs,
-  lib,
-  config,
+  sharedConfig,
   ...
-}: let
-in {
+}: {
   config = {
     stylix =
-      (import ../stylix/common.nix {inherit pkgs;}).stylix
+      (import ../stylix/common.nix {inherit pkgs sharedConfig;}).stylix
       // {
         targets = {
           chromium.enable = true; # GUI

@@ -14,7 +14,6 @@ in {
 
   home.packages = with pkgs; [
     hyprsunset
-    hyprpolkitagent
   ];
   wayland.windowManager.hyprland = {
     enable = true;
