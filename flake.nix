@@ -1,17 +1,24 @@
 rec {
   description = "nix config";
 
-  nixConfig = rec {
+  nixConfig = {
+    experimental-features = ["nix-command" "flakes" "pipe-operators"];
+    trusted-users = ["root" "shawn"];
+
+    accept-flake-config = true;
+    show-trace = true;
+    auto-optimise-store = true;
+
     extra-substituters = [
-      "https://aseipp-nix-cache.global.ssl.fastly.net"
-      "https://nix-community.cachix.org"
-      "https://cache.nixos.org/"
+      # "https://aseipp-nix-cache.global.ssl.fastly.net"
+      # "https://app.cachix.org/cache/nix-community"
+
       # "https://hyprland.cachix.org"
-      "https://niri.cachix.org"
-            "https://app.cachix.org/cache/nix-community"
+      # "https://niri.cachix.org"
     ];
     extra-trusted-public-keys = [
-      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      # "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+
       # "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
     ];
   };
@@ -20,7 +27,7 @@ rec {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.11";
 
-            neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
+    neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
 
     # nix-software-center.url = "github:snowfallorg/nix-software-center";
     # nixos-conf-editor.url = "github:snowfallorg/nixos-conf-editor";
@@ -37,24 +44,25 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # nix-matlab = {
-    #   # nix-matlab's Nixpkgs input follows Nixpkgs' nixos-unstable branch. However
-    #   # your Nixpkgs revision might not follow the same branch. You'd want to
-    #   # match your Nixpkgs and nix-matlab to ensure fontconfig related
-    #   # compatibility.
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    #   url = "gitlab:doronbehar/nix-matlab";
-    # };
-    # add module       nix-matlab.overlay
-    # then pkg matlab, will be avalible
+    zjstatus = {
+      url = "github:dj95/zjstatus";
+    };
 
     pre-commit-hooks.url = "github:cachix/git-hooks.nix";
 
     stylix.url = "github:danth/stylix";
 
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
+    iwmenu = {
+      url = "github:e-tho/iwmenu";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    bzmenu = {
+      url = "github:e-tho/bzmenu";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    niri.url = "github:sodiboo/niri-flake";
+    # niri.url = "github:sodiboo/niri-flake";
 
     # astal = {
     #   url = "github:aylur/astal";
@@ -66,22 +74,13 @@ rec {
     # };
 
     # hyprland.url = "github:hyprwm/Hyprland";
-    # hyprswitch.url = "github:h3rmt/hyprswitch/release";
+    hyprswitch.url = "github:h3rmt/hyprswitch/release";
     # hyprland-plugins = {
     #   url = "github:hyprwm/hyprland-plugins";
     #   inputs.hyprland.follows = "hyprland";
     # };
     # hypr-dynamic-cursors = {
     #   url = "github:VirtCode/hypr-dynamic-cursors";
-    #   inputs.hyprland.follows = "hyprland";
-    # };
-    # hyprscroller = {
-    #   url = "github:dawsers/hyprscroller";
-    #   flake = false;
-    # };
-
-    # hy3 = {
-    #   url = "github:outfoxxed/hy3";
     #   inputs.hyprland.follows = "hyprland";
     # };
 
@@ -94,6 +93,16 @@ rec {
       url = "github:Gerg-L/spicetify-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # charon-shell = {
+    #   url = "github:PandeCode/charon-shell";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+
+    # charon-nvim = {
+    #   url = "github:PandeCode/charon-nvim";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
   };
 
   outputs = {
@@ -106,25 +115,38 @@ rec {
 
     systems = {
       x86_64-linux = "x86_64-linux";
-      aarch64-linux = "aarch64-linux";
-      x86_64-darwin = "x86_64-darwin";
-      aarch64-darwin = "aarch64-darwin";
+      # aarch64-linux = "aarch64-linux";
+      # x86_64-darwin = "x86_64-darwin";
+      # aarch64-darwin = "aarch64-darwin";
     };
 
     supportedSystems = builtins.attrNames systems;
     forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
-    overlays = {nixpkgs.overlays = with inputs; [];};
+    overlays = {
+      nixpkgs.overlays = with inputs; [
+        (final: prev: {
+          zjstatus = zjstatus.packages.${prev.system}.default;
+        })
+      ];
+    };
 
-    # created to emulate osConfig with home_manager
+    # created to emulate osConfig with home_manager and to share config between nixos and home-manager
     sharedConfig_kazuha = {
       hostName = "kazuha";
       userName = "shawn";
 
+      hostname = "kazuha";
+      username = "shawn";
+
+      user = "shawn";
+
+      terminal = "ghostty";
+
       gaming = {
-        enable = false;
-        epic = false;
-        minecraft = false;
+        enable = true;
+        epic = true;
+        minecraft = true;
         osu = false;
         ps2 = false;
         switch = false;
@@ -136,10 +158,11 @@ rec {
       osx-kvm.enable = false;
 
       wms = {
-        hyprland.enable = false;
+        hyprland.enable = true;
         sway.enable = true;
         i3.enable = true;
-        niri.enable = true;
+        river.enable = false;
+        niri.enable = false; # issue https://github.com/sodiboo/niri-flake/issues/1018
         # dwm.enable = true;
         # xmonad.enable = true;
         # bspwm.enable = true;
@@ -163,13 +186,13 @@ rec {
         nixpkgs.lib.nixosSystem {
           specialArgs =
             {
-              inherit inputs outputs system sys_name dotutils;
+              inherit inputs outputs system sys_name dotutils nixConfig;
               pkgs-stable = inputs.nixpkgs-stable.legacyPackages.${system};
             }
             // args;
           modules =
             [
-              # {nix.settings = nixConfig;}
+              {nix.settings = nixConfig;}
               overlays
               inputs.stylix.nixosModules.stylix
               ./hosts/${sys_name}/configuration.nix

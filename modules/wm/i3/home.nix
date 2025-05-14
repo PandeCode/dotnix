@@ -141,7 +141,7 @@ in {
       ];
       window.titlebar = false;
       modifier = "Mod4";
-      terminal = "wezterm";
+      terminal = config.shared.x.terminal;
       keybindings =
         {
           "Mod1+F4" = "kill";

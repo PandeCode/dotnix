@@ -49,10 +49,10 @@
       statix
 
       spotify-player
-      spotifyd
-      spotify-qt
+      # spotifyd
+      # spotify-qt
       spot
-      ncspot
+      # ncspot
       # psst
 
       # silicon # Create beautiful image of your source code https://github.com/Aloxaf/silicon
@@ -88,7 +88,7 @@
       # git
       gh
       delta
-      commitizen
+      # commitizen
       pre-commit
       lazygit
       gitoxide
@@ -117,12 +117,12 @@
 
       # Calculators
       numbat
-      kalker
+      # kalker
       # sc-im
 
       openbabel
 
-      languagetool
+      # languagetool
 
       # (import ../../../derivations/beatprints.nix {
       # inherit lib pkgs;

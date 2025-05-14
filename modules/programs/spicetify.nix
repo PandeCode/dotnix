@@ -13,7 +13,8 @@ in {
   programs.spicetify = let
     spicePkgs = inputs.spicetify-nix.legacyPackages.${pkgs.system};
   in {
-    enable = lib.mkForce true;
+    # theme = lib.mkForce spicePkgs.themes.hazy;
+    enable = true;
     enabledCustomApps = with spicePkgs.apps; [
       newReleases
       lyricsPlus

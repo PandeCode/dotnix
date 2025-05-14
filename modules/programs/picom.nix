@@ -16,7 +16,7 @@ in {
       vSync = true;
       fade = true;
       shadow = true;
-      package = pkgs.picom-pijulius;
+      # package = pkgs.picom-pijulius;
 
       # package =
       # (picom.overrideAttrs (oldAttrs: {

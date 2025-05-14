@@ -11,6 +11,7 @@ in {
     "hyprland"
     "niri"
     "sway"
+    "river"
     "i3"
   ];
 }

@@ -1,6 +1,7 @@
 {
   lib,
   pkgs,
+  sharedConfig,
   ...
 }: {
   imports = [
@@ -18,123 +19,62 @@
 
     ../../modules/hosts/stylix.nix
 
-    ../../modules/hosts/virt_manager.nix
-    ../../modules/hosts/osx-kvm.nix
+    # ../../modules/hosts/virt_manager.nix
+    # ../../modules/hosts/osx-kvm.nix
   ];
 
+  virtualisation.waydroid.enable = false;
   zramSwap.enable = true;
 
-  services = {
-    # qemuGuest.enable = true;
-    openssh.settings.PermitRootLogin = lib.mkForce "yes";
-  };
-
-  networking.hostName = "kazuha";
-  networking.networkmanager.enable = true;
-  time.timeZone = "America/Costa_Rica";
+  # hardware = {
+  #   enable = true;
+  #   graphics.extraPackages = [
+  #     pkgs.intel-compute-runtime
+  #   ];
+  # };
 
   boot = {
     kernelPackages = pkgs.linuxPackages_zen;
     loader = {
-      # systemd-boot.enable = true;
+      systemd-boot.enable = true;
       # systemd-boot.windows = {
       #   "11" = {
       #     title = "Windows 11";
       #     efiDeviceHandle = "/dev/nvme0n1p2";
       #   };
       # };
-      grub = {
-        enable = true;
-        useOSProber = true;
-        device = "nodev";
-        efiSupport = true;
-      };
+      # grub = {
+      #   enable = true;
+      #   useOSProber = true;
+      #   device = "nodev";
+      #   efiSupport = true;
+      # };
 
       efi.canTouchEfiVariables = true;
     };
     supportedFilesystems = lib.mkForce ["btrfs" "reiserfs" "vfat" "f2fs" "xfs" "ntfs" "cifs"];
   };
 
+  time.timeZone = "America/Costa_Rica";
   i18n.defaultLocale = "en_US.UTF-8";
+  i18n.extraLocaleSettings = rec {
+    LC_TIME = "en_US.UTF-8";
 
-  i18n.extraLocaleSettings = {
-    LC_ADDRESS = "es_CR.UTF-8";
-    LC_IDENTIFICATION = "es_CR.UTF-8";
-    LC_MEASUREMENT = "es_CR.UTF-8";
-    LC_MONETARY = "es_CR.UTF-8";
-    LC_NAME = "es_CR.UTF-8";
-    LC_NUMERIC = "es_CR.UTF-8";
-    LC_PAPER = "es_CR.UTF-8";
-    LC_TELEPHONE = "es_CR.UTF-8";
-    LC_TIME = "es_CR.UTF-8";
+    LC_ADDRESS = LC_TIME;
+    LC_IDENTIFICATION = LC_TIME;
+    LC_MEASUREMENT = LC_TIME;
+    LC_MONETARY = LC_TIME;
+    LC_NAME = LC_TIME;
+    LC_NUMERIC = LC_TIME;
+    LC_PAPER = LC_TIME;
+    LC_TELEPHONE = LC_TIME;
   };
 
-  # services.printing.enable = true;
-
-  users.users.shawn = {
+  users.users.${sharedConfig.userName} = {
     isNormalUser = true;
-    description = "shawn";
+    description = sharedConfig.userName;
     extraGroups = ["networkmanager" "wheel" "video" "libvirtd"];
   };
 
-  nixpkgs.config.allowUnfree = true;
-
-  security = {
-    sudo = {
-      enable = true;
-      extraRules = [
-        {
-          commands =
-            map (command: {
-              inherit command;
-              options = ["NOPASSWD"];
-            })
-            [
-              "${pkgs.systemd}/bin/systemctl suspend"
-              "${pkgs.systemd}/bin/reboot"
-              "${pkgs.systemd}/bin/poweroff"
-            ];
-          groups = ["wheel"];
-        }
-      ];
-      extraConfig = with pkgs; ''
-        Defaults timestamp_timeout=-1
-        Defaults insults
-        Defaults passwd_tries=5
-        Defaults:picloud secure_path="${lib.makeBinPath [
-          systemd
-        ]}:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin"
-      '';
-    };
-    pam.loginLimits = [
-      {
-        domain = "@users";
-        item = "rtprio";
-        type = "-";
-        value = 1;
-      }
-    ];
-  };
-
-  programs = {
-    nix-ld = {
-      enable = true;
-      libraries = with pkgs; [gtk3 fuse3];
-    };
-    mtr.enable = true;
-    gnupg.agent = {
-      enable = true;
-      enableSSHSupport = true;
-    };
-  };
-  services.openssh.enable = true;
-
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
-
   system.stateVersion = "24.11";
-
 }

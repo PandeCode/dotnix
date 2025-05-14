@@ -4,7 +4,6 @@
 {
   config,
   lib,
-  pkgs,
   modulesPath,
   ...
 }: {
@@ -56,11 +55,11 @@
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
-    powerManagement = {
-enable = true;
-        cpuFreqGovernor = "performance";
-        powertop.enable = true;
-        # scsiLinkPolicy = "max_performance";
- };
-          # “ondemand”, “powersave”, “performance”
+  powerManagement = {
+    enable = true;
+    cpuFreqGovernor = "performance";
+    powertop.enable = true;
+    # scsiLinkPolicy = "max_performance";
+  };
+  # “ondemand”, “powersave”, “performance”
 }

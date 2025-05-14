@@ -4,9 +4,7 @@
   config,
   inputs,
   ...
-}: let
-  cfg = config.hyprland;
-in {
+}: {
   imports = [
     ../wayland/os.nix
   ];
@@ -14,14 +12,15 @@ in {
   programs = {
     hyprland = {
       enable = true;
+      withUWSM = true;
       xwayland.enable = true;
-      package = pkgs.hyprland;
+      # package = pkgs.hyprland;
       # package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
     };
   };
   environment = {
-    systemPackages = with pkgs; [
-      inputs.hyprswitch.packages.${pkgs.stdenv.hostPlatform.system}.default
+    systemPackages = [
+      # inputs.hyprswitch.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
   };
 }

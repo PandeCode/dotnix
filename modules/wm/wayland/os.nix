@@ -2,10 +2,9 @@
   pkgs,
   lib,
   config,
+  inputs,
   ...
-}: let
-  cfg = config.wayland;
-in {
+}: {
   imports = [../os.nix];
 
   xdg.portal.wlr.enable = lib.mkForce true;
@@ -34,9 +33,26 @@ in {
     };
 
     systemPackages = with pkgs; [
+      # inputs.charon-shell.packages.${pkgs.system}.default
+
       brightnessctl
       cliphist
-      grim
+
+      (grim.overrideAttrs (oldAttrs: {
+        src = fetchFromGitHub {
+          owner = "eriedaberrie";
+          repo = "grim-hyprland";
+          rev = "4a3d6f5b87b01e92c404b9393b79057b85f58c60";
+          sha256 = "sha256-4m2QFT8mY6CM3YSebMJhd/kJWaRxTYOS/nvAs2TaIQs=";
+        };
+        buildInputs =
+          oldAttrs.buildInputs
+          ++ [
+            wayland-scanner
+            hyprwayland-scanner
+          ];
+      }))
+
       grimblast
       pamixer
       playerctl
@@ -49,6 +65,9 @@ in {
       swww # linux-wallpaperengine hyprpaper swaybg wpaperd mpvpaper
       gowall
       swaybg
+
+      wmctrl
+      wev
     ];
   };
 }

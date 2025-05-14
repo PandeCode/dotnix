@@ -1,18 +1,34 @@
 {
   pkgs,
   lib,
-  config,
   ...
 }: {
   boot = {
     plymouth = {
       enable = true;
+      theme = "Custom";
+
+      extraConfig =
+        /*
+        ini
+        */
+        ''
+          DeviceScale=2
+        '';
+
       # theme = "SimulatedUniverse";
-      theme = "PlymouthTheme-Cat";
       # theme = "chain";
-      themePackages = with pkgs; [
+
+      themePackages = [
+        (pkgs.callPackage ../../derivations/plymouth-theme-custom.nix {
+          video = builtins.fetchurl {
+            url = "https://github.com/PandeCode/dotnix/raw/refs/heads/media/boot.mkv";
+            sha256 = "0chfw9w7jwl6dpkm56b3n8nqyrqc7y1a3d6wdbvkxxgxb322jmwy";
+          };
+        })
+
         # (import ../../derivations/hsr-plymouth.nix {inherit stdenvNoCC fetchFromGitHub lib unstableGitUpdater;})
-        (import ../../derivations/plymouth-theme-cat.nix {inherit stdenvNoCC fetchFromGitHub lib unstableGitUpdater;})
+        # (import ../../derivations/plymouth-theme-cat.nix {inherit stdenvNoCC fetchFromGitHub lib unstableGitUpdater;})
         # (import ../../derivations/plymouth-theme-chain.nix {
         #   inherit pkgs stdenvNoCC fetchFromGitHub lib unstableGitUpdater;
         #   config = {
@@ -39,6 +55,6 @@
     # Hide the OS choice for bootloaders.
     # It's still possible to open the bootloader list by pressing any key
     # It will just not appear on screen unless a key is pressed
-    loader.timeout = lib.mkForce 0;
+    loader.timeout = lib.mkForce 4;
   };
 }

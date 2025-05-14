@@ -12,5 +12,6 @@ in {
     "niri"
     "sway"
     "i3"
+    "river"
   ];
 }

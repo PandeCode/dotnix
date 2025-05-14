@@ -65,7 +65,7 @@ layout {
 
         		command_weather_command     "bash -c ~/.config/zellij/shell/weather.sh"
         		command_weather_format      "{stdout}"
-        		command_weather_interval    "3600"
+        		command_weather_interval    "21600"
         		command_weather_rendermode  "dynamic"
 
 				command_git_branch_command     "git rev-parse --abbrev-ref HEAD"

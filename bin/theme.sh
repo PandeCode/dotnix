@@ -1,19 +1,22 @@
-#!/run/current-system/sw/bin/bash
+#!/usr/bin/env bash
 
-theme="$1"
+# Get the list of home-manager generations
+generations=($(home-manager generations | awk '{print $7}'))
 
-# Check if theme is a single word
-if [[ ! "$theme" =~ ^[a-zA-Z0-9_]+$ ]]; then
-    notify-send "Error" "Theme must be a single word."
+# Validate argument
+if [[ "$1" != "dark" && "$1" != "light" ]]; then
+    echo "Usage: $0 <dark|light>"
     exit 1
 fi
+choice="$1"
 
-# Check if the file exists
-file_path="$(home-manager generations | head -1 | perl -pe 's/.*-> //g')/specialisation/${theme}/activate"
-if [[ ! -f "$file_path" ]]; then
-    available_themes=$(ls "$(home-manager generations | head -1 | perl -pe 's/.*-> //g')/specialisation")
-    notify-send "Error" "The file for theme '$theme' does not exist. Available themes: $available_themes"
-    exit 1
-fi
+# Iterate through all available generations
+for gen in "${generations[@]}"; do
+    if [[ -d "$gen/specialisation/$choice" ]]; then
+        echo "Activating $choice specialisation from generation: $gen"
+        bash -c "$gen/specialisation/$choice/activate"
+        exit 0
+    fi
+done
 
-bash -c "$(ls "$file_path")"
+echo "No valid $choice specialisation directory found in any generation."

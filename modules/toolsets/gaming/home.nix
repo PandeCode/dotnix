@@ -10,8 +10,8 @@
       else [];
 
     epic = [heroic];
-    # minecraft = [(prismlauncher.override {jdks = [temurin-jre-bin-8 temurin-jre-bin-17 temurin-jre-bin-21];})];
-    minecraft = [ prismlauncher ];
+    minecraft = [(prismlauncher.override {jdks = [temurin-jre-bin-8 temurin-jre-bin-17 temurin-jre-bin-21];})];
+    # minecraft = [ prismlauncher ];
     osu = [osu-lazer-bin];
     ps2 = [pcsx2-bin];
     switch = [suyu];
@@ -23,6 +23,9 @@
       wine-staging
       winetricks
 
+      protonup-qt
+
+      antimicrox
       mangohud
       gamescope
     ]

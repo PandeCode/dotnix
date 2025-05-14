@@ -1,252 +1,161 @@
 {
   pkgs,
   config,
+  lib,
+  sharedConfig,
   ...
 }: let
-  inherit (config.lib.formats.rasi) mkLiteral;
-  l = mkLiteral;
-  font = config.stylix.fonts.sansSerif.name;
-  c = config.lib.stylix.colors;
-
-  bg0 = l "#${c.base00}E6";
-  bg1 = l "#${c.base01}80";
-  bg2 = l "#${c.base02}E6";
-
-  fg0 = l "#${c.base04}";
-  fg1 = l "#${c.base05}";
-  fg2 = l "#${c.base06}80";
-
-  bg3 = l "#${c.base03}80";
-
-  accent = l "#60cdff";
-  urgent = accent;
-
-  macos = {
-    /*
-    MACOS SPOTLIGHT LIKE DARK THEME FOR ROFI
-    */
-    /*
-    Author: Newman Sanchez (https://github.com/newmanls)
-    */
-    "*" = {
-      font = "${font} 12";
-      background-color = l "transparent";
-      text-color = fg0;
-      margin = 0;
-      padding = 0;
-      spacing = 0;
+  themes = pkgs.stdenv.mkDerivation {
+    name = "rofi-themes-patched";
+    src = pkgs.fetchFromGitHub {
+      owner = "adi1090x";
+      repo = "rofi";
+      rev = "b76c16b2b7c465d7b082e11e5210fcd10c6683a7";
+      hash = "sha256-R4LmFRjXTo66v8P/fMJee5m1ksuOtJ+VdYleftIM/rk=";
+      sparseCheckout = [
+        "fonts"
+        "files"
+      ];
     };
 
-    window = {
-      background-color = bg0;
+    installPhase = ''
+      mkdir -p $out
+      sed -i '$d' files/config.rasi
 
-      location = l "center";
-      width = 640;
-      border-radius = 8;
-    };
+      cat >> files/config.rasi << EOF
 
-    inputbar = {
-      font = "${font} 20";
-      padding = l "12px";
-      spacing = l "12px";
-      children = map l ["icon-search" "entry"];
-    };
+      kb-accept-alt             : "Shift+Return";
+      kb-accept-custom          : "Control+Alt+Return";
+      kb-accept-custom-alt      : "Control+Shift+Alt+Return";
+      kb-accept-entry           : "Return,KP_Enter";
+      kb-cancel                 : "Escape";
+      kb-clear-line             : "Control+w";
+      kb-custom-10              : "Alt+0";
+      kb-custom-11              : "Alt+exclam";
+      kb-custom-12              : "Alt+at";
+      kb-custom-13              : "Alt+numbersign";
+      kb-custom-14              : "Alt+dollar";
+      kb-custom-15              : "Alt+percent";
+      kb-custom-16              : "Alt+dead_circumflex";
+      kb-custom-17              : "Alt+ampersand";
+      kb-custom-18              : "Alt+asterisk";
+      kb-custom-19              : "Alt+parenleft";
+      kb-custom-1               : "Alt+1";
+      kb-custom-2               : "Alt+2";
+      kb-custom-3               : "Alt+3";
+      kb-custom-4               : "Alt+4";
+      kb-custom-5               : "Alt+5";
+      kb-custom-6               : "Alt+6";
+      kb-custom-7               : "Alt+7";
+      kb-custom-8               : "Alt+8";
+      kb-custom-9               : "Alt+9";
+      kb-delete-entry           : "Shift+Delete";
+      kb-ellipsize              : "Alt+period";
+      kb-mode-complete          : "Control+space";
+      kb-mode-next              : "Control+Tab";
+      kb-mode-previous          : "Control+ISO_Left_Tab";
+      kb-move-char-back         : "Left";
+      kb-move-char-forward      : "Right";
+      kb-move-end               : "Control+e";
+      kb-move-front             : "Control+a";
+      kb-move-word-back         : "Control+Left";
+      kb-move-word-forward      : "Control+Right";
+      kb-page-next              : "Control+l";
+      kb-page-prev              : "Control+h";
+      kb-primary-paste          : "Control+V,Shift+Insert";
+      kb-remove-char-back       : "BackSpace";
+      kb-remove-char-forward    : "Delete";
+      kb-remove-to-eol          : "";
+      kb-remove-to-sol          : "";
+      kb-remove-word-back       : "Control+BackSpace";
+      kb-remove-word-forward    : "";
+      kb-row-down               : "Control+j";
+      kb-row-first              : "Home,KP_Home";
+      kb-row-last               : "End,KP_End";
+      kb-row-left               : "Control+Page_Up";
+      kb-row-right              : "Control+Page_Down";
+      kb-row-select             : "Control+Return";
+      /* kb-row-tab                : "Tab"; */
+      kb-row-up                 : "Control+k";
+      kb-screenshot             : "Alt+S";
+      kb-secondary-paste        : "Control+v,Insert";
+      kb-select-10              : "Super+0";
+      kb-select-1               : "Super+1";
+      kb-select-2               : "Super+2";
+      kb-select-3               : "Super+3";
+      kb-select-4               : "Super+4";
+      kb-select-5               : "Super+5";
+      kb-select-6               : "Super+6";
+      kb-select-7               : "Super+7";
+      kb-select-8               : "Super+8";
+      kb-select-9               : "Super+9";
+      kb-toggle-case-sensitivity: "grave,dead_grave";
+      kb-toggle-sort            : "Alt+grave";
+      me-accept-custom          : "Control+MouseDPrimary";
+      me-accept-entry           : "MouseDPrimary";
+      me-select-entry           : "MousePrimary";
+      ml-row-down               : "ScrollDown";
+      ml-row-left               : "ScrollLeft";
+      ml-row-right              : "ScrollRight";
+      ml-row-up                 : "ScrollUp";
 
-    icon-search = {
-      expand = false;
-      filename = "search";
-      size = l "28px";
-    };
+      }
 
-    "icon-search, entry, element-text, element-icon" = {
-      vertical-align = l "0.5";
-    };
+      EOF
 
-    entry = {
-      font = l "inherit";
-      placeholder = "Search";
-      placeholder-color = fg2;
-    };
+      cp -r files fonts $out/
 
-    element-icon = {
-      size = l "1em";
-    };
-
-    element-text = {
-      text-color = l "inherit";
-    };
-
-    message = {
-      border = l "2px 0 0";
-      border-color = bg1;
-      background-color = bg1;
-    };
-
-    textbox = {
-      padding = l "8px 24px";
-    };
-
-    listview = {
-      lines = 10;
-      columns = 1;
-
-      fixed-height = false;
-      border = l "1px 0 0";
-      border-color = bg1;
-    };
-
-    element = {
-      padding = l "8px 16px";
-      spacing = l "16px";
-      background-color = l "transparent";
-    };
-
-    "element normal active" = {
-      text-color = bg2;
-    };
-
-    "element alternate active" = {
-      text-color = bg2;
-    };
-
-    "element selected normal, element selected active" = {
-      background-color = bg2;
-      text-color = fg1;
-    };
-  };
-
-  windows-11-list = {
-    "*" = {
-      font = "${font} 10";
-
-      background-color = l "transparent";
-      text-color = fg0;
-
-      margin = 0;
-      padding = 0;
-      spacing = 0;
-    };
-
-    "element-icon, element-text, scrollbar" = {
-      cursor = l "pointer";
-    };
-
-    window = {
-      location = l "south";
-      width = l "600px";
-      height = l "600px";
-      y-offset = l "-4px";
-
-      background-color = bg1;
-      border-radius = l "8px";
-    };
-
-    mainbox = {
-      padding = l "24px";
-      spacing = l "24px";
-    };
-
-    inputbar = {
-      padding = l "8px";
-      spacing = l "4px";
-      children = map l ["icon-search" "entry"];
-      border = l "0 0 2px 0 solid";
-      border-color = accent;
-      border-radius = l "2px";
-      background-color = bg0;
-    };
-
-    "icon-search, entry, element-icon, element-text " = {
-      vertical-align = l "0.5";
-    };
-
-    icon-search = {
-      expand = false;
-      filename = "search-symbolic";
-      size = l "24px";
-    };
-
-    entry = {
-      font = "${font} 12";
-      placeholder = "Type here to search";
-      placeholder-color = fg1;
-    };
-
-    textbox = {
-      padding = l "4px 8px";
-      background-color = bg2;
-    };
-
-    listview = {
-      columns = 2;
-      spacing = l "8px";
-      fixed-height = true;
-      fixed-columns = true;
-    };
-
-    element = {
-      spacing = l " 1em";
-      padding = l "8px";
-      border-radius = l "2px";
-    };
-
-    "element normal urgent " = {
-      text-color = urgent;
-    };
-
-    "element normal active " = {
-      text-color = accent;
-    };
-
-    "element alternate active " = {
-      text-color = accent;
-    };
-
-    "element selected active " = {
-      text-color = accent;
-    };
-
-    "element selected " = {
-      background-color = bg3;
-    };
-
-    "element selected urgent " = {
-      background-color = urgent;
-    };
-
-    element-icon = {
-      size = l " 1.5em";
-    };
-
-    element-text = {
-      text-color = l "inherit";
-    };
+      find $out -type f -name colors.rasi -exec \
+      sed -i 's|~/.config/rofi/colors/onedark.rasi|~/.config/rofi/nix.rasi|g' {} +
+    '';
   };
 in {
-  home.packages = [
+  home.file = {
+    ".local/share/fonts" = {
+      source = "${themes}/fonts";
+      recursive = true;
+    };
+  };
+
+  # home.activation.updateFontsCache = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  #   echo "🔄 Rebuilding font cache..."
+  #   ${pkgs.fontconfig}/bin/fc-cache -fv
+  # '';
+
+  home.packages = with pkgs; [
     (
-      pkgs.writeShellScriptBin "rofi-wifi-menu" (builtins.readFile (builtins.fetchurl {
+      writeShellScriptBin "rofi-wifi-menu" (builtins.readFile (builtins.fetchurl {
         url = "https://raw.githubusercontent.com/zbaylin/rofi-wifi-menu/refs/heads/master/rofi-wifi-menu.sh";
         sha256 = "0gilv2q4l7synn1labwzw3bm4xy4h1z2l7kh1jhjyfxn3xpx7fnc";
       }))
     )
+
+    (rofi-wayland.override {plugins = [rofi-emoji rofi-calc rofi-games rofi-power-menu rofi-mpd];})
   ];
 
   programs = {
-    rofi = with pkgs; {
-      enable = true;
-      package = rofi-wayland;
-      plugins = [rofi-emoji rofi-calc rofi-games rofi-power-menu rofi-mpd];
-      cycle = true;
-      terminal = "wezterm";
-      # theme = windows-11-list;
-      theme = macos;
-    };
-
     rbw = {
       enable = true;
       settings.email = config.programs.git.userEmail;
       package = pkgs.rofi-rbw-wayland;
     };
+  };
+  xdg.configFile = {
+    "rofi" = {
+      source = "${themes}/files";
+      recursive = true;
+    };
+    "rofi/nix.rasi".text = let
+      c = config.lib.stylix.colors;
+    in ''
+      * {
+          background:     #${c.base00}FF;
+          background-alt: #${c.base01}FF;
+          foreground:     #${c.base05}FF;
+          selected:       #${c.base02}FF;
+          active:         #${c.base03}FF;
+          urgent:         #${c.base0F}FF;
+      }
+    '';
   };
 }

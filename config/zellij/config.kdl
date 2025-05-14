@@ -1,25 +1,17 @@
-themes {
-    tokyonight_night {
-        fg "#c0caf5"
-        bg "#292e42"
-        // Black should match the terminal background color
-        // This ensures the top and bottom bars are transparent
-        black "#1a1b26"
-        red "#f7768e"
-        green "#9ece6a"
-        yellow "#e0af68"
-        blue "#7aa2f7"
-        magenta "#bb9af7"
-        cyan "#7dcfff"
-        white "#a9b1d6"
-        orange "#ff9e64"
+default_shell "fish"
+pane_frames false
+scrollback_editor "nvim"
+copy_command "cs"
+
+load_plugins {
+    "file:~/.config/zellij/plugins/zjframes.wasm" {
+        hide_frame_for_single_pane       "true"
+        hide_frame_except_for_search     "true"
+        hide_frame_except_for_scroll     "true"
     }
 }
 
-theme "tokyonight_night"
-
 keybinds clear-defaults=true {
-
     tmux {
         bind "c" { NewTab;SwitchToMode "Normal"; }
         bind "n" { NewPane; SwitchToMode "Normal"; }
@@ -150,29 +142,3 @@ keybinds clear-defaults=true {
     }
 
 }
-
-plugins {
-    // tab-bar { path "tab-bar"; }
-    // status-bar { path "status-bar"; }
-    // strider { path "strider"; }
-    // compact-bar { path "compact-bar"; }
-    // session-manager { path "session-manager"; }
-}
-
-// load_plugins {
-//     "file:~/.config/zellij/plugins/zjframes.wasm" {
-//         hide_frame_for_single_pane       "true"
-//         hide_frame_except_for_search     "true"
-//         hide_frame_except_for_fullscreen "true"
-//     }
-// }
-
-default_shell "fish"
-pane_frames false
-
-scrollback_editor "nvim"
-
-// TODO: Be handled by nix
-// copy_command "xclip -selection clipboard" // x11
-copy_command "wl-copy"// wayland
-// copy_command "pbcopy"// osx

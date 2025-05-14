@@ -38,7 +38,6 @@ stdenvNoCC.mkDerivation {
     homepage = "https://github.com/krishnan793/PlymouthTheme-Cat";
     license = lib.licenses.gpl3Only;
     maintainers = with lib.maintainers; [ ];
-    mainProgram = "plymouth-theme-cat";
     platforms = lib.platforms.all;
   };
 

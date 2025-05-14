@@ -2,7 +2,7 @@
   pkgs,
   config,
   lib,
-inputs,
+  inputs,
   ...
 }: {
   home = let
@@ -19,67 +19,73 @@ inputs,
     viAlias = true;
     vimAlias = true;
     vimdiffAlias = true;
+
     package = inputs.neovim-nightly-overlay.packages.${pkgs.system}.default;
 
-    extraPackages = with pkgs; [
-      (pkgs.python3.withPackages (python-pkgs:
-        with python-pkgs; [
-          python-lsp-server
-          python-lsp-ruff
-          python-lsp-black
-          pyls-memestra
-          pylsp-rope
-        ]))
+    extraPackages =
+      (with pkgs.vimPlugins.nvim-treesitter-parsers; [asm bash c comment cpp csv fish git_config git_rebase gitattributes gitcommit gitignore glsl heex html javascript json json5 kdl latex lua luadoc luau make markdown markdown_inline nix nu powershell python query rust tsx typescript vim vimdoc scss graphql fennel])
+      ++ (with pkgs; [
+        (pkgs.python3.withPackages (python-pkgs:
+          with python-pkgs; [
+            python-lsp-server
+            python-lsp-ruff
+            python-lsp-black
+            pyls-memestra
+            pylsp-rope
+          ]))
 
-      (import ../../derivations/mpls.nix {inherit pkgs lib;})
-      (import ../../derivations/codelldb.nix {inherit pkgs;})
-      (import ../../derivations/cpptools.nix {inherit pkgs;})
+        # (import ../../derivations/mpls.nix {inherit pkgs lib;})
+        # (import ../../derivations/codelldb.nix {inherit pkgs;})
+        # (import ../../derivations/cpptools.nix {inherit pkgs;})
 
-      haskell-language-server
-      tex-fmt
+        fennel-ls
+        fnlfmt
 
-      chafa
-      dwt1-shell-color-scripts
-      pokemon-colorscripts-mac
+        haskell-language-server
+        tex-fmt
 
-      ghostscript_headless
+        chafa
+        dwt1-shell-color-scripts
+        pokemon-colorscripts-mac
 
-      # Language Servers
-      # basedpyright
-      emmet-ls
-      glsl_analyzer
-      gopls
-      lua-language-server
-      neocmakelsp
-      nixd
-      clang-tools
-      nil
-      nodePackages.bash-language-server
-      pylyzer
-      tailwindcss-language-server
-      texlab
-      # vim-language-server
-      vscode-langservers-extracted
-      yaml-language-server
+        ghostscript_headless
 
-      # Formatters
-      alejandra
-      black
-      nodePackages.prettier
-      prettierd
-      shfmt
-      stylua
+        # Language Servers
+        # basedpyright
+        emmet-ls
+        glsl_analyzer
+        gopls
+        lua-language-server
+        neocmakelsp
+        nixd
+        clang-tools
+        nil
+        nodePackages.bash-language-server
+        pylyzer
+        tailwindcss-language-server
+        texlab
+        # vim-language-server
+        vscode-langservers-extracted
+        yaml-language-server
 
-      # Linters
-      markdownlint-cli
+        # Formatters
+        alejandra
+        black
+        nodePackages.prettier
+        prettierd
+        shfmt
+        stylua
 
-      # Utilities
-      aspell
-      ctags
-      lazygit
-      ra-multiplex
-      tree-sitter
-      xxd
-    ];
+        # Linters
+        markdownlint-cli
+
+        # Utilities
+        aspell
+        ctags
+        lazygit
+        ra-multiplex
+        tree-sitter
+        xxd
+      ]);
   };
 }

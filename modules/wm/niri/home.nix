@@ -3,11 +3,8 @@
   lib,
   config,
   inputs,
-  dotutils,
   ...
-}: let
-  cfg = config.niri;
-in {
+}: {
   imports = [
     inputs.niri.homeModules.niri
     inputs.niri.homeModules.stylix
@@ -20,8 +17,52 @@ in {
     enable = true;
     package = pkgs.niri-unstable;
 
+    # finalConfig =
+    #   /*
+    #   kdl
+    #   */
+    #   ''
+    #     overview {
+    #         zoom 0.25;
+    #         // backdrop-color "#777777";
+    #     }
+    #     gestures {
+    #         hot-corners {
+    #             off
+    #         }
+    #     }
+    #   '';
+
     settings = {
+      animations = {
+        window-open = {
+          easing = {
+            curve = "linear";
+            duration-ms = 250;
+          };
+        };
+        window-close = {
+          easing = {
+            curve = "linear";
+            duration-ms = 250;
+          };
+        };
+        window-resize = {
+          easing = {
+            curve = "linear";
+            duration-ms = 250;
+          };
+        };
+
+        shaders = {
+          window-open = builtins.readFile ../../../config/niri/shaders/open.glsl;
+          window-close = builtins.readFile ../../../config/niri/shaders/close.glsl;
+          window-resize = builtins.readFile ../../../config/niri/shaders/resize.glsl;
+        };
+      };
+
       prefer-no-csd = true;
+
       workspaces = {
         ws_1 = {};
         ws_2 = {};
@@ -30,46 +71,106 @@ in {
         ws_5 = {};
       };
       window-rules =
-        let
-          m = name: (map (v: {
-            matches = [{app-id = v;} {title = v;}];
-            open-on-workspace = name;
-          }) [config.wayland.shared.workspace_rules.${name}]);
-        in
-          [
-            {
-              open-maximized = true;
-              # geometry-corner-radius = 12;
-              draw-border-with-background = false;
-              clip-to-geometry = true;
-            }
-            {
-              matches = [{is-active = false;}];
-              opacity = 0.95;
-            }
-            {
-              matches = [{app-id = "zen";}];
-              variable-refresh-rate = true;
-              border = {width = 0;};
-            }
-          ]
-          # ++ (map (v: {
-          #   matches = [
-          #     {app-id = v;}
-          #     {title = v;}
-          #     {is-floating = true;}
-          #   ];
-          #   open-floating = true;
-          # }) [config.wayland.shared.workspace_rules.float])
-          # ++ m "ws_1"
-          # ++ m "ws_2"
-          # ++ m "ws_3"
-          # ++ m "ws_4"
-          # ++ m "ws_5"
+        [
+          {
+            open-maximized = true;
+            draw-border-with-background = false;
+            clip-to-geometry = true;
+            geometry-corner-radius = rec {
+              bottom-left = 8.0;
+              bottom-right = bottom-left;
+              top-left = bottom-left;
+              top-right = bottom-left;
+            };
+            border = {width = 2;};
+          }
+          {
+            matches = [{app-id = "^baba$";}];
+            baba-is-float = true;
+          }
+          {
+            matches = [{is-window-cast-target = true;}];
+
+            focus-ring = {
+              active = {color = "#f38ba8";};
+              inactive = {color = "#7d0d2d";};
+            };
+
+            border = {
+              inactive = {color = "#7d0d2d";};
+            };
+
+            shadow = {
+              color = "#7d0d2d70";
+            };
+
+            tab-indicator = {
+              active = {color = "#f38ba8";};
+              inactive = {color = "#7d0d2d";};
+            };
+          }
+
+          {
+            matches = [{is-active = false;}];
+            opacity = 0.95;
+          }
+          {
+            matches = [{app-id = "zen";}];
+            variable-refresh-rate = true;
+            border = {width = 0;};
+          }
+
+          {
+            matches =
+              lib.flatten
+              (map (
+                  v:
+                    if builtins.isString v && builtins.substring 0 6 v == "title:"
+                    then [{title = builtins.substring 6 (builtins.stringLength v) v;}]
+                    else [{app-id = v;} {title = v;}]
+                )
+                config.wayland.shared.workspace_rules.float);
+            open-floating = true;
+          }
+          # { # TODO Wait for niri devs
+          #   matches =
+          #     lib.flatten
+          #     (map (
+          #         v:
+          #           if builtins.isString v && builtins.substring 0 6 v == "title:"
+          #           then [{title = builtins.substring 6 (builtins.stringLength v) v;}]
+          #           else [{app-id = v;} {title = v;}]
+          #       )
+          #       config.wayland.shared.workspace_rules.pin);
+          #   pin = true;
+          # }
+        ]
+        ++ lib.flatten (
+          map (ws: {
+            matches =
+              lib.flatten
+              (map (
+                  v:
+                    if builtins.isString v && builtins.substring 0 6 v == "title:"
+                    then [{title = builtins.substring 6 (builtins.stringLength v) v;}]
+                    else [{app-id = v;} {title = v;}]
+                )
+                config.wayland.shared.workspace_rules.${ws});
+            open-on-workspace = ws;
+          }) ["ws_1" "ws_2" "ws_3" "ws_4" "ws_5"]
+        )
+        # ++ m "ws_1"
+        # ++ m "ws_2"
+        # ++ m "ws_3"
+        # ++ m "ws_4"
+        # ++ m "ws_5"
         # pin
         ;
       environment = {
         DISPLAY = ":0";
+      };
+      layout = {
+        gaps = 8;
       };
       outputs."eDP-1" = {
         enable = true;
@@ -148,8 +249,8 @@ in {
 
         "Mod+Shift+Slash".action = show-hotkey-overlay;
 
-        "Mod+e".action = spawn "nautilus";
-        "Mod+Return".action = spawn "wezterm";
+        "Mod+e".action = spawn config.wayland.shared.explorer;
+        "Mod+Return".action = spawn config.wayland.shared.terminal;
         "Ctrl+Alt+Delete".action = spawn "hyprlock";
         "Ctrl+Shift+Alt+Delete".action = quit;
 
@@ -272,6 +373,8 @@ in {
         "Mod+BracketLeft".action = consume-or-expel-window-left;
         "Mod+BracketRight".action = consume-or-expel-window-right;
 
+        "Mod+Tab".action = toggle-overview;
+
         # Consume one window from the right to the bottom of the focused column.
         "Mod+Comma".action = consume-window-into-column;
         # Expel the bottom window from the focused column to the right.
@@ -313,7 +416,7 @@ in {
         # "Mod+Period".action = switch-layout "prev";
 
         "Print".action = screenshot;
-                # "Ctrl+Print".action = screenshot-screen;
+        # "Ctrl+Print".action = screenshot-screen;
         "Alt+Print".action = screenshot-window;
 
         "Mod+Shift+P".action = power-off-monitors;

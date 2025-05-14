@@ -1,47 +1,75 @@
 #!/usr/bin/env bash
 
-album_art=$(playerctl -p spotify metadata mpris:artUrl 2>/dev/null)
 
-set() {
-	echo "$1"
-	cp "$1" /tmp/cover.jpg
+fetch_art() {
+    local player=$1
+    local status
+    status=$(playerctl -p "$player" status 2>/dev/null)
+
+    if [[ "$status" == "Playing" || "$status" == "Paused" ]]; then
+        album_art=$(playerctl -p "$player" metadata mpris:artUrl 2>/dev/null)
+        if [[ -n "$album_art" ]]; then
+            echo "$status|$player|$album_art"
+        fi
+    fi
 }
 
-if [[ -z $album_art ]]; then
-	album_art=$(playerctl -p spotify_player metadata mpris:artUrl 2>/dev/null)
+declare -A player_art
+players=($(playerctl -l 2>/dev/null))
 
-	if [[ -z $album_art ]]; then
-		album_art=$(playerctl -p chromium metadata mpris:artUrl 2>/dev/null)
+# Check each available player
+for p in "${players[@]}"; do
+    result=$(fetch_art "$p")
+    if [[ -n "$result" ]]; then
+        status="${result%%|*}"
+        rest="${result#*|}"
+        player="${rest%%|*}"
+        art="${rest#*|}"
+        player_art["$player"]="$status|$art"
+    fi
+done
 
-		if [[ -z $album_art ]]; then
-			album_art=$(playerctl -p firefox metadata mpris:artUrl 2>/dev/null)
-			if [[ -z $album_art ]]; then
-				exit
-			else
-				set $(echo "$album_art" | sed "s/file...//")
-				exit
-			fi
+# Prioritize 'Playing' first
+chosen_art=""
+for p in "${players[@]}"; do
+    data=${player_art["$p"]}
+    if [[ $data == Playing* ]]; then
+        chosen_art="${data#*|}"
+        break
+    fi
+done
 
-			exit
-		else
-			set $(echo "$album_art" | sed "s/file...//")
-			exit
-		fi
-	fi
+# Fallback to 'Paused' if no 'Playing'
+if [[ -z $chosen_art ]]; then
+    for p in "${players[@]}"; do
+        data=${player_art["$p"]}
+        if [[ $data == Paused* ]]; then
+            chosen_art="${data#*|}"
+            break
+        fi
+    done
 fi
 
+# Exit if still empty
+if [[ -z $chosen_art ]]; then
+    exit
+fi
+
+# Local file (e.g., from browsers)
+if [[ "$chosen_art" == file://* ]]; then
+    path="${chosen_art/file:\/\//}"
+    set_cover "$path"
+    exit
+fi
+
+# Remote art cache
 CAD=~/.cache/spotifyPictureCache
+mkdir -p "$CAD"
+cd "$CAD" || exit
 
-if [[ ! -d "$CAD" ]]; then
-	mkdir $CAD
+filename=$(basename "$chosen_art")
+if [[ ! -f "$filename" ]]; then
+    wget -c "$chosen_art" -q
 fi
 
-cd $CAD || exit
-
-file=$(echo "$album_art" | sed 's|.*/||')
-
-if ! [ -f "$file" ]; then
-	wget -c "${album_art}" -q
-fi
-
-set "$CAD/$file"
+echo "$CAD/$filename"

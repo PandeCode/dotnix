@@ -47,7 +47,7 @@ in
         };
         window.titlebar = false;
         modifier = "Mod4";
-        terminal = "wezterm";
+        terminal = config.wayland.shared.terminal;
         keybindings = let
           alt = "Mod1";
           super = "Mod4";

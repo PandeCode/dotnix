@@ -1,16 +1,21 @@
 {
   pkgs,
   inputs,
+  lib,
   ...
 }: {
   # nixpkgs.config.permittedInsecurePackages = [
   # "adobe-reader-9.5.5"
   # ];
 
-  xdg.portal.enable = true;
+  xdg.portal.enable = lib.mkForce true;
   xdg.portal.extraPortals = [pkgs.xdg-desktop-portal-gtk];
 
   security.rtkit.enable = true;
+
+  services.xserver.desktopManager.gnome.enable = true;
+  # services.desktopManager.plasma6.enable = true;
+  # services.xserver.desktopManager.plasma6.enable = true;
 
   services = {
     pipewire = {
@@ -62,15 +67,15 @@
       dunst
       libnotify
 
-      libreoffice-qt6
+      # libreoffice-qt6
 
       cage
 
       mpv
-      openshot-qt
+      # openshot-qt
       nautilus
       obsidian
-      inkscape
+      # inkscape
       zathura
       # adobe-reader
 
@@ -84,11 +89,11 @@
 
       linux-wifi-hotspot
 
-      texliveFull
+      # texliveFull
       # godot_4-mono
-      godot_4
-      pixelorama
-      libresprite
+      # godot_4
+      # pixelorama
+      # libresprite
 
       uxplay
       pandoc
@@ -113,9 +118,9 @@
       gnome-clocks
 
       vlc
-      sunshine
-      android-tools
-      scrcpy
+      # sunshine
+      # android-tools
+      # scrcpy
     ];
   };
 }

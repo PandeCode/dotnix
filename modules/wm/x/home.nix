@@ -22,7 +22,7 @@ in {
         startup =
           config.wm.shared.startup
           ++ [
-             "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
+            "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
             "xmodmap ~/.Xmodmap"
             "greenclip daemon"
             "xflux"
@@ -46,8 +46,12 @@ in {
   };
 
   config = {
-    greenclip.enable = true;
-    picom.enable = true;
+    greenclip = {
+      enable = true;
+    };
+    picom = {
+      enable = true;
+    };
 
     home = {
       # CapsLock to Control, and Shift+CapsLock to CapsLock:
@@ -56,9 +60,6 @@ in {
         clear control
         add control = Caps_Lock Control_L Control_R
         keycode 66 = Control_L Caps_Lock NoSymbol NoSymbol
-
-        # Natural Scrolling
-        # pointer = 1 2 3 5 4 7 6 8 9 10 11 12
       '';
       packages = with pkgs; [
         xorg.xmodmap

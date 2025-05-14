@@ -1,8 +1,8 @@
 {
   pkgs,
   lib,
-  config,
   inputs,
+  sharedConfig,
   ...
 }: let
   _bind = mod: key: exec: {inherit mod key exec;};
@@ -17,13 +17,43 @@ in {
   options.wm = {
     shared = lib.mkOption {
       default = rec {
-        terminal = "wezterm";
+        terminal = "ghostty";
         explorer = "nautilus";
         workspace_rules = {
           float =
             # WARN: Copied from DWM, WINTYPE, not sure if they count as classes
-            ["DIALOG" "UTILITY" "TOOLBAR" "SPLASH" "_KDE_NET_WM_WINDOW_TYPE_OVERRIDE" "_NET_WM_WINDOW_TYPE_NORMAL"]
-            ++ ["title:Blender Preferences" "vimb" "title:Picture-in-picture"];
+            [
+              "DIALOG"
+              "UTILITY"
+              "TOOLBAR"
+              "SPLASH"
+              "_KDE_NET_WM_WINDOW_TYPE_OVERRIDE"
+              "_NET_WM_WINDOW_TYPE_NORMAL"
+              "title:Blender Preferences"
+              "title:Picture-in-picture"
+              "vimb"
+              "Pqiv"
+              "hyprbind"
+            ];
+          pin = [
+            "title:Picture-in-picture"
+            "Pqiv"
+            "hyprbind"
+          ];
+          noblur = ["firefox" "Google-chrome"];
+
+          noshadow = [
+            "zen-twilight"
+            "title:Picture-in-picture"
+            "floating:1"
+          ];
+
+          noborder = [
+            "zen-twilight"
+            "title:Picture-in-picture"
+            "floating:1"
+          ];
+
           ws_1 = ["St" "st" terminal "alacritty" "kitty" "st-256color"];
           ws_2 = ["Browser" "Firefox" "Google-chrome" "Opera"];
           ws_3 = ["ModernGL" "Emacs" "emacs" "neovide" "Code" "Code - Insiders" "Blender"];
@@ -31,9 +61,8 @@ in {
           ws_5 = ["Spotify" "vlc"];
           ws_6 = ["Mail" "Thunderbird"];
           ws_7 = ["riotclientux.exe" "leagueclient.exe" "Zenity" "zenity" "wine" "wine.exe" "explorer.exe"];
-          noblur = ["firefox" "Google-chrome"];
-          pin = ["title:Picture-in-picture"];
         };
+
         startup = [
           terminal
           "blueman-applet"
@@ -107,12 +136,30 @@ in {
         enable = true;
         enableBashIntegration = true;
         enableFishIntegration = true;
+        settings = {
+          background-opacity = lib.mkForce 0.8;
+          background-blur = lib.mkForce true;
+          window-vsync = lib.mkForce true;
+          window-decoration = lib.mkForce "server";
+          clipboard-trim-trailing-spaces = lib.mkForce true;
+          clipboard-paste-protection = lib.mkForce true;
+          confirm-close-surface = lib.mkForce false;
+
+          custom-shader = "./ghostty-shaders/gears-and-belts.glsl";
+        };
       };
       alacritty.enable = true;
     };
 
     home.packages = [
       pkgs.spatial-shell
+      inputs.bzmenu.packages.${pkgs.system}.default
+      inputs.iwmenu.packages.${pkgs.system}.default
+
+      (pkgs.writeShellScriptBin "webcamize" (builtins.readFile (builtins.fetchurl {
+        url = "https://github.com/cowtoolz/webcamize/raw/refs/heads/master/webcamize";
+        sha256 = "13cqqzj5naw8fw1kash0v5lpxplx5hy887k9cypdz0r6g4inj66r";
+      })))
     ];
 
     xdg.configFile = {

@@ -2,6 +2,7 @@
   pkgs,
   lib,
   config,
+  inputs,
   ...
 }: let
   cfg = config.wayland;
@@ -25,7 +26,7 @@ in
             "wl-paste --type image --watch cliphist store" # Stores only image data
           ];
           _bind = mod: key: exec: {inherit mod key exec;};
-          mod = _bind "super";
+          mod = _bind "Super";
           nomod = _bind "";
 
           bindexec =
@@ -34,16 +35,16 @@ in
               (mod "n" "swaync-client -t -sw")
               (mod "z" "woomer")
 
-              (_bind "super shift" "c" "hyprpicker -a")
-              (_bind "super shift" "l" "hyprlock")
+              (_bind "Super Shift" "c" "hyprpicker -a")
+              (_bind "Super Shift" "l" "hyprlock")
 
               (nomod "Print" "grimblast copy area")
 
-              (_bind "super shift" "b" "toggle_waybar.sh")
-              (_bind "super shift" "r" "wayrec.sh")
+              (_bind "Super Shift" "b" "toggle_waybar.sh")
+              (_bind "Super Shift" "r" "wayrec.sh")
 
               (mod "v" "rofi -modi clipboard:cliphist-rofi-img -show clipboard -show-icons")
-              (_bind "super shift" "v" "bash -c \"cliphist list | rofi -dmenu | cliphist decode | xargs -I '{}' ydotool type '{}'\"")
+              (_bind "Super Shift" "v" "bash -c \"cliphist list | rofi -dmenu | cliphist decode | xargs -I '{}' ydotool type '{}'\"")
             ];
           inherit (config.wm.shared) bindexec_el;
         };
@@ -51,7 +52,9 @@ in
     };
 
     config = {
-      programs.hyprlock.enable = true;
+      programs.hyprlock = {
+        enable = true;
+      };
 
       home.packages = with pkgs; [
         wlprop

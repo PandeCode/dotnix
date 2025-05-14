@@ -19,16 +19,23 @@ in {
 
   config = lib.mkIf cfg.enable {
     home.packages = with pkgs; [swhkd];
-    xdg.configFile = {
+    xdg.configFile = rec {
       "swhkd/tty.sxhkd".text = ''
         XF86Audio{Prev,Next}
         	mpc -q {prev,next}
       '';
-      "swhkd/all.sxhkd".text = '''';
+
+      "swhkd/wm.sxhkd".text = '''';
 
       "swhkd/x.sxhkd".text = '''';
       "swhkd/wayland.sxhkd".text = '''';
-      "swhkd/dwm.sxhkd".text = '''';
+
+      # ${${"swhkd/wm.sxhkd"}.text}
+      # ${${"swhkd/x.sxhkd"|}.text}
+      "swhkd/dwm.sxhkd".text = ''
+
+
+      '';
       "swhkd/hyprland.sxhkd".text = '''';
       "swhkd/i3.sxhkd".text = ''
         super + {h,j,k,l}

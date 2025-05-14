@@ -4,22 +4,23 @@
   config,
   ...
 } @ all: {
-# TODO: enable when needed
-  # specialisation = {
-  #   dark.configuration = {
-  #     stylix.base16Scheme = lib.mkForce "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
-  #     home.sessionVariables.THEME = "dark";
-  #   };
-  #
-  #   light.configuration = {
-  #     stylix.base16Scheme = lib.mkForce "${pkgs.base16-schemes}/share/themes/tokyo-night-light.yaml";
-  #     home.sessionVariables.THEME = "light";
-  #   };
-  # };
+  # TODO: enable when needed
+  specialisation = {
+    dark.configuration = {
+      stylix.base16Scheme = lib.mkForce "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
+      home.sessionVariables.THEME = "dark";
+    };
+
+    light.configuration = {
+      stylix.base16Scheme = lib.mkForce "${pkgs.base16-schemes}/share/themes/tokyo-night-light.yaml";
+      home.sessionVariables.THEME = "light";
+    };
+  };
 
   xdg.configFile."gowall/config.yml".text =
     lib.strings.toJSON
     {
+      EnableImagePreviewing = false;
       themes = [
         {
           name = "nix";
@@ -28,16 +29,39 @@
       ];
     };
 
+  xdg.configFile."charon-shell/style.scss".text = with config.lib.stylix.colors;
+  /*
+  scss
+  */
+    ''
+      $base00: #${base00}; $base01: #${base01}; $base02: #${base02}; $base03: #${base03};
+      $base04: #${base04}; $base05: #${base05}; $base06: #${base06}; $base07: #${base07};
+      $base08: #${base08}; $base09: #${base09}; $base0A: #${base0A}; $base0B: #${base0B};
+      $base0C: #${base0C}; $base0D: #${base0D}; $base0E: #${base0E}; $base0F: #${base0F};
+    '';
+
+  xdg.configFile."stylix/nvim.lua".text = with config.lib.stylix.colors;
+  /*
+  lua
+  */
+    ''
+      return {
+        base00 = '#${base00}', base01 = '#${base01}', base02 = '#${base02}', base03 = '#${base03}',
+        base04 = '#${base04}', base05 = '#${base05}', base06 = '#${base06}', base07 = '#${base07}',
+        base08 = '#${base08}', base09 = '#${base09}', base0A = '#${base0A}', base0B = '#${base0B}',
+        base0C = '#${base0C}', base0D = '#${base0D}', base0E = '#${base0E}', base0F = '#${base0F}'
+      }
+    '';
+
   stylix =
     (import ../stylix/common.nix all).stylix
     // {
-        iconTheme = {
-            enable = true;
-            package = pkgs.arc-icon-theme;
-            dark = "Arc-Dark";
-            light = "Arc";
-        };
-
+      iconTheme = {
+        enable = true;
+        package = pkgs.arc-icon-theme;
+        dark = "Arc-Dark";
+        light = "Arc";
+      };
 
       targets = {
         rofi.enable = false;
@@ -45,7 +69,16 @@
         hyprland.hyprpaper.enable = false;
         neovim.enable = lib.mkForce false;
         waybar.enable = false;
-        wezterm.enable = false;
+        wezterm.enable = true;
+        hyprlock.enable = false;
+
+        # neovim  = {
+        #     plugin = "mini.base16";
+        #     transparentBackground = {
+        #         main = true;
+        #         signColumn = true;
+        #     };
+        # };
 
         # alacritty.enable = true;
         # bat.enable = true;
@@ -59,7 +92,6 @@
         # gtk.enable = true;
         # gtk.flatpakSupport.enable = true;
         # hyprland.enable = true;
-        # hyprlock.enable = true;
         # kitty.enable = true;
         # lazygit.enable = true;
         # ncspot.enable = true;
@@ -102,9 +134,6 @@
         # mako.enable = true;
         # mangohud.enable = true;
         # micro.enable = true;
-        # neovim.plugin
-        # neovim.transparentBackground.main
-        # neovim.transparentBackground.signColumn
         # nixvim.enable = true;
         # nixvim.plugin
         # nixvim.transparentBackground.main
