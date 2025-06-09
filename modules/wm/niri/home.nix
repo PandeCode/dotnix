@@ -217,7 +217,6 @@
         ["wezterm"]
         ["bash" "-c" "waybar -c $(get_niri_waybar.sh)"]
         ["swww-daemon"]
-        ["systemctl" "--user" "start" "hyprpolkitagent"]
         ["wl-paste" "--type" "text" "--watch" "cliphist" "store"]
         ["wl-paste" "--type" "image" "--watch" "cliphist" "store"]
       ];

@@ -34,27 +34,26 @@
         layer = "top";
         position = "top";
         reload_style_on_change = true;
-        modules-left = [
-          "custom/notification"
-          "hyprland/workspaces"
-          "hyprland/submap"
-          "hyprland/window"
-        ];
-        modules-center = [
-          "image#album-art"
 
-          "custom/lyrics"
-        ];
         modules-right = [
+          "custom/notification"
+          "image#album-art"
           "custom/cava"
           "custom/prev"
           "custom/play"
           "custom/next"
-
+          "custom/lyrics"
+        ];
+        modules-center = [
+          "hyprland/workspaces"
+          "hyprland/submap"
+          "group/name"
+        ];
+        modules-left = [
           "group/expand"
+          "hyprland/language"
           "bluetooth"
           "network"
-          "hyprland/language"
           "battery"
           "clock"
         ];
@@ -99,7 +98,7 @@
             empty = "";
           };
           persistent-workspaces = {
-            "*" = [1 2 3 4 5];
+            "*" = [1 2 3 4];
           };
         };
         "hyprland/language" = {
@@ -165,15 +164,29 @@
           format-alt = "{time} {icon}";
           format-icons = ["󰁻" "󰁼" "󰁾" "󰂀" "󰂂" "󰁹"];
         };
+        "custom/endpoint" = {
+          format = "|";
+          tooltip = false;
+        };
 
         "custom/expand" = {
           format = "";
           tooltip = false;
         };
 
-        "custom/endpoint" = {
-          format = "|";
+        "custom/name" = {
+          format = ">";
           tooltip = false;
+        };
+
+        "group/name" = {
+          orientation = "horizontal";
+          drawer = {
+            transition-duration = 600;
+            transition-to-right = true;
+            click-to-reveal = true;
+          };
+          modules = ["hyprland/window"];
         };
 
         "group/expand" = {

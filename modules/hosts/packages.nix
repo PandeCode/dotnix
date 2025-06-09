@@ -118,6 +118,15 @@
     inetutils
     wget
     bat
+    bat-extras.batpipe
+    bat-extras.batman
+    bat-extras.batdiff
+    bat-extras.batgrep
+    bat-extras.batwatch
+
+    tealdeer
+    wikiman
+
     expect # unbuffer command
     tree-sitter
     jq
@@ -183,6 +192,12 @@
     nsxiv
     pqiv
 
+    systemctl-tui
+    sysz
+
+        caligula
+        astroterm
+        pastel
     # advcpmv
   ];
 }

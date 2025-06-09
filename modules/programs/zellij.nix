@@ -10,7 +10,7 @@
 
   programs.zellij = {
     enable = true;
-    enableBashIntegration = true;
+    enableBashIntegration = false;
     enableFishIntegration = true;
   };
 
@@ -24,11 +24,6 @@
       ''
         themes {
             nix {
-                /* yellow "#e0af68" */
-                /* blue "#7aa2f7" */
-                /* white "#a9b1d6" */
-                /* orange "#ff9e64" */
-
                 fg      "#${c.base05}"
                 bg      "#${c.base00}"
                 black   "#${c.base00}"

@@ -64,9 +64,11 @@
 
   environment = {
     systemPackages = with pkgs; [
+
       dunst
       libnotify
 
+      onlyoffice-bin
       # libreoffice-qt6
 
       cage
@@ -89,6 +91,8 @@
 
       linux-wifi-hotspot
 
+      typst
+      vimb
       # texliveFull
       # godot_4-mono
       # godot_4

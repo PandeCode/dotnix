@@ -245,12 +245,22 @@ handle_player() {
     local player="$1"
     local album
 
+    if [ -z "${PRINT_PLAYER}" ]; then
+        :
+    else
+        echo "$player"
+    fi
+
     case "$player" in
         spotify|.spotify-wrappe)
             PLAYER=spotify
             lrclib | current_line "$(get_position)"
             ;;
-        spotify_player)
+        spotifyd|spotifyd*)
+            PLAYER=spotifyd
+            lrclib | current_line "$(get_position)"
+            ;;
+        spotify_player|spotify_player*)
             PLAYER=spotify_player
             lrclib | current_line "$(get_position)"
             ;;
@@ -289,17 +299,46 @@ done
 
 # Fallback: Process name check
 declare -A fallback=(
-    ["spotify"]="spotify .spotify-wrappe"
+    ["spotifyd"]="spotifyd"
+    ["spotify"]="spotify .spotify-wrapper"
     ["spotify_player"]="spotify_player"
     ["chromium"]="google-chrome-stable"
-    ["firefox"]="firefox .zen-wrapped .zen-twilight-w"
+    ["firefox"]="firefox .zen-wrapped .zen-twilight-w zen"
 )
 
 for player in "${!fallback[@]}"; do
-    for proc in ${fallback[$player]}; do
-        if pgrep -fx "$proc" >/dev/null || pgrep -x "$proc" >/dev/null; then
+    read -ra procs <<< "${fallback[$player]}"
+    for proc in "${procs[@]}"; do
+        if pgrep -fx "$proc" 2> /dev/null >/dev/null || pgrep -x "$proc" 2> /dev/null >/dev/null; then
             handle_player "$player"
             exit 0
         fi
     done
 done
+
+
+generate_music_sequence() {
+    local notes=("♩" "♪" "♫" "♬" "𝅝" "𝅗𝅥" "𝅘𝅥" "𝅘𝅥𝅮" "𝅘𝅥𝅯" "𝅘𝅥𝅰" "𝅘𝅥𝅱" "𝅘𝅥𝅲")
+    local rests=("𝄽" "𝄾" "𝄿" "𝅀" "𝅁" "𝅂" "𝅃" "𝅥")
+    local accidentals=("♭" "♯" "𝄫" "𝄪" "")
+    local output=""
+    local count=$((RANDOM % 5 + 8)) # 8–12 items
+
+    for ((i = 0; i < count; i++)); do
+        if (( RANDOM % 4 == 0 )); then
+            # Insert a rest
+            rest=${rests[$RANDOM % ${#rests[@]}]}
+            output+="$rest  "
+        else
+            # Insert note with optional accidental
+            accidental=${accidentals[$RANDOM % ${#accidentals[@]}]}
+            note=${notes[$RANDOM % ${#notes[@]}]}
+            output+="$accidental$note  "
+        fi
+    done
+
+    # Optional: wrap in bar-like visual delimiters
+    echo "|  $output|"
+}
+
+generate_music_sequence

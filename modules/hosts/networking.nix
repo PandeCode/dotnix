@@ -1,7 +1,17 @@
 {sharedConfig, ...}: {
   networking = {
     hostName = sharedConfig.hostName;
-    networkmanager.enable = true;
+
+    # wireless.iwd.enable = true;
+    networkmanager = {
+      enable = true;
+      # dns = "none";
+      # wifi = {
+      #   backend = "iwd";
+      #   powersave = true;
+      # };
+    };
+
     firewall = rec {
       enable = true;
       allowedTCPPorts = [7000 7100 5900];
@@ -18,12 +28,6 @@
       ];
       allowedUDPPortRanges = allowedTCPPortRanges;
     };
-    # networkmanager = {
-    #   enable = true;
-    #   dns = "none";
-    #   # wifi.powersave = true;
-    # };
-
     nameservers = [
       "1.1.1.1"
       "1.0.0.1"

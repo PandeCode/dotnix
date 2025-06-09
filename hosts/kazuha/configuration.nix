@@ -55,7 +55,7 @@
     supportedFilesystems = lib.mkForce ["btrfs" "reiserfs" "vfat" "f2fs" "xfs" "ntfs" "cifs"];
   };
 
-  time.timeZone = "America/Costa_Rica";
+  time.timeZone = "America/Toronto";
   i18n.defaultLocale = "en_US.UTF-8";
   i18n.extraLocaleSettings = rec {
     LC_TIME = "en_US.UTF-8";
@@ -73,7 +73,7 @@
   users.users.${sharedConfig.userName} = {
     isNormalUser = true;
     description = sharedConfig.userName;
-    extraGroups = ["networkmanager" "wheel" "video" "libvirtd"];
+    extraGroups = ["networkmanager" "wheel" "video" "libvirtd" "input"];
   };
 
   system.stateVersion = "24.11";

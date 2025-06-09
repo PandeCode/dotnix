@@ -2,6 +2,7 @@
   pkgs,
   config,
   lib,
+  inputs,
   sharedConfig,
   ...
 }: let
@@ -9,7 +10,7 @@
   footalttab = false;
 in {
   imports = [
-    # inputs.hyprland.homeManagerModules.default
+    inputs.hyprland.homeManagerModules.default
     ../wayland/home.nix
   ];
 
@@ -41,13 +42,14 @@ in {
   wayland.windowManager.hyprland = {
     enable = true;
     systemd.enable = false;
-    # package = lib.mkForce null;
-    # portalPackage = lib.mkForce null;
 
-    plugins = with pkgs.hyprlandPlugins; [
+    plugins = with inputs.hyprland-plugins.packages.${system}; [
+      inputs.hypr-dynamic-cursors.packages.${system}.hypr-dynamic-cursors
+
       hyprexpo
       hyprtrails
-      hypr-dynamic-cursors
+      hyprwinwrap
+      hyprscrolling
     ];
 
     settings = {
@@ -60,6 +62,7 @@ in {
 
       general = {
         gaps_out = 8;
+        layout = "scrolling";
       };
 
       input = {
@@ -74,6 +77,11 @@ in {
         disable_hyprland_logo = true;
       };
       plugin = {
+        hyprscrolling = {
+          fullscreen_on_one_column = "true";
+          column_width = 0.5;
+          explicit_column_widths = "0.333, 0.5, 0.667, 1.0";
+        };
         hyprexpo = {
           columns = 3;
           gap_size = 5;
@@ -101,12 +109,23 @@ in {
       exec = [
         "hyprshade auto"
       ];
+
+      animations = {
+        animation = [
+          "workspaces,                         1,           5,    default,   slidevert"
+          "windows,                            1,           4,    default,   slide"
+          "windowsIn,                          1,           4,    default,   slide"
+          "windowsOut,                         1,           4,    default,   slide"
+        ];
+      };
+
       exec-once =
         config.wayland.shared.startup
         ++ [
           "waybar"
           "hyprswitch init --show-title --size-factor 4.5 --workspaces-per-row 6 &"
         ];
+
       windowrule = let
         getName = str:
           if builtins.substring 0 6 str == "class:" || builtins.substring 0 6 str == "title:" || builtins.substring 0 6 str == "float:"
@@ -117,6 +136,7 @@ in {
       in
         [
           "opacity 1.0 1.0, floating:1"
+          "suppressevent maximize, class:.*"
         ]
         ++ (lib.fold (a: b: a ++ b) [] (map mkRule ["float" "noblur" "noborder" "noshadow" "pin"]))
         ++ (lib.fold (a: b: a ++ b) [] (map mkWsRule (map toString (lib.range 1 5))));
@@ -125,41 +145,33 @@ in {
         "super,       mouse:272, movewindow"
         "super,       mouse:273, resizewindow"
       ];
-      animations = {
-        animation = [
-          "workspaces, 1, 5, default, slidevert"
-        ];
-      };
+
       bind = let
-        shared_binds = map ({
-          mod ? "",
-          exec,
-          key,
-        }: "${mod},${key},exec,${exec}")
-        config.wayland.shared.bindexec;
-        ws_binds = (
-          builtins.concatLists (builtins.genList (
-              i: let
-                ws = i + 1;
-              in [
-                "super,       code:1${toString i}, workspace,       ${toString ws}"
-                "super SHIFT, code:1${toString i}, movetoworkspace, ${toString ws}"
-              ]
-            )
-            9)
-        );
       in
         [
-          "super, h, movefocus, l"
-          "super, l, movefocus, r"
-          "super, k, workspace, e-1"
-          "super, j, workspace, e+1"
+          "super, h, exec, hyprctl.sh focus_l"
+          "super, l, exec, hyprctl.sh focus_r"
+          "super, j, exec, hyprctl.sh focus_d"
+          "super, k, exec, hyprctl.sh focus_u"
+
+          "super shift, h, exec, hyprctl.sh move_l"
+          "super shift, l, exec, hyprctl.sh move_r"
+          "super shift, j, exec, hyprctl.sh move_d"
+          "super shift, k, exec, hyprctl.sh move_u"
+
+          "super ctrl, h, exec, hyprctl.sh resize_l"
+          "super ctrl, l, exec, hyprctl.sh resize_r"
+          "super ctrl, j, exec, hyprctl.sh resize_d"
+          "super ctrl, k, exec, hyprctl.sh resize_u"
+
+          "super, D, exec, hyprdesk.sh"
+          "super, A, exec, hypranim.sh"
+          "super,       q,  exec,           hyprctl reload"
+
+          "ALT,        F4, killactive,     "
 
           ",            keyboard_brightness_up_shortcut,   exec,          _tool_ctrl key up"
           ",            keyboard_brightness_down_shortcut, exec,          _tool_ctrl key down"
-
-          "ALT,        F4, killactive,     "
-          "super,       q,  exec,           hyprctl reload"
 
           "alt,        tab, exec, hyprswitch gui --mod-key alt_l --key tab --close mod-key-release --reverse-key=mod=shift && hyprswitch dispatch"
           "alt shift,  tab, exec, hyprswitch gui --mod-key alt_l --key tab --close mod-key-release --reverse-key=mod=shift && hyprswitch dispatch -r"
@@ -183,12 +195,24 @@ in {
           "super, m, togglespecialworkspace, magic"
           "super, m, movetoworkspace, special:magic"
           "super, m, togglespecialworkspace, magic"
-
-          "super, D, exec, hyprdesk.sh"
-          "super, A, exec, hypranim.sh"
         ]
-        ++ shared_binds
-        ++ ws_binds;
+        ++ (
+          map ({
+            mod ? "",
+            exec,
+            key,
+          }: "${mod},${key},exec,${exec}")
+          config.wayland.shared.bindexec
+        )
+        ++ (
+          builtins.concatLists (builtins.genList (
+              i: [
+                "super,       code:1${toString i}, workspace,       ${toString (i + 1)}"
+                "super SHIFT, code:1${toString i}, movetoworkspace, ${toString (i + 1)}"
+              ]
+            )
+            9)
+        );
       bindel = map ({
         mod ? "",
         exec,
@@ -197,18 +221,60 @@ in {
       config.wayland.shared.bindexec_el;
 
       binde = [
-        "super, equal, exec, hyprctl -q keyword cursor:zoom_factor $(hyprctl getoption cursor:zoom_factor | awk '/^float.*/ {print $2 * 1.1}')"
-        "super, minus, exec, hyprctl -q keyword cursor:zoom_factor $(hyprctl getoption cursor:zoom_factor | awk '/^float.*/ {print $2 * 0.9}')"
-        "super, KP_ADD, exec, hyprctl -q keyword cursor:zoom_factor $(hyprctl getoption cursor:zoom_factor | awk '/^float.*/ {print $2 * 1.1}')"
-        "super, KP_SUBTRACT, exec, hyprctl -q keyword cursor:zoom_factor $(hyprctl getoption cursor:zoom_factor | awk '/^float.*/ {print $2 * 0.9}')"
+        "super,                              equal,       exec, hyprctl -q keyword cursor:zoom_factor $(hyprctl getoption cursor:zoom_factor | awk '/^float.*/ {print $2 * 1.1}')"
+        "super,                              minus,       exec, hyprctl -q keyword cursor:zoom_factor $(hyprctl getoption cursor:zoom_factor | awk '/^float.*/ {print $2 * 0.9}')"
+        "super,                              KP_ADD,      exec, hyprctl -q keyword cursor:zoom_factor $(hyprctl getoption cursor:zoom_factor | awk '/^float.*/ {print $2 * 1.1}')"
+        "super,                              KP_SUBTRACT, exec, hyprctl -q keyword cursor:zoom_factor $(hyprctl getoption cursor:zoom_factor | awk '/^float.*/ {print $2 * 0.9}')"
       ];
     };
 
-    extraConfig =
+    # col.active_border = rgba(0,            190,         150,  1) rgba(0, 0, 0, 0) rgba(100, 190, 255, 1) rgba(0, 0, 0, 0) rgba (0, 190, 150, 1) 35deg
+    extraConfig = let
+      pipW = 480;
+      sW = 1920;
+    in
       /*
       hyprlang
       */
       ''
+        windowrule = animation slide top,    class:^(obol_slide_top)$
+        windowrule = animation slide bottom, class:^(obol_slide_bottom)$
+        windowrule = animation slide left,   class:^(obol_slide_left)$
+        windowrule = animation slide right,  class:^(obol_slide_right)$
+
+        windowrule = noanim,   title:GlslViewer
+        windowrule = noblur,   title:GlslViewer
+        windowrule = nodim,    title:GlslViewer
+        windowrule = float,    title:GlslViewer
+        windowrule = pin,      title:GlslViewer
+
+        windowrule = float,    class:deskpet
+        windowrule = pin,      class:deskpet
+        windowrule = noanim,   class:deskpet
+        windowrule = nodim,    class:deskpet
+        windowrule = noblur,   class:deskpet
+        windowrule = nofocus,  class:deskpet
+        windowrule = noshadow, class:deskpet
+        windowrule = noborder, class:deskpet
+
+        windowrule = size ${toString pipW} ${toString ((pipW * 9) / 16)}, title:^(Picture-in-Picture)$
+        windowrule = move ${toString (sW - 20 - pipW)} 20,                title:^(Picture-in-Picture)$
+        windowrule = workspace 1 silent,                                  title:^(Picture-in-Picture)$
+        windowrule = float,                                               title:^(Picture-in-Picture)$
+        windowrule = pin,                                                 title:^(Picture-in-Picture)$
+        windowrule = opacity 1.0 override 1.0 override,                   title:^(Picture-in-Picture)$
+        windowrule = noblur,                                              title:^(Picture-in-Picture)$
+        windowrule = nodim,                                               title:^(Picture-in-Picture)$
+        windowrule = noshadow,                                            title:^(Picture-in-Picture)$
+        windowrule = noborder,                                            title:^(Picture-in-Picture)$
+
+        windowrule = float,                             class:^(mpv)$
+        windowrule = pin,                               class:^(mpv)$
+        windowrule = size 320 180,                      class:^(mpv)$
+        windowrule = move 20 20,                        class:^(mpv)$
+        windowrule = opacity 1.0 override 1.0 override, class:^(mpv)$
+        windowrule = noblur,                            class:^(mpv)$
+        windowrule = nodim,                             class:^(mpv)$
 
         bind = super, r, submap, resize
 
@@ -254,18 +320,8 @@ in {
         bind = , escape, submap, reset
 
         submap = reset
-
-        windowrule = float, class:hyprpet
-        windowrule = pin, class:hyprpet
-        windowrule = noanim,class:hyprpet
-        windowrule = nodim,class:hyprpet
-        windowrule = noblur, class:hyprpet
-        windowrule = nofocus, class:hyprpet
-        windowrule = noshadow, class:hyprpet
-        windowrule = noborder, class:hyprpet
-
       ''
-      # windowrule=opacity 0.0 0.0,class:hyprpet
+      # windowrule=opacity 0.0 0.0,class:deskpet
       + (
         if footalttab
         then ''
@@ -286,8 +342,6 @@ in {
           windowrule = stayfocused, class:alttab
           windowrule = workspace special:alttab, class:alttab
           windowrule = bordersize 0, class:alttab
-
-
         ''
         else ""
       );

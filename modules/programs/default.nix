@@ -37,6 +37,8 @@
     };
 
     packages = with pkgs; [
+      zoom-us
+
       gcc
       progress
 
@@ -48,10 +50,10 @@
       nh
       statix
 
-      spotify-player
+      spotifyd
       # spotifyd
       # spotify-qt
-      spot
+      ncspot
       # ncspot
       # psst
 

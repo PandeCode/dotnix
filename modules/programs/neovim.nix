@@ -34,7 +34,8 @@
             pylsp-rope
           ]))
 
-        # (import ../../derivations/mpls.nix {inherit pkgs lib;})
+        mpls
+
         # (import ../../derivations/codelldb.nix {inherit pkgs;})
         # (import ../../derivations/cpptools.nix {inherit pkgs;})
 

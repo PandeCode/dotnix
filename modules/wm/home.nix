@@ -96,7 +96,6 @@ in {
 
           (_bind "super shift" "g" "find ~/Pictures/gifs/ -type f | shuf -n 1 | xargs -I{} pqiv -c -c -i '{}'")
 
-          (nomod "XF86AudioMute" "_tool_ctrl vol toggle")
           (nomod "XF86AudioPlay" "_tool_ctrl media toggle")
           (nomod "XF86AudioNext" "_tool_ctrl media next")
           (nomod "XF86AudioPrev" "_tool_ctrl media prev")
@@ -104,7 +103,7 @@ in {
           (mod "t" "translate-clip.sh")
           (_bind "super shift" "t" "translate-img.sh")
           (_bind "super ctrl" "f" "_tool_riot")
-          (mod "s" "_tool_search")
+          (mod "p" "_tool_search")
 
           (_bind "super shift" "c" "rofi-calc.sh")
 
@@ -112,6 +111,7 @@ in {
           (_bind "alt shift" "space" "rofi-run-pr.sh")
         ];
         bindexec_el = [
+          (nomod "XF86AudioMute" "_tool_ctrl vol mute")
           (nomod "XF86AudioRaiseVolume" "_tool_ctrl vol up")
           (nomod "XF86AudioLowerVolume" "_tool_ctrl vol down")
           (nomod "XF86AudioMicMute" "_tool_ctrl mic down")
@@ -153,25 +153,85 @@ in {
 
     home.packages = [
       pkgs.spatial-shell
-      inputs.bzmenu.packages.${pkgs.system}.default
-      inputs.iwmenu.packages.${pkgs.system}.default
 
-      (pkgs.writeShellScriptBin "webcamize" (builtins.readFile (builtins.fetchurl {
-        url = "https://github.com/cowtoolz/webcamize/raw/refs/heads/master/webcamize";
-        sha256 = "13cqqzj5naw8fw1kash0v5lpxplx5hy887k9cypdz0r6g4inj66r";
-      })))
+      # (pkgs.writeShellScriptBin "webcamize" (builtins.readFile (builtins.fetchurl {
+      #   url = "https://github.com/cowtoolz/webcamize/raw/refs/heads/master/webcamize";
+      #   sha256 = "13cqqzj5naw8fw1kash0v5lpxplx5hy887k9cypdz0r6g4inj66r";
+      # })))
     ];
 
-    xdg.configFile = {
-      "spatial/config-waybar".text = ''
-        status_bar_name "waybar"
-      '';
-      "spatial/config-sway".text = ''
-        status_bar_name "i3blocks"
-      '';
-      "spatial/config-i3".text = ''
-        status_bar_name "i3blocks"
-      '';
+    xdg = {
+      desktopEntries = {
+        systemctl-tui = {
+          name = "Systemctl TUI";
+          comment = "Launch systemctl-tui in Ghostty";
+          exec = "ghostty --title=\"Systemctl TUI\" -e systemctl-tui";
+          icon = "utilities-terminal";
+          terminal = false;
+          type = "Application";
+          categories = ["System" "Utility"];
+        };
+
+        systemctl-tui-sudo = {
+          name = "Systemctl TUI (sudo)";
+          comment = "Launch systemctl-tui with sudo in Ghostty";
+          exec = "ghostty --title=\"Systemctl TUI (sudo)\" -e bash -c \"sudo systemctl-tui\"";
+          icon = "utilities-terminal";
+          terminal = false;
+          type = "Application";
+          categories = ["System" "Utility"];
+        };
+
+        stacer = {
+          name = "Stacer";
+          comment = "System optimizer and monitor";
+          exec = "stacer";
+          icon = "stacer"; # Or fallback: "utilities-system-monitor"
+          terminal = false;
+          type = "Application";
+          categories = ["System" "Utility"];
+        };
+
+        stacer-root = {
+          name = "Stacer (Root)";
+          comment = "Launch Stacer with root privileges";
+          exec = "pkexec stacer";
+          icon = "stacer";
+          terminal = false;
+          type = "Application";
+          categories = ["System" "Utility"];
+        };
+      };
+
+      configFile = {
+        "spatial/config-waybar".text = ''
+          status_bar_name "waybar"
+        '';
+        "spatial/config-sway".text = ''
+          status_bar_name "i3blocks"
+        '';
+        "spatial/config-i3".text = ''
+          status_bar_name "i3blocks"
+        '';
+      };
+    };
+    services.fusuma = {
+      enable = true;
+      settings = {
+        threshold = {
+          swipe = 0.1;
+        };
+        interval = {
+          swipe = 0.7;
+        };
+        swipe = {
+          "3" = {
+            left = {
+              command = "notify-send fusma left 3";
+            };
+          };
+        };
+      };
     };
   };
 }

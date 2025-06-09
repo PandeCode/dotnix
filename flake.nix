@@ -13,13 +13,13 @@ rec {
       # "https://aseipp-nix-cache.global.ssl.fastly.net"
       # "https://app.cachix.org/cache/nix-community"
 
-      # "https://hyprland.cachix.org"
+      "https://hyprland.cachix.org"
+      "https://nix-community.cachix.org"
       # "https://niri.cachix.org"
     ];
     extra-trusted-public-keys = [
-      # "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-
-      # "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
     ];
   };
 
@@ -57,32 +57,19 @@ rec {
       url = "github:e-tho/iwmenu";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    bzmenu = {
-      url = "github:e-tho/bzmenu";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
 
     # niri.url = "github:sodiboo/niri-flake";
 
-    # astal = {
-    #   url = "github:aylur/astal";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-    # ags = {
-    #   url = "github:aylur/ags";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
+    hyprland.url = "github:hyprwm/Hyprland";
 
-    # hyprland.url = "github:hyprwm/Hyprland";
-    hyprswitch.url = "github:h3rmt/hyprswitch/release";
-    # hyprland-plugins = {
-    #   url = "github:hyprwm/hyprland-plugins";
-    #   inputs.hyprland.follows = "hyprland";
-    # };
-    # hypr-dynamic-cursors = {
-    #   url = "github:VirtCode/hypr-dynamic-cursors";
-    #   inputs.hyprland.follows = "hyprland";
-    # };
+    hyprland-plugins = {
+      url = "github:hyprwm/hyprland-plugins";
+      inputs.hyprland.follows = "hyprland";
+    };
+    hypr-dynamic-cursors = {
+      url = "github:VirtCode/hypr-dynamic-cursors";
+      inputs.hyprland.follows = "hyprland";
+    };
 
     # xmonad-contexts = {
     #   url = "github:Procrat/xmonad-contexts";
@@ -160,7 +147,7 @@ rec {
       wms = {
         hyprland.enable = true;
         sway.enable = true;
-        i3.enable = true;
+        i3.enable = false;
         river.enable = false;
         niri.enable = false; # issue https://github.com/sodiboo/niri-flake/issues/1018
         # dwm.enable = true;
@@ -234,7 +221,7 @@ rec {
 
           modules = [
             overlays
-            inputs.stylix.homeManagerModules.stylix
+            inputs.stylix.homeModules.stylix
             {
               nix.package = nixpkgs.legacyPackages.${system}.nix;
               home = rec {

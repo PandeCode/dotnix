@@ -15,7 +15,7 @@ CONFIG_FILE="$HOME/.spotify.sh-config"
 SPOTIFY_CREDS_FILE="$HOME/.config/spotify_client"
 CACHE_DIR="$HOME/.cache/spotify-cli"
 CACHE_ENABLED=true
-CACHE_TTL=86400  # Cache validity in seconds (24 hours)
+CACHE_TTL=864000  # Cache validity in seconds (240 hours)
 
 # Default options
 FORMAT="json" # Format can be "json" or "text"

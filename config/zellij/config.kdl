@@ -3,14 +3,6 @@ pane_frames false
 scrollback_editor "nvim"
 copy_command "cs"
 
-load_plugins {
-    "file:~/.config/zellij/plugins/zjframes.wasm" {
-        hide_frame_for_single_pane       "true"
-        hide_frame_except_for_search     "true"
-        hide_frame_except_for_scroll     "true"
-    }
-}
-
 keybinds clear-defaults=true {
     tmux {
         bind "c" { NewTab;SwitchToMode "Normal"; }

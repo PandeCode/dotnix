@@ -19,6 +19,7 @@
     };
     sharedShellAliases =
       {
+        neo = "neovide (fzf) 2>&1  > /dev/null & disown";
         ns = "nix-shell shell.nix --command 'fish'";
         nsp = "nix-shell --command 'fish' -p";
 
@@ -33,7 +34,7 @@
         nh-ol = "nh os switch   ~/dotnix -v -- --show-trace -vL";
 
         nfu = "nix flake update";
-           update = "sudo : ; cd ~/dotnix && nix flake update && nh-ol && nh-hl";
+        update = "sudo : ; cd ~/dotnix && nix flake update && nh-ol && nh-hl";
 
         gamescopehdr = "DXVK_HDR=1 gamescope -f --hdr-enabled -- ";
         steamhdr = "ENABLE_HDR_WSI=1 DXVK_HDR=1 DISPLAY= ";
@@ -159,7 +160,7 @@
       configFile.source = ../../config/nushell/config.nu;
     };
 
-    thefuck = enable_shells;
+    pay-respects = enable_shells;
     atuin = enable_shells;
     carapace = enable_shells;
     zoxide = enable_shells;

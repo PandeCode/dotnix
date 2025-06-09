@@ -15,12 +15,12 @@
       withUWSM = true;
       xwayland.enable = true;
       # package = pkgs.hyprland;
-      # package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
+      package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
     };
   };
   environment = {
     systemPackages = [
-      # inputs.hyprswitch.packages.${pkgs.stdenv.hostPlatform.system}.default
+      pkgs.hyprswitch
     ];
   };
 }
