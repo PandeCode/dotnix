@@ -47,7 +47,7 @@ in {
       inputs.hypr-dynamic-cursors.packages.${system}.hypr-dynamic-cursors
 
       hyprexpo
-      hyprtrails
+      # hyprtrails
       hyprwinwrap
       hyprscrolling
     ];
@@ -248,6 +248,15 @@ in {
         windowrule = float,    title:GlslViewer
         windowrule = pin,      title:GlslViewer
 
+        windowrule = float,    class:raypets
+        windowrule = pin,      class:raypets
+        windowrule = noanim,   class:raypets
+        windowrule = nodim,    class:raypets
+        windowrule = noblur,   class:raypets
+        windowrule = nofocus,  class:raypets
+        windowrule = noshadow, class:raypets
+        windowrule = noborder, class:raypets
+
         windowrule = float,    class:deskpet
         windowrule = pin,      class:deskpet
         windowrule = noanim,   class:deskpet
@@ -258,7 +267,7 @@ in {
         windowrule = noborder, class:deskpet
 
         windowrule = size ${toString pipW} ${toString ((pipW * 9) / 16)}, title:^(Picture-in-Picture)$
-        windowrule = move ${toString (sW - 20 - pipW)} 20,                title:^(Picture-in-Picture)$
+        windowrule = move ${toString (sW - 20 - pipW)} 50,                title:^(Picture-in-Picture)$
         windowrule = workspace 1 silent,                                  title:^(Picture-in-Picture)$
         windowrule = float,                                               title:^(Picture-in-Picture)$
         windowrule = pin,                                                 title:^(Picture-in-Picture)$

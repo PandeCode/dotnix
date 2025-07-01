@@ -8,7 +8,6 @@
     ./shells.nix
     ./zellij.nix
 
-    ./neovim.nix
     ./spicetify.nix
     ./wezterm.nix
 
@@ -39,44 +38,16 @@
     packages = with pkgs; [
       zoom-us
 
-      gcc
-      progress
-
       pscircle
       xdg-utils
 
-      ueberzug
-
-      nh
       statix
 
       spotifyd
-      # spotifyd
-      # spotify-qt
-      ncspot
-      # ncspot
-      # psst
 
-      # silicon # Create beautiful image of your source code https://github.com/Aloxaf/silicon
-      # glow # Render markdown on the CLI, with pizzazz! https://github.com/charmbracelet/glow
-      # charm-freeze # Tool to generate images of code and terminal output https://github.com/charmbracelet/freeze
-      # goshot
-
-      shc # Shell Script Compiler https://neurobin.org/projects/softwares/unix/shc/
-
-      imagemagick
-
-      glslviewer
+      silicon
 
       ncdu
-      # fdupes
-      # nnn
-      # yazi
-
-      tre-command
-      ast-grep
-      ripgrep
-      fd
 
       dejsonlz4
 
@@ -84,58 +55,10 @@
 
       gobang
       sqlite
-
       nix-search-cli
-
-      # git
-      gh
-      delta
-      # commitizen
-      pre-commit
-      lazygit
-      gitoxide
-      xxd
-
-      # Better Tools
-      axel
-      tldr
-      eza
-      difftastic
-      just
-      duf
-      dust
-      hurl
-      xh
-      hyperfine
-
-      socat
-
-      # Eye Candy
-      fastfetch
-      imgcat
-      hub
-      bonsai
-      cmatrix
-
-      # Calculators
-      numbat
-      # kalker
-      # sc-im
-
-      openbabel
-
-      # languagetool
-
-      # (import ../../../derivations/beatprints.nix {
-      # inherit lib pkgs;
-      # pkgs = pkgs-stable;
-      # })
 
       ghostty
       pscircle
-      # sageWithDoc
-
-      (import ../../derivations/httptap.nix {inherit lib pkgs;})
 
       (tesseract.override {
         enableLanguages = ["eng"];

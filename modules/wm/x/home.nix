@@ -12,7 +12,6 @@ in {
     ../home.nix
     ../../programs/sxhkd.nix
     ../../programs/greenclip.nix
-    ../../programs/picom.nix
   ];
 
   options.x = {
@@ -29,7 +28,7 @@ in {
             "lastbg.sh"
             "alttab"
             "dunst"
-            "picom -b --backend glx"
+            "picom -b"
           ];
         bindexec =
           config.wm.shared.bindexec
@@ -49,10 +48,6 @@ in {
     greenclip = {
       enable = true;
     };
-    picom = {
-      enable = true;
-    };
-
     home = {
       # CapsLock to Control, and Shift+CapsLock to CapsLock:
       file.".Xmodmap".text = ''
@@ -62,11 +57,15 @@ in {
         keycode 66 = Control_L Caps_Lock NoSymbol NoSymbol
       '';
       packages = with pkgs; [
+        slurp
+        grim
+        xclip
         xorg.xmodmap
         picom-pijulius
         xflux
         alttab
         feh
+        scrot
         slop
         paperview
         xtitle

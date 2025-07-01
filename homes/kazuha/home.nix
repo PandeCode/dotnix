@@ -8,6 +8,7 @@
   in
     [
       ../../modules/programs/default.nix
+      ../../modules/homes/links.nix
       ../../modules/homes/stylix.nix
       ../../modules/wm/default.home.nix
     ]

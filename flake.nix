@@ -2,35 +2,27 @@ rec {
   description = "nix config";
 
   nixConfig = {
-    experimental-features = ["nix-command" "flakes" "pipe-operators"];
     trusted-users = ["root" "shawn"];
-
+    experimental-features = ["nix-command" "flakes" "pipe-operators"];
     accept-flake-config = true;
     show-trace = true;
     auto-optimise-store = true;
 
     extra-substituters = [
-      # "https://aseipp-nix-cache.global.ssl.fastly.net"
-      # "https://app.cachix.org/cache/nix-community"
-
-      "https://hyprland.cachix.org"
       "https://nix-community.cachix.org"
-      # "https://niri.cachix.org"
+      "https://hyprland.cachix.org"
+      "https://charon.cachix.org"
     ];
     extra-trusted-public-keys = [
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+      "charon.cachix.org-1:epdetEs1ll8oi8DT8OG2jEA4whj3FDbqgPFvapEPbY8="
     ];
   };
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.11";
-
-    neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
-
-    # nix-software-center.url = "github:snowfallorg/nix-software-center";
-    # nixos-conf-editor.url = "github:snowfallorg/nixos-conf-editor";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.05";
 
     # nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
 
@@ -41,20 +33,6 @@ rec {
 
     home-manager = {
       url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    zjstatus = {
-      url = "github:dj95/zjstatus";
-    };
-
-    pre-commit-hooks.url = "github:cachix/git-hooks.nix";
-
-    stylix.url = "github:danth/stylix";
-
-    zen-browser.url = "github:0xc000022070/zen-browser-flake";
-    iwmenu = {
-      url = "github:e-tho/iwmenu";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -76,20 +54,34 @@ rec {
     #   flake = false;
     # };
 
+    zen-browser.url = "github:0xc000022070/zen-browser-flake";
+    iwmenu = {
+      url = "github:e-tho/iwmenu";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    zjstatus = {
+      url = "github:dj95/zjstatus";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     spicetify-nix = {
       url = "github:Gerg-L/spicetify-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # charon-shell = {
-    #   url = "github:PandeCode/charon-shell";
+    hermes = {
+      url = "github:pandecode/hermes";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # obol = {
+    #   url = "github:PandeCode/obol";
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
 
-    # charon-nvim = {
-    #   url = "github:PandeCode/charon-nvim";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
+    pre-commit-hooks.url = "github:cachix/git-hooks.nix";
+    stylix.url = "github:danth/stylix";
   };
 
   outputs = {
@@ -147,7 +139,7 @@ rec {
       wms = {
         hyprland.enable = true;
         sway.enable = true;
-        i3.enable = false;
+        i3.enable = true;
         river.enable = false;
         niri.enable = false; # issue https://github.com/sodiboo/niri-flake/issues/1018
         # dwm.enable = true;
@@ -271,12 +263,13 @@ rec {
         buildInputs = with nixpkgs.legacyPackages.${system}; [
           nh
           statix
+          deadnix
           nixd
           nix-init
           nix-index
           nix-fast-build
 
-          ghc
+          # ghc
         ];
       };
 

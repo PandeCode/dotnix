@@ -152,7 +152,8 @@ in {
     };
 
     home.packages = [
-      pkgs.spatial-shell
+      pkgs.appimage-run
+      # pkgs.spatial-shell
 
       # (pkgs.writeShellScriptBin "webcamize" (builtins.readFile (builtins.fetchurl {
       #   url = "https://github.com/cowtoolz/webcamize/raw/refs/heads/master/webcamize";

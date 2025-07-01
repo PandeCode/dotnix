@@ -93,6 +93,9 @@ in {
     enable = true;
     package = pkgs.i3-gaps;
 
+    extraConfig = ''
+      for_window [class="feh"] floating enable, sticky enable, border pixel 0, move absolute position 0 px 0 px
+    '';
     config = {
       bars = [
         {
@@ -107,36 +110,36 @@ in {
             size = 8.0;
           };
           trayOutput = "primary";
-          colors = {
-            background = "#000000";
-            statusline = "#ffffff";
-            separator = "#666666";
-            focusedWorkspace = {
-              border = "#4c7899";
-              background = "#285577";
-              text = "#ffffff";
-            };
-            activeWorkspace = {
-              border = "#333333";
-              background = "#5f676a";
-              text = "#ffffff";
-            };
-            inactiveWorkspace = {
-              border = "#333333";
-              background = "#222222";
-              text = "#888888";
-            };
-            urgentWorkspace = {
-              border = "#2f343a";
-              background = "#900000";
-              text = "#ffffff";
-            };
-            bindingMode = {
-              border = "#2f343a";
-              background = "#900000";
-              text = "#ffffff";
-            };
-          };
+          # colors = {
+          #   background = "#000000";
+          #   statusline = "#ffffff";
+          #   separator = "#666666";
+          #   focusedWorkspace = {
+          #     border = "#4c7899";
+          #     background = "#285577";
+          #     text = "#ffffff";
+          #   };
+          #   activeWorkspace = {
+          #     border = "#333333";
+          #     background = "#5f676a";
+          #     text = "#ffffff";
+          #   };
+          #   inactiveWorkspace = {
+          #     border = "#333333";
+          #     background = "#222222";
+          #     text = "#888888";
+          #   };
+          #   urgentWorkspace = {
+          #     border = "#2f343a";
+          #     background = "#900000";
+          #     text = "#ffffff";
+          #   };
+          #   bindingMode = {
+          #     border = "#2f343a";
+          #     background = "#900000";
+          #     text = "#ffffff";
+          #   };
+          # };
         }
       ];
       window.titlebar = false;
@@ -148,10 +151,14 @@ in {
           "Mod4+f" = "fullscreen toggle";
           "Mod4+Shift+f" = "floating toggle";
 
-          "Mod+h" = "exec $spatialmsg 'focus left'";
-          "Mod+l" = "exec $spatialmsg 'focus right'";
-          "Mod+k" = "exec $spatialmsg 'focus up'";
-          "Mod+j" = "exec $spatialmsg 'focus down'";
+          "Mod4+j" = "workspace next_on_output";
+          "Mod4+k" = "workspace prev_on_output";
+
+          "Mod4+l" = "focus left";
+          "Mod4+h" = "focus right";
+
+          "Mod4+Shift+j" = "move container to workspace next_on_output";
+          "Mod4+Shift+k" = "move container to workspace prev_on_output";
         }
         // flattenListAttrsToAttr
         (

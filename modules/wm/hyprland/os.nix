@@ -20,7 +20,7 @@
   };
   environment = {
     systemPackages = [
-      pkgs.hyprswitch
+      pkgs.hyprshell
     ];
   };
 }

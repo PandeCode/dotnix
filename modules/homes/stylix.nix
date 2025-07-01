@@ -29,7 +29,7 @@
       ];
     };
 
-  xdg.configFile."charon-shell/style.scss".text = with config.lib.stylix.colors;
+  xdg.configFile."stylix/style.scss".text = with config.lib.stylix.colors;
   /*
   scss
   */
@@ -40,7 +40,7 @@
       $base0C: #${base0C}; $base0D: #${base0D}; $base0E: #${base0E}; $base0F: #${base0F};
     '';
 
-  xdg.configFile."stylix/nvim.lua".text = with config.lib.stylix.colors;
+  xdg.configFile."stylix/style.lua".text = with config.lib.stylix.colors;
   /*
   lua
   */

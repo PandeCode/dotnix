@@ -5,7 +5,6 @@
 }: {
   imports = [
     ./nix.nix
-    ./neovim.nix
     ./networking.nix
     ./services.nix
     ./packages.nix
