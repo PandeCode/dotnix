@@ -262,6 +262,7 @@ rec {
       default = nixpkgs.legacyPackages.${system}.mkShell {
         buildInputs = with nixpkgs.legacyPackages.${system}; [
           nh
+          alejandra
           statix
           deadnix
           nixd

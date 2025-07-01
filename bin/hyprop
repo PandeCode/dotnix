@@ -6,12 +6,12 @@
 # Dependencies
 cmd_failures=''
 for cmd in hyprctl jq slurp; do
-  command -v "${cmd}" >/dev/null 2>&1 || cmd_failures="${cmd_failures},${cmd}"
+	command -v "${cmd}" >/dev/null 2>&1 || cmd_failures="${cmd_failures},${cmd}"
 done
 
-if (( "${#cmd_failures}" > 0 )); then
-  printf -- '%s\n' "The following dependencies are missing: ${cmd_failures/,/}" >&2
-  exit 1
+if (("${#cmd_failures}" > 0)); then
+	printf -- '%s\n' "The following dependencies are missing: ${cmd_failures/,/}" >&2
+	exit 1
 fi
 
 # Get all clients and selection (point) region via slurp

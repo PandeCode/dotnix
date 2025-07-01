@@ -10,21 +10,21 @@ default=$chars1
 
 # Select character set based on argument
 case "$1" in
-    "set1")
-        chars="$chars1"
-        ;;
-    "set2")
-        chars="$chars2"
-        ;;
-    "set3")
-        chars="$chars3"
-        ;;
-    "set4")
-        chars="$chars4"
-        ;;
-    *)
-        chars="$default"
-        ;;
+"set1")
+	chars="$chars1"
+	;;
+"set2")
+	chars="$chars2"
+	;;
+"set3")
+	chars="$chars3"
+	;;
+"set4")
+	chars="$chars4"
+	;;
+*)
+	chars="$default"
+	;;
 esac
 
 # Convert characters to sed expression

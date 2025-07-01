@@ -4,8 +4,8 @@
 set -euo pipefail
 
 if [[ $# -lt 2 ]]; then
-    echo "Usage: $0 input.gif output.png"
-    exit 1
+	echo "Usage: $0 input.gif output.png"
+	exit 1
 fi
 
 INPUT_GIF="$1"

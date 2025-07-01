@@ -62,14 +62,13 @@
     serviceConfig.ExecStart = "${pkgs.bluez}/bin/mpris-proxy";
   };
 
-programs.nautilus-open-any-terminal = {
-  enable = true;
-  terminal = "ghostty";
-};
+  programs.nautilus-open-any-terminal = {
+    enable = true;
+    terminal = "ghostty";
+  };
 
   environment = {
     systemPackages = with pkgs; [
-
       dunst
       libnotify
 

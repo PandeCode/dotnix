@@ -5,10 +5,8 @@
   unstableGitUpdater,
 }:
 stdenvNoCC.mkDerivation {
-
   pname = "plymouth-theme-cat";
   version = "unstable-2025-01-09";
-
 
   src = fetchFromGitHub {
     owner = "krishnan793";
@@ -16,7 +14,6 @@ stdenvNoCC.mkDerivation {
     rev = "9f9bbc0e6cb8677684d198eb1139d90aceff82e0";
     hash = "sha256-yNryZkjSDFYGTExCz6Dkoust749QK65JYoCIO2oN+Y4=";
   };
-
 
   postPatch = ''
     # Remove not needed files
@@ -37,8 +34,7 @@ stdenvNoCC.mkDerivation {
     description = "This is a Plymouth theme created that can be used in Linux Distributions";
     homepage = "https://github.com/krishnan793/PlymouthTheme-Cat";
     license = lib.licenses.gpl3Only;
-    maintainers = with lib.maintainers; [ ];
+    maintainers = with lib.maintainers; [];
     platforms = lib.platforms.all;
   };
-
 }

@@ -10,7 +10,7 @@
 
   nvim = {
     enable = true;
-    packageNames  = ["nvim" "nvim-rs" "nvim-cpp" "nvim-go" "nvim-web"];
+    packageNames = ["nvim" "nvim-rs" "nvim-cpp" "nvim-go" "nvim-web"];
   };
 
   programs = {
@@ -33,8 +33,6 @@
 
     mtr.enable = true;
   };
-
-    
 
   environment.systemPackages = with pkgs; [
     home-manager
@@ -127,7 +125,7 @@
     just
     duf
     dust
-   # hurl
+    # hurl
     xh
     hyperfine
     socat

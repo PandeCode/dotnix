@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 if [ "$#" -ne 3 ]; then
-  echo "Usage: some_output | replace_btw \"<start_pattern>\" \"<end_pattern>\" <file>"
-  exit 1
+	echo "Usage: some_output | replace_btw \"<start_pattern>\" \"<end_pattern>\" <file>"
+	exit 1
 fi
 
 start_pattern=$1

@@ -6,8 +6,8 @@
 set -e
 
 if [ -z "$1" ]; then
-  echo "Usage: $0 <github-subdir-url>"
-  exit 1
+	echo "Usage: $0 <github-subdir-url>"
+	exit 1
 fi
 
 URL="$1"

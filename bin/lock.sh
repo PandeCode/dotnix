@@ -3,12 +3,12 @@ LC_ALL=C
 
 # Ensure hyprlock is installed
 if ! command -v hyprlock &>/dev/null; then
-    echo "hyprlock is not installed."
-    exit 1
+	echo "hyprlock is not installed."
+	exit 1
 fi
 
 if pgrep -x "hyprlock" &>/dev/null; then
-    exit
+	exit
 fi
 
 # Get a random image from the walls directory
