@@ -208,35 +208,35 @@ youtube() {
 
 		res=$(
 			python3 <<EOF
-from youtube_transcript_api import YouTubeTranscriptApi
-from youtube_transcript_api.formatters import TextFormatter
+			from youtube_transcript_api import YouTubeTranscriptApi
+			from youtube_transcript_api.formatters import TextFormatter
 
-def convert_to_timestamp_format(seconds):
-    """Convert seconds to [MM:SS.MS] format"""
-    minutes = seconds // 60
-    seconds_remainder = seconds % 60
-    # Format with exactly 2 decimal places for milliseconds
-    return f"[{minutes:02d}:{seconds_remainder:05.2f}]"
+			def convert_to_timestamp_format(seconds):
+			"""Convert seconds to [MM:SS.MS] format"""
+			minutes = seconds // 60
+			seconds_remainder = seconds % 60
+			# Format with exactly 2 decimal places for milliseconds
+			return f"[{minutes:02d}:{seconds_remainder:05.2f}]"
 
-def convert_json_to_timestamp_format(json_str):
-    formatted_lines = []
-    for entry in json_str:
-        timestamp = convert_to_timestamp_format(int(entry['start']))
-        formatted_lines.append(f"{timestamp} {entry['text']}")
-    return '\n'.join(formatted_lines)
+			def convert_json_to_timestamp_format(json_str):
+			formatted_lines = []
+			for entry in json_str:
+				timestamp = convert_to_timestamp_format(int(entry['start']))
+				formatted_lines.append(f"{timestamp} {entry['text']}")
+				return '\n'.join(formatted_lines)
 
-t = YouTubeTranscriptApi.get_transcript('$id')
+				t = YouTubeTranscriptApi.get_transcript('$id')
 
-print(convert_json_to_timestamp_format(t), end='\n')
+				print(convert_json_to_timestamp_format(t), end='\n')
 EOF
-		)
-		if [ $? -eq 0 ]; then
-			echo "$res" >"$file_path"
-		fi
+)
+if [ $? -eq 0 ]; then
+	echo "$res" >"$file_path"
+fi
 
-		# Release the lock
-		release_lock "$lock_name"
-		echo "$res"
+# Release the lock
+release_lock "$lock_name"
+echo "$res"
 	fi
 }
 
@@ -252,40 +252,47 @@ handle_player() {
 	fi
 
 	case "$player" in
-	spotify | .spotify-wrappe)
-		PLAYER=spotify
-		lrclib | current_line "$(get_position)"
-		;;
-	spotifyd | spotifyd*)
-		PLAYER=spotifyd
-		lrclib | current_line "$(get_position)"
-		;;
-	spotify_player | spotify_player*)
-		PLAYER=spotify_player
-		lrclib | current_line "$(get_position)"
-		;;
-	chromium)
-		PLAYER=chromium
-		album=$(playerctl -p $PLAYER metadata xesam:album | tr -d '\n')
-		if [ -z "$album" ]; then
-			playerctl -p $PLAYER metadata --format "{{title}} {{artist}}"
-		else
-			lrclib | current_line "$(get_position)"
-		fi
-		;;
-	firefox)
-		PLAYER=firefox
-		album=$(playerctl -p $PLAYER metadata xesam:album | tr -d '\n')
-		if [ -z "$album" ]; then
-			id=$(get_id)
-			if [ $? -eq 0 ]; then
-				subs=$(youtube "$id")
-				echo "$subs" | current_line "$(get_position)"
+		spotify | .spotify-wrappe)
+			PLAYER=spotify
+			if ! lrclib | current_line "$(get_position)"; then
+				playerctl metadata --format "{{title}} - {{artist}}"
 			fi
-		else
-			lrclib | current_line "$(get_position)"
-		fi
-		;;
+			;;
+		spotifyd | spotifyd*)
+			PLAYER=spotifyd
+			if ! lrclib | current_line "$(get_position)"; then
+				playerctl metadata --format "{{title}} - {{artist}}"
+			fi
+
+			;;
+		spotify_player | spotify_player*)
+			PLAYER=spotify_player
+			if ! lrclib | current_line "$(get_position)"; then
+				playerctl metadata --format "{{title}} - {{artist}}"
+			fi
+			;;
+		chromium)
+			PLAYER=chromium
+			album=$(playerctl -p $PLAYER metadata xesam:album | tr -d '\n')
+			if [ -z "$album" ]; then
+				playerctl -p $PLAYER metadata --format "{{title}} {{artist}}"
+			else
+				lrclib | current_line "$(get_position)"
+			fi
+			;;
+		firefox)
+			PLAYER=firefox
+			album=$(playerctl -p $PLAYER metadata xesam:album | tr -d '\n')
+			if [ -z "$album" ]; then
+				id=$(get_id)
+				if [ $? -eq 0 ]; then
+					subs=$(youtube "$id")
+					echo "$subs" | current_line "$(get_position)"
+				fi
+			else
+				lrclib | current_line "$(get_position)"
+			fi
+			;;
 	esac
 }
 
@@ -315,29 +322,3 @@ for player in "${!fallback[@]}"; do
 		fi
 	done
 done
-
-generate_music_sequence() {
-	local notes=("♩" "♪" "♫" "♬" "𝅝" "𝅗𝅥" "𝅘𝅥" "𝅘𝅥𝅮" "𝅘𝅥𝅯" "𝅘𝅥𝅰" "𝅘𝅥𝅱" "𝅘𝅥𝅲")
-	local rests=("𝄽" "𝄾" "𝄿" "𝅀" "𝅁" "𝅂" "𝅃" "𝅥")
-	local accidentals=("♭" "♯" "𝄫" "𝄪" "")
-	local output=""
-	local count=$((RANDOM % 5 + 8)) # 8–12 items
-
-	for ((i = 0; i < count; i++)); do
-		if ((RANDOM % 4 == 0)); then
-			# Insert a rest
-			rest=${rests[$RANDOM % ${#rests[@]}]}
-			output+="$rest  "
-		else
-			# Insert note with optional accidental
-			accidental=${accidentals[$RANDOM % ${#accidentals[@]}]}
-			note=${notes[$RANDOM % ${#notes[@]}]}
-			output+="$accidental$note  "
-		fi
-	done
-
-	# Optional: wrap in bar-like visual delimiters
-	echo "|  $output|"
-}
-
-generate_music_sequence

@@ -26,29 +26,19 @@ in {
 
   programs.i3status-rust = {
     enable = true;
-    bars.i3 = {
+    bars.default = {
+      theme = "solarized-dark";
+      icons = "awesome4";
       blocks =
         (map (i: i // {block = "custom";}) [
           {
             command = "lyrics-line.sh";
-            interval = 2;
+            interval = 3;
           }
-
           {
             command = "curl -Ss 'https://wttr.in?0&T&Q' | cut -c 16- | head -2 | xargs echo";
             interval = 3600;
           }
-
-          {
-            command = "hostname -i | awk '{ print \"IP:\" $1 }'";
-            interval = "once";
-          }
-
-          {
-            command = "wget -qO - https://icanhazip.com/";
-            interval = "once";
-          }
-
           {
             command = "xtitle -s";
             interval = 1;
@@ -144,11 +134,12 @@ in {
       ];
       window.titlebar = false;
       modifier = "Mod4";
-      terminal = config.shared.x.terminal;
+      inherit (config.shared.x) terminal;
       keybindings =
         {
           "Mod1+F4" = "kill";
           "Mod4+f" = "fullscreen toggle";
+          "Mod4+Ctrl+f" = "fullscreen toggle";
           "Mod4+Shift+f" = "floating toggle";
 
           "Mod4+j" = "workspace next_on_output";

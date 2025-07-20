@@ -7,7 +7,7 @@
   ...
 }: let
   system = pkgs.stdenv.hostPlatform.system;
-  footalttab = false;
+  footalttab = true;
 in {
   imports = [
     inputs.hyprland.homeManagerModules.default
@@ -39,21 +39,56 @@ in {
       end_time = 06:00:00   # optional if more than one shader has start_time
     '';
 
+  services.hypridle = {
+    enable = true;
+    settings = {
+      general = {
+        after_sleep_cmd = "hyprctl dispatch dpms on";
+        ignore_dbus_inhibit = false;
+        lock_cmd = "lock.sh";
+      };
+
+      listener = [
+        {
+          timeout = 900;
+          on-timeout = "lock.sh";
+        }
+        {
+          timeout = 1200;
+          on-timeout = "hyprctl dispatch dpms off";
+          on-resume = "hyprctl dispatch dpms on";
+        }
+        {
+          timeout = 1800; # 30min
+          on-timeout = "systemctl suspend";
+        }
+        {
+          timeout = 150; # 2.5min.
+          on-timeout = "brightnessctl -s set 10"; # set monitor backlight to minimum, avoid 0 on OLED monitor.
+          on-resume = "brightnessctl -r"; # monitor backlight restore.
+        }
+        {
+          timeout = 150; # 2.5min.
+          on-timeout = "brightnessctl -sd rgb:kbd_backlight set 0"; # turn off keyboard backlight.
+          on-resume = "brightnessctl -rd rgb:kbd_backlight"; # turn on keyboard backlight.
+        }
+      ];
+    };
+  };
+
   wayland.windowManager.hyprland = {
     enable = true;
     systemd.enable = false;
 
     plugins = with inputs.hyprland-plugins.packages.${system}; [
       inputs.hypr-dynamic-cursors.packages.${system}.hypr-dynamic-cursors
-
       hyprexpo
-      # hyprtrails
       hyprwinwrap
       hyprscrolling
     ];
 
     settings = {
-      env = "AQ_DRM_DEVICES,/dev/dri/card2:/dev/dri/card1";
+      env = ["AQ_DRM_DEVICES,/dev/dri/card2:/dev/dri/card1"];
 
       decoration = {
         dim_inactive = true;
@@ -123,7 +158,6 @@ in {
         config.wayland.shared.startup
         ++ [
           "waybar"
-          "hyprswitch init --show-title --size-factor 4.5 --workspaces-per-row 6 &"
         ];
 
       windowrule = let
@@ -172,9 +206,6 @@ in {
 
           ",            keyboard_brightness_up_shortcut,   exec,          _tool_ctrl key up"
           ",            keyboard_brightness_down_shortcut, exec,          _tool_ctrl key down"
-
-          "alt,        tab, exec, hyprswitch gui --mod-key alt_l --key tab --close mod-key-release --reverse-key=mod=shift && hyprswitch dispatch"
-          "alt shift,  tab, exec, hyprswitch gui --mod-key alt_l --key tab --close mod-key-release --reverse-key=mod=shift && hyprswitch dispatch -r"
 
           "super,       grave, hyprexpo:expo, toggle"
 
@@ -354,42 +385,5 @@ in {
         ''
         else ""
       );
-  };
-
-  services.hypridle = {
-    enable = true;
-    settings = {
-      general = {
-        after_sleep_cmd = "hyprctl dispatch dpms on";
-        ignore_dbus_inhibit = false;
-        lock_cmd = "lock.sh";
-      };
-
-      listener = [
-        {
-          timeout = 900;
-          on-timeout = "lock.sh";
-        }
-        {
-          timeout = 1200;
-          on-timeout = "hyprctl dispatch dpms off";
-          on-resume = "hyprctl dispatch dpms on";
-        }
-        {
-          timeout = 1800; # 30min
-          on-timeout = "systemctl suspend";
-        }
-        {
-          timeout = 150; # 2.5min.
-          on-timeout = "brightnessctl -s set 10"; # set monitor backlight to minimum, avoid 0 on OLED monitor.
-          on-resume = "brightnessctl -r"; # monitor backlight restore.
-        }
-        {
-          timeout = 150; # 2.5min.
-          on-timeout = "brightnessctl -sd rgb:kbd_backlight set 0"; # turn off keyboard backlight.
-          on-resume = "brightnessctl -rd rgb:kbd_backlight"; # turn on keyboard backlight.
-        }
-      ];
-    };
   };
 }

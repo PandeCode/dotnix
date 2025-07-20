@@ -21,7 +21,7 @@
           (lib.fold (a: b: a // b) {} (map (m: {"${m.mod} ${m.key}" = "spawn ${m.exec}";}) config.wayland.shared.bindexec))
           // {
             "Alt F4" = "close";
-            "Super Return" = "spawn ghostty";
+            "Super Return" = "spawn ${config.wayland.shared.terminal}";
             # Super+Shift+E to exit river
             "Super+Shift E" = "exit";
 

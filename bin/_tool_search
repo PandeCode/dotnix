@@ -61,7 +61,7 @@ case "$choice" in
 	;;
 "nixpkgs search")
 	query=$(rofi -dmenu -p "Enter nixpkgs query")
-	[ -z "$query" ] || open_browser "https://search.nixos.org/packages?channel=24.11&from=0&size=50&sort=relevance&type=packages&query=$(printf "%s" "$query" | jq -sRr @uri)"
+	[ -z "$query" ] || open_browser "https://search.nixos.org/packages?channel=unstable&from=0&size=50&sort=relevance&type=packages&query=$(printf "%s" "$query" | jq -sRr @uri)"
 	;;
 "pypi")
 	query=$(rofi -dmenu -p "Enter PyPI query")

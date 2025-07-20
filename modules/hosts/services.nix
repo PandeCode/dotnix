@@ -8,8 +8,8 @@
   cfg = config.services;
 in {
   imports = [
-    ./services/usbnotify.nix
-    ./services/sunshine.nix
+    # ./services/usbnotify.nix
+    # ./services/sunshine.nix
   ];
 
   options = {

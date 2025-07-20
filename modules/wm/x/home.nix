@@ -6,6 +6,8 @@
 }: let
   _bind = mod: key: exec: {inherit mod key exec;};
   mod = _bind "super";
+  mod_shift = _bind "super shift";
+  mod_ctrl = _bind "super ctrl";
   nomod = _bind "";
 in {
   imports = [
@@ -37,6 +39,10 @@ in {
 
             (mod "v" config.greenclip.commands.copy)
             (_bind "super shift" "v" config.greenclip.commands.copy)
+
+            (mod "d" "gromit-mpx --toggle && notify-send 'Gromit' 'Gromit-MPX toggled'")
+            (mod_shift "d" "gromit-mpx --clear && notify-send 'Gromit' 'Screen cleared'")
+            (mod_ctrl "d" "bash -c 'pgrep gromit-mpx && pkill gromit-mpx && notify-send 'Gromit' 'Gromit-MPX killed' || (gromit-mpx & notify-send 'Gromit' 'Gromit-MPX started')'")
           ];
 
         inherit (config.wm.shared) bindexec_el;
@@ -45,7 +51,7 @@ in {
   };
 
   config = {
-    greenclip = {
+    services.gromit-mpx = {
       enable = true;
     };
     home = {
@@ -66,6 +72,7 @@ in {
         alttab
         feh
         scrot
+        maim
         slop
         paperview
         xtitle

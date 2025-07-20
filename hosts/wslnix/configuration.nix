@@ -44,9 +44,4 @@
     overrideStrategy = "asDropin";
     unitConfig.ConditionPathExists = "!/run/user/%i";
   };
-
-  programs.nix-ld = {
-    enable = true;
-    libraries = with pkgs; [gtk3];
-  };
 }

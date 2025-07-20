@@ -1,4 +1,5 @@
 {sharedConfig, ...}: {
+  services.globalprotect.enable = true;
   networking = {
     hostName = sharedConfig.hostName;
 

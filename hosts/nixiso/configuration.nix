@@ -40,13 +40,6 @@
   };
   time.timeZone = "America/Costa_Rica";
 
-  programs = {
-    nix-ld = {
-      enable = true;
-      libraries = with pkgs; [gtk3];
-    };
-  };
-
   systemd = {
     services.sshd.wantedBy = pkgs.lib.mkForce ["multi-user.target"];
     targets = {

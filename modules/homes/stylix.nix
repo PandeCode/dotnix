@@ -53,6 +53,21 @@
       }
     '';
 
+  home = {
+    sessionVariables = {
+      XCURSOR_THEME = config.home.pointerCursor.name;
+      XCURSOR_SIZE = config.home.pointerCursor.size;
+    };
+    packages = [pkgs.bibata-cursors];
+    # pointerCursor = {
+    #   gtk.enable = true;
+    #   x11.enable = true;
+    #   size = 48;
+    #   package = pkgs.bibata-cursors;
+    #   name = "Bibata-Mordern-Ice";
+    # };
+  };
+
   stylix =
     (import ../stylix/common.nix all).stylix
     // {

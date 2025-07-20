@@ -1,7 +1,8 @@
 {
   pkgs,
   lib,
-  inputs,
+  config,
+  # inputs,
   sharedConfig,
   ...
 }: let
@@ -17,8 +18,7 @@ in {
   options.wm = {
     shared = lib.mkOption {
       default = rec {
-        terminal = "ghostty";
-        explorer = "nautilus";
+        inherit (sharedConfig) terminal explorer;
         workspace_rules = {
           float =
             # WARN: Copied from DWM, WINTYPE, not sure if they count as classes
@@ -67,6 +67,8 @@ in {
           terminal
           "blueman-applet"
           "nm-applet --indicator"
+          "gsettings set org.gnome.desktop.interface cursor-theme '${config.home.pointerCursor.name}'"
+          "gsettings set org.gnome.desktop.interface cursor-size ${toString config.home.pointerCursor.size}"
         ];
         bindings = {
           cycle_layout = ["super" "space"];
@@ -101,8 +103,8 @@ in {
           (nomod "XF86AudioPrev" "_tool_ctrl media prev")
 
           (mod "t" "translate-clip.sh")
-          (_bind "super shift" "t" "translate-img.sh")
-          (_bind "super ctrl" "f" "_tool_riot")
+          (_bind "super shift" "t" "touchpad.sh")
+          # (_bind "super ctrl" "f" "_tool_riot")
           (mod "p" "_tool_search")
 
           (_bind "super shift" "c" "rofi-calc.sh")
@@ -123,6 +125,10 @@ in {
   };
 
   config = {
+    home.sessionVariables = {
+        TERMINAL = config.wm.shared.terminal;
+        EXPLORER = config.wm.shared.explorer;
+    };
     programs = {
       kitty = {
         enable = true;
@@ -145,21 +151,23 @@ in {
           clipboard-paste-protection = lib.mkForce true;
           confirm-close-surface = lib.mkForce false;
 
-          custom-shader = "./ghostty-shaders/gears-and-belts.glsl";
+          # custom-shader = "./ghostty-shaders/gears-and-belts.glsl";
         };
       };
       alacritty.enable = true;
     };
 
-    home.packages = [
-      pkgs.appimage-run
-      # pkgs.spatial-shell
+    home = {
+      packages = [
+        pkgs.appimage-run
+        # pkgs.spatial-shell
 
-      # (pkgs.writeShellScriptBin "webcamize" (builtins.readFile (builtins.fetchurl {
-      #   url = "https://github.com/cowtoolz/webcamize/raw/refs/heads/master/webcamize";
-      #   sha256 = "13cqqzj5naw8fw1kash0v5lpxplx5hy887k9cypdz0r6g4inj66r";
-      # })))
-    ];
+        # (pkgs.writeShellScriptBin "webcamize" (builtins.readFile (builtins.fetchurl {
+        #   url = "https://github.com/cowtoolz/webcamize/raw/refs/heads/master/webcamize";
+        #   sha256 = "13cqqzj5naw8fw1kash0v5lpxplx5hy887k9cypdz0r6g4inj66r";
+        # })))
+      ];
+    };
 
     xdg = {
       desktopEntries = {

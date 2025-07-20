@@ -13,5 +13,6 @@ in {
     "sway"
     "river"
     "i3"
+    "dwm"
   ];
 }

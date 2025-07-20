@@ -2,8 +2,6 @@
   nix = {
     settings = nixConfig;
 
-    binaryCaches = ["https://aseipp-nix-cache.freetls.fastly.net"];
-
     gc = {
       automatic = true;
       dates = "weekly";

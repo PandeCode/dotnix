@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+set -e
+
+# === Usage ===
+# ./ghdl [-o out_dir] https://github.com/user/repo/tree/branch/path/to/folder
+# Default output dir: basename of folder path
+
+# === Parse options ===
+while [[ "$1" =~ ^- ]]; do
+  case "$1" in
+    -o|--output)
+      shift
+      CUSTOM_OUT="$1"
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      exit 1
+      ;;
+  esac
+done
+
+URL="$1"
+
+if [[ -z "$URL" ]]; then
+  echo "Usage: $0 [-o out_dir] https://github.com/<user>/<repo>/tree/<branch>/<folder>"
+  exit 1
+fi
+
+# === Parse GitHub URL ===
+regex="https://github.com/([^/]+)/([^/]+)/tree/([^/]+)/(.*)"
+if [[ "$URL" =~ $regex ]]; then
+  USER="${BASH_REMATCH[1]}"
+  REPO="${BASH_REMATCH[2]}"
+  BRANCH="${BASH_REMATCH[3]}"
+  FOLDER_PATH="${BASH_REMATCH[4]}"
+else
+  echo "Error: Invalid GitHub tree URL."
+  exit 1
+fi
+
+REPO_URL="https://github.com/${USER}/${REPO}.git"
+FOLDER_NAME="$(basename "$FOLDER_PATH")"
+OUT_DIR="${CUSTOM_OUT:-$FOLDER_NAME}"
+TMP_DIR="$(mktemp -d)"
+
+echo "[*] Repo: $USER/$REPO"
+echo "[*] Branch: $BRANCH"
+echo "[*] Folder: $FOLDER_PATH"
+echo "[*] Output: $OUT_DIR"
+
+# === Sparse clone ===
+git clone --filter=blob:none --no-checkout "$REPO_URL" "$TMP_DIR"
+cd "$TMP_DIR"
+git sparse-checkout init --cone
+git sparse-checkout set "$FOLDER_PATH"
+git checkout "$BRANCH"
+
+# === Copy out ===
+cp -r "$FOLDER_PATH" "$OLDPWD/$OUT_DIR"
+cd "$OLDPWD"
+rm -rf "$TMP_DIR"
+
+echo "[✓] Downloaded into '$OUT_DIR/'"

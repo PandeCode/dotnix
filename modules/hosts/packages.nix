@@ -5,20 +5,15 @@
 }: {
   imports = [
     inputs.hermes.nixosModules.default
+    ./nix-ld.nix
   ];
   nixpkgs.config.allowUnfree = true;
 
   nvim = {
     enable = true;
-    packageNames = ["nvim" "nvim-rs" "nvim-cpp" "nvim-go" "nvim-web"];
   };
 
   programs = {
-    nix-ld = {
-      enable = true;
-      libraries = with pkgs; [gtk3 fuse3];
-    };
-
     gnupg.agent = {
       enable = true;
       enableSSHSupport = true;
@@ -34,8 +29,19 @@
     mtr.enable = true;
   };
 
+  services.xserver.wacom.enable = true;
+  hardware = {
+    opentabletdriver = {
+      enable = true;
+      daemon.enable = true;
+    };
+  };
+
   environment.systemPackages = with pkgs; [
     home-manager
+
+    xf86_input_wacom
+    opentabletdriver
 
     gnumake
 
@@ -118,7 +124,7 @@
     xxd
 
     # Better Tools
-    axel
+    # axel
     tldr
     eza
     difftastic

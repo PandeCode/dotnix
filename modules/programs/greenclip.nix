@@ -3,11 +3,8 @@
   lib,
   config,
   ...
-}: let
-  cfg = config.greenclip;
-in {
+}: {
   options.greenclip = {
-    enable = lib.mkEnableOption "enable greenclip";
     commands = lib.mkOption {
       default = {
         copy = ''rofi -modi "clipboard:greenclip print" -show clipboard -run-command '{cmd}' '';
@@ -17,7 +14,7 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = {
     home = {
       packages = [pkgs.haskellPackages.greenclip pkgs.xdotool];
 

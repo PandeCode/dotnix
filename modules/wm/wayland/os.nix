@@ -34,6 +34,7 @@
 
     systemPackages = with pkgs; [
       # inputs.charon-shell.packages.${pkgs.system}.default
+      inputs.obolc.packages.${pkgs.system}.default
 
       brightnessctl
       cliphist

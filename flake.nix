@@ -8,15 +8,19 @@ rec {
     show-trace = true;
     auto-optimise-store = true;
 
+    # substituters = ["https://aseipp-nix-cache.freetls.fastly.net"];
+
     extra-substituters = [
       "https://nix-community.cachix.org"
       "https://hyprland.cachix.org"
       "https://charon.cachix.org"
+      # "https://cuda-maintainers.cachix.org"
     ];
     extra-trusted-public-keys = [
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
       "charon.cachix.org-1:epdetEs1ll8oi8DT8OG2jEA4whj3FDbqgPFvapEPbY8="
+      # "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
     ];
   };
 
@@ -49,6 +53,11 @@ rec {
       inputs.hyprland.follows = "hyprland";
     };
 
+    dwm-flexipatch = {
+      url = "github:pandecode/dwm-flexipatch";
+      flake = false;
+    };
+
     # xmonad-contexts = {
     #   url = "github:Procrat/xmonad-contexts";
     #   flake = false;
@@ -79,6 +88,11 @@ rec {
     #   url = "github:PandeCode/obol";
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
+
+    obolc = {
+      url = "github:PandeCode/obolc";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     pre-commit-hooks.url = "github:cachix/git-hooks.nix";
     stylix.url = "github:danth/stylix";
@@ -113,14 +127,14 @@ rec {
     # created to emulate osConfig with home_manager and to share config between nixos and home-manager
     sharedConfig_kazuha = {
       hostName = "kazuha";
-      userName = "shawn";
-
       hostname = "kazuha";
-      username = "shawn";
 
+      userName = "shawn";
+      username = "shawn";
       user = "shawn";
 
-      terminal = "ghostty";
+      terminal = "kitty";
+      explorer = "nautilus";
 
       gaming = {
         enable = true;
@@ -140,6 +154,7 @@ rec {
         hyprland.enable = true;
         sway.enable = true;
         i3.enable = true;
+        dwm.enable = true;
         river.enable = false;
         niri.enable = false; # issue https://github.com/sodiboo/niri-flake/issues/1018
         # dwm.enable = true;
