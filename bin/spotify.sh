@@ -6,7 +6,7 @@
 # ---------------- Configuration ----------------
 CLIENT_ID=""
 CLIENT_SECRET=""
-REDIRECT_URI="http://localhost:8888/callback"
+REDIRECT_URI="http://127.0.0.1:8888/callback"
 AUTH_CODE=""
 ACCESS_TOKEN=""
 REFRESH_TOKEN=""
