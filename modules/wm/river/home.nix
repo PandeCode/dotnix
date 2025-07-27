@@ -10,12 +10,7 @@
   wayland.windowManager.river = {
     enable = true;
     settings = {
-      spawn =
-        config.wayland.shared.startup
-        ++ [
-          "firefox"
-          "ghostty"
-        ];
+      spawn = config.wayland.shared.startup ;
       map = {
         normal =
           (lib.fold (a: b: a // b) {} (map (m: {"${m.mod} ${m.key}" = "spawn ${m.exec}";}) config.wayland.shared.bindexec))

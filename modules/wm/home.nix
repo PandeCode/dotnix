@@ -29,32 +29,37 @@ in {
               "SPLASH"
               "_KDE_NET_WM_WINDOW_TYPE_OVERRIDE"
               "_NET_WM_WINDOW_TYPE_NORMAL"
-              "title:Blender Preferences"
-              "title:Picture-in-picture"
+
               "vimb"
               "Pqiv"
+              "feh"
               "hyprbind"
+
+              "title:Blender Preferences"
+              "title:Picture-in-picture"
             ];
           pin = [
             "title:Picture-in-picture"
+
             "Pqiv"
             "hyprbind"
+            "feh"
           ];
-          noblur = ["firefox" "Google-chrome"];
+          noblur = ["firefox" "Google-chrome" "Pqiv" "feh"];
 
           noshadow = [
             "zen-twilight"
             "title:Picture-in-picture"
-            "floating:1"
           ];
 
           noborder = [
             "zen-twilight"
             "title:Picture-in-picture"
-            "floating:1"
+            "Pqiv"
+            "feh"
           ];
 
-          ws_1 = ["St" "st" terminal "alacritty" "kitty" "st-256color"];
+          ws_1 = ["St" "st" "ghostty" "alacritty" "kitty" "st-256color"];
           ws_2 = ["Browser" "Firefox" "Google-chrome" "Opera"];
           ws_3 = ["ModernGL" "Emacs" "emacs" "neovide" "Code" "Code - Insiders" "Blender"];
           ws_4 = ["hakuneko-desktop" "Unity" "unityhub" "UnityHub" "zoom"];
@@ -102,9 +107,8 @@ in {
           (nomod "XF86AudioNext" "_tool_ctrl media next")
           (nomod "XF86AudioPrev" "_tool_ctrl media prev")
 
-          (mod "t" "translate-clip.sh")
           (_bind "super shift" "t" "touchpad.sh")
-          # (_bind "super ctrl" "f" "_tool_riot")
+          (_bind "super alt ctrl" "f" "_tool_riot")
           (mod "p" "_tool_search")
 
           (_bind "super shift" "c" "rofi-calc.sh")
@@ -126,12 +130,15 @@ in {
 
   config = {
     home.sessionVariables = {
-        TERMINAL = config.wm.shared.terminal;
-        EXPLORER = config.wm.shared.explorer;
+      TERMINAL = config.wm.shared.terminal;
+      EXPLORER = config.wm.shared.explorer;
     };
     programs = {
       kitty = {
         enable = true;
+        settings = {
+          cursor_trail = 1;
+        };
         shellIntegration = {
           enableBashIntegration = true;
           enableFishIntegration = true;
@@ -173,8 +180,8 @@ in {
       desktopEntries = {
         systemctl-tui = {
           name = "Systemctl TUI";
-          comment = "Launch systemctl-tui in Ghostty";
-          exec = "ghostty --title=\"Systemctl TUI\" -e systemctl-tui";
+          comment = "Launch systemctl-tui in terminal";
+          exec = "${sharedConfig.terminal} --title=\"Systemctl TUI\" -e systemctl-tui";
           icon = "utilities-terminal";
           terminal = false;
           type = "Application";
@@ -183,33 +190,33 @@ in {
 
         systemctl-tui-sudo = {
           name = "Systemctl TUI (sudo)";
-          comment = "Launch systemctl-tui with sudo in Ghostty";
-          exec = "ghostty --title=\"Systemctl TUI (sudo)\" -e bash -c \"sudo systemctl-tui\"";
+          comment = "Launch systemctl-tui with sudo in terminal";
+          exec = "${sharedConfig.terminal} --title=\"Systemctl TUI (sudo)\" -e bash -c \"sudo systemctl-tui\"";
           icon = "utilities-terminal";
           terminal = false;
           type = "Application";
           categories = ["System" "Utility"];
         };
-
-        stacer = {
-          name = "Stacer";
-          comment = "System optimizer and monitor";
-          exec = "stacer";
-          icon = "stacer"; # Or fallback: "utilities-system-monitor"
-          terminal = false;
-          type = "Application";
-          categories = ["System" "Utility"];
-        };
-
-        stacer-root = {
-          name = "Stacer (Root)";
-          comment = "Launch Stacer with root privileges";
-          exec = "pkexec stacer";
-          icon = "stacer";
-          terminal = false;
-          type = "Application";
-          categories = ["System" "Utility"];
-        };
+        #
+        # stacer = {
+        #   name = "Stacer";
+        #   comment = "System optimizer and monitor";
+        #   exec = "stacer";
+        #   icon = "stacer"; # Or fallback: "utilities-system-monitor"
+        #   terminal = false;
+        #   type = "Application";
+        #   categories = ["System" "Utility"];
+        # };
+        #
+        # stacer-root = {
+        #   name = "Stacer (Root)";
+        #   comment = "Launch Stacer with root privileges";
+        #   exec = "pkexec stacer";
+        #   icon = "stacer";
+        #   terminal = false;
+        #   type = "Application";
+        #   categories = ["System" "Utility"];
+        # };
       };
 
       configFile = {
@@ -225,7 +232,7 @@ in {
       };
     };
     services.fusuma = {
-      enable = true;
+      enable = false;
       settings = {
         threshold = {
           swipe = 0.1;

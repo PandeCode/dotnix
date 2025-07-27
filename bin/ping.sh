@@ -4,10 +4,12 @@ RED=#ff5555
 GREEN=#50fa7b
 YELLOW=#f1fa8c
 WHITE=#f8f8f2
+
 NO_NET="󰪎"
 BEST_NET="󰀳"
 OK_NET="󰖟"
 BAD_NET="󱂠"
+
 PING_HOST=$ZELLIJ_PING_HOST
 
 is_number() {
@@ -23,15 +25,14 @@ if [ -z "$ping_host" ]; then ping_host="9.9.9.9"; fi
 
 ping_count=3
 ping_wait_time=255
-
 ping_log_file="/tmp/ping.log"
 ping_result_file="/tmp/ping_result"
 ping_pid_file="/tmp/ping.pid"
 
 ping_not_running() {
 	local pid
-	pid=$(cat $ping_pid_file)
-	! ps -p "$pid" >/dev/null
+	pid=$(cat $ping_pid_file 2>/dev/null)
+	! ps -p "$pid" >/dev/null 2>&1
 }
 
 read_cached_result() {
@@ -43,8 +44,7 @@ read_cached_result() {
 }
 
 read_ping_result() {
-	result=$(cut -sd / -f 5 $ping_log_file | cut -d . -f 1)
-
+	result=$(cut -sd / -f 5 $ping_log_file 2>/dev/null | cut -d . -f 1)
 	if is_number "$result"; then
 		echo "$result"
 	else
@@ -64,7 +64,6 @@ execute_ping() {
 colorize_ping_value() {
 	local ping=$1
 	local result
-
 	if [ "$ping" -lt 1 ] || [ "$ping" -ge 1000 ]; then
 		result=$RED
 	elif [ "$ping" -lt 100 ]; then
@@ -74,14 +73,12 @@ colorize_ping_value() {
 	elif [ "$ping" -lt 1000 ]; then
 		result=$YELLOW
 	fi
-
 	echo "$result"
 }
 
 ping_icon() {
 	local ping=$1
 	local result
-
 	if [ "$ping" -lt 1 ] || [ "$ping" -ge 1000 ]; then
 		result="$NO_NET"
 	elif [ "$ping" -lt 100 ]; then
@@ -91,14 +88,12 @@ ping_icon() {
 	elif [ "$ping" -lt 1000 ]; then
 		result="$BAD_NET"
 	fi
-
 	echo $result
 }
 
 format_ping_value() {
 	local value=$1
 	local result
-
 	if [ "$value" -eq -1 ]; then
 		result="N/A"
 	elif [ "$value" -ge 1000 ]; then
@@ -108,7 +103,6 @@ format_ping_value() {
 	else
 		result=$(printf %3d "$value")
 	fi
-
 	echo "$result"
 }
 
@@ -120,17 +114,16 @@ addPadding() {
 	fi
 }
 
-icon=${1:no}
+# Parse command line arguments
+icon=${1:-no}
+color=${2:-yes}
 
 main() {
 	local ping_result
-
 	if ping_not_running; then
 		ping_result=$(read_ping_result)
 		update_cached_result "$ping_result"
-
 		execute_ping
-
 	else
 		ping_result=$(read_cached_result)
 	fi
@@ -138,11 +131,19 @@ main() {
 	ping_value=$ping_result
 	ping_result="$(format_ping_value "$ping_result")"
 
-	if [[ "$icon" == "no" ]]; then
-		echo -n "$(colorize_ping_value "$ping_value") ${ping_result}"
-	else
-		echo -n "$(colorize_ping_value "$ping_value") $(ping_icon "$ping_value") ${ping_result}"
+	# Determine color prefix
+	local color_prefix=""
+	if [[ "$color" == "yes" ]]; then
+		color_prefix="$(colorize_ping_value "$ping_value") "
 	fi
+
+	# Determine icon
+	local icon_part=""
+	if [[ "$icon" == "yes" ]]; then
+		icon_part="$(ping_icon "$ping_value") "
+	fi
+
+	echo -n "${color_prefix}${icon_part}${ping_result}"
 }
 
 main

@@ -27,15 +27,14 @@ in {
             "xmodmap ~/.Xmodmap"
             "greenclip daemon"
             "xflux"
-            "lastbg.sh"
+            "bg.sh last"
             "alttab"
-            "dunst"
             "picom -b"
           ];
         bindexec =
           config.wm.shared.bindexec
           ++ [
-            (nomod "Print" "")
+            (nomod "Print" "maim -s | xclip -selection clipboard -t image/png")
 
             (mod "v" config.greenclip.commands.copy)
             (_bind "super shift" "v" config.greenclip.commands.copy)
@@ -51,8 +50,11 @@ in {
   };
 
   config = {
-    services.gromit-mpx = {
-      enable = true;
+    services = {
+      dunst.enable = true;
+      gromit-mpx = {
+        enable = true;
+      };
     };
     home = {
       # CapsLock to Control, and Shift+CapsLock to CapsLock:

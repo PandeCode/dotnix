@@ -2,6 +2,7 @@
   pkgs,
   inputs,
   lib,
+  sharedConfig,
   ...
 }: {
   # nixpkgs.config.permittedInsecurePackages = [
@@ -64,12 +65,11 @@
 
   programs.nautilus-open-any-terminal = {
     enable = true;
-    terminal = sharedConfig.terminal;
+    inherit (sharedConfig) terminal;
   };
 
   environment = {
     systemPackages = with pkgs; [
-      dunst
       libnotify
 
       onlyoffice-bin
@@ -81,6 +81,7 @@
       # openshot-qt
       nautilus
       obsidian
+      rnote
       # inkscape
       zathura
       # adobe-reader

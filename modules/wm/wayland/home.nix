@@ -34,6 +34,8 @@ in
               (mod "n" "swaync-client -t -sw")
               (mod "z" "woomer")
 
+              (_bind "Super Ctrl Shift" "c" "hyprpicker -a")
+
               (nomod "Print" "grimblast copy area")
 
               (_bind "Super Shift" "b" "toggle_waybar.sh")

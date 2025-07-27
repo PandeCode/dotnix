@@ -6,87 +6,42 @@
   ...
 }:
 with builtins;
-with utils;
 with lib; let
   flattenListAttrsToAttr = lib.foldl' (a: b: a // b) {};
-  _ = {
+  mapBindingsToi3 = map ({
     mod,
     key,
     exec,
   }: {
     "${(replaceStrings [" " "super" "alt"] ["+" "Mod4" "Mod1"] (trim "${mod} ${key}"))}" = "exec ${exec}";
-  };
-  mapBindingsToi3 = map _;
-  c = config.lib.stylix.colors;
+  });
+
   font = config.stylix.fonts.sansSerif.name;
+  c = config.lib.stylix.colors;
 in {
   imports = [
     ../x/home.nix
+    ../../programs/i3status-rs.nix
   ];
-
-  programs.i3status-rust = {
-    enable = true;
-    bars.default = {
-      theme = "solarized-dark";
-      icons = "awesome4";
-      blocks =
-        (map (i: i // {block = "custom";}) [
-          {
-            command = "lyrics-line.sh";
-            interval = 3;
-          }
-          {
-            command = "curl -Ss 'https://wttr.in?0&T&Q' | cut -c 16- | head -2 | xargs echo";
-            interval = 3600;
-          }
-          {
-            command = "xtitle -s";
-            interval = 1;
-          }
-        ])
-        ++ [
-          {
-            alert = 10.0;
-            block = "disk_space";
-            info_type = "available";
-            interval = 60;
-            path = "/";
-            warning = 20.0;
-          }
-          {
-            block = "memory";
-            format = " $icon $mem_used_percents ";
-            format_alt = " $icon $swap_used_percents ";
-          }
-          {
-            block = "cpu";
-            interval = 1;
-          }
-          {
-            block = "load";
-            format = " $icon $1m ";
-            interval = 1;
-          }
-          {
-            block = "sound";
-          }
-          {
-            block = "time";
-            format = " $timestamp.datetime(f:'%a %d/%m %R') ";
-            interval = 60;
-          }
-        ];
-    };
-  };
-
   xsession.windowManager.i3 = {
     enable = true;
-    package = pkgs.i3-gaps;
-
     extraConfig = ''
       for_window [class="feh"] floating enable, sticky enable, border pixel 0, move absolute position 0 px 0 px
+
+      for_window [class="pqiv"] floating enable, sticky enable, border pixel 0, move absolute position 0 px 0 px
     '';
     config = {
+      gaps = {
+        smartBorders = "on";
+        smartGaps = true;
+
+        inner = 8;
+        outer = 4;
+        top = 4;
+        bottom = 6;
+        left = 8;
+        right = 8;
+      };
       bars = [
         {
           mode = "dock";
@@ -94,42 +49,47 @@ in {
           position = "top";
           workspaceButtons = true;
           workspaceNumbers = true;
-          statusCommand = "${pkgs.i3status-rust}/bin/i3status-rs ~/.config/i3status-rust/config-i3.toml";
+          statusCommand = "${pkgs.i3status-rust}/bin/i3status-rs ~/.config/i3status-rs/config.toml";
           fonts = {
-            names = ["monospace"];
+            names = [font "monospace"];
             size = 8.0;
           };
           trayOutput = "primary";
-          # colors = {
-          #   background = "#000000";
-          #   statusline = "#ffffff";
-          #   separator = "#666666";
-          #   focusedWorkspace = {
-          #     border = "#4c7899";
-          #     background = "#285577";
-          #     text = "#ffffff";
-          #   };
-          #   activeWorkspace = {
-          #     border = "#333333";
-          #     background = "#5f676a";
-          #     text = "#ffffff";
-          #   };
-          #   inactiveWorkspace = {
-          #     border = "#333333";
-          #     background = "#222222";
-          #     text = "#888888";
-          #   };
-          #   urgentWorkspace = {
-          #     border = "#2f343a";
-          #     background = "#900000";
-          #     text = "#ffffff";
-          #   };
-          #   bindingMode = {
-          #     border = "#2f343a";
-          #     background = "#900000";
-          #     text = "#ffffff";
-          #   };
-          # };
+          colors = {
+            background = "#${c.base00}";
+            statusline = "#${c.base05}";
+            separator = "#${c.base03}";
+
+            focusedWorkspace = {
+              border = "#${c.base0A}";
+              background = "#${c.base0D}";
+              text = "#${c.base00}";
+            };
+
+            activeWorkspace = {
+              border = "#${c.base03}";
+              background = "#${c.base02}";
+              text = "#${c.base05}";
+            };
+
+            inactiveWorkspace = {
+              border = "#${c.base02}";
+              background = "#${c.base01}";
+              text = "#${c.base04}";
+            };
+
+            urgentWorkspace = {
+              border = "#${c.base02}";
+              background = "#${c.base0F}";
+              text = "#${c.base00}";
+            };
+
+            bindingMode = {
+              border = "#${c.base02}";
+              background = "#${c.base0E}";
+              text = "#${c.base00}";
+            };
+          };
         }
       ];
       window.titlebar = false;
@@ -142,14 +102,20 @@ in {
           "Mod4+Ctrl+f" = "fullscreen toggle";
           "Mod4+Shift+f" = "floating toggle";
 
-          "Mod4+j" = "workspace next_on_output";
-          "Mod4+k" = "workspace prev_on_output";
+          "Mod4+h" = "exec i3ctl.sh focus_l";
+          "Mod4+l" = "exec i3ctl.sh focus_r";
+          "Mod4+j" = "exec i3ctl.sh focus_d";
+          "Mod4+k" = "exec i3ctl.sh focus_u";
 
-          "Mod4+l" = "focus left";
-          "Mod4+h" = "focus right";
+          "Mod4+Shift+h" = "exec i3ctl.sh move_l";
+          "Mod4+Shift+l" = "exec i3ctl.sh move_r";
+          "Mod4+Shift+j" = "exec i3ctl.sh move_d";
+          "Mod4+Shift+k" = "exec i3ctl.sh move_u";
 
-          "Mod4+Shift+j" = "move container to workspace next_on_output";
-          "Mod4+Shift+k" = "move container to workspace prev_on_output";
+          "Mod4+Ctrl+h" = "exec i3ctl.sh resize_l";
+          "Mod4+Ctrl+l" = "exec i3ctl.sh resize_r";
+          "Mod4+Ctrl+j" = "exec i3ctl.sh resize_d";
+          "Mod4+Ctrl+k" = "exec i3ctl.sh resize_u";
         }
         // flattenListAttrsToAttr
         (
@@ -166,7 +132,7 @@ in {
         );
 
       startup =
-        map (command: {inherit command;}) (config.x.shared.startup ++ ["spatial"]);
+        map (command: {inherit command;}) (config.x.shared.startup ++ ["bg.sh last"]);
     };
   };
 }

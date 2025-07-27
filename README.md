@@ -1,5 +1,11 @@
+```bash
+git clone --recurse-submodules --depth 1 --shallow-submodules
+```
+
 # Files for Backing Up and Reproducing My NixOS System on WSL
+
 [![Build and Tag ISO](https://github.com/PandeCode/dotnix/actions/workflows/build_iso.yml/badge.svg)](https://github.com/PandeCode/dotnix/actions/workflows/build_iso.yml)
+
 > Very much a WIP
 
 Building the iso fails locally so git commits beging with "build-iso" trigger and action that build the iso.

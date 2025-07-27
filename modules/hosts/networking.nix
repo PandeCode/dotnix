@@ -15,8 +15,8 @@
 
     firewall = rec {
       enable = true;
-      allowedTCPPorts = [7000 7100 5900];
-      allowedUDPPorts = [6000 6001 7011 5900];
+      allowedTCPPorts = [7000 7100 5900 5353];
+      allowedUDPPorts = [6000 6001 7011 5900 5353];
       allowedTCPPortRanges = [
         {
           from = 30000;

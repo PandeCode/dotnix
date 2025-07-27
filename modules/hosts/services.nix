@@ -55,6 +55,7 @@ in {
       avahi = {
         enable = true;
         nssmdns4 = true; # printing
+        openFirewall = true;
         publish = {
           addresses = true;
           workstation = true;

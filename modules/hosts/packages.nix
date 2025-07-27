@@ -45,6 +45,8 @@
 
     gnumake
 
+    glib
+
     nh
 
     gcc
@@ -53,7 +55,7 @@
     ueberzug
 
     alsa-utils
-    stacer
+    # stacer
 
     gnupg
     pinentry
