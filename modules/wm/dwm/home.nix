@@ -8,6 +8,12 @@
 in {
   imports = [../x/home.nix];
 
+  dotnix.symlinkPairs = [
+    ["~/dotnix/submodules/dwm-flexipatch/autostart.sh" "~/.local/share/dwm/autostart.sh"]
+    ["~/dotnix/submodules/dwm-flexipatch/autostart_blocking.sh" "~/.local/share/dwm/autostart_blocking.sh"]
+    ["~/dotnix/submodules/dwm-flexipatch/patch/layoutmenu.sh" "~/dotnix/bin/layoutmenu.sh"]
+  ];
+
   xresources.properties =
     {"dwm.font" = font;}
     // (dotutils.mapAttrsWithKeyTransform (k: v: {

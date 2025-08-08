@@ -1,0 +1,6 @@
+[[block]]
+block = "custom"
+command = "xtitle | cut -c1-50"
+interval = 1
+format = "$text"
+hide_when_empty = true

@@ -27,6 +27,7 @@ in {
             "xmodmap ~/.Xmodmap"
             "greenclip daemon"
             "xflux"
+            "dunst"
             "bg.sh last"
             "alttab"
             "picom -b"
@@ -51,10 +52,24 @@ in {
 
   config = {
     services = {
-      dunst.enable = true;
+      dunst = {
+        enable = true;
+        settings = {
+          global = {
+            dmenu = "dmenu -p dunst:";
+            browser = "xdg-open";
+          };
+        };
+      };
       gromit-mpx = {
         enable = true;
       };
+    };
+    dotnix = {
+      enable = true;
+      symlinkPairs = [
+        ["${config.home.homeDirectory}/dotnix/config/picom/picom.conf" "${config.home.homeDirectory}/.config/picom/picom.conf"]
+      ];
     };
     home = {
       # CapsLock to Control, and Shift+CapsLock to CapsLock:
@@ -65,6 +80,7 @@ in {
         keycode 66 = Control_L Caps_Lock NoSymbol NoSymbol
       '';
       packages = with pkgs; [
+        libxcvt
         slurp
         grim
         xclip
@@ -78,6 +94,9 @@ in {
         slop
         paperview
         xtitle
+        xmenu
+
+        (dmenu-rs-enable-plugins.override {enablePlugins = true;})
       ];
     };
   };

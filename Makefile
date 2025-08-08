@@ -1,6 +1,6 @@
 update:
 	sudo echo Update
-	nix flake update
+	# nix flake update
 	nh os switch ~/dotnix/ -- --show-trace -vL --accept-flake-config && nh home switch ~/dotnix/ -- --show-trace -vL --accept-flake-config
 
 

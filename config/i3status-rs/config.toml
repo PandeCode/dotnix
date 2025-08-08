@@ -1,52 +1,42 @@
-[icons]
-icons = "awesome6"
-
-# Current window title
-[[block]]
-block = "custom"
-command = "xtitle -s | cut -c1-50"
-interval = 1
-format = "$text"
-hide_when_empty = true
-
 [[block]]
 block = "custom"
 command = "curl -s 'https://wttr.in?format=%c+%t+%h' 2>/dev/null || echo '🌡️ --'"
 interval = 1800
 format = " $text "
 
-[[block]]
-block = "custom"
-json = true
-interval = 60
-command = '''
-PING=$(ping -c4 1.1.1.1 | tail -n1 | cut -d'/' -f5)
-
-# Fallback if ping fails
-if [[ -z "$PING" ]]; then
-  ICON="󰪎"        # No network
-  COLOR="#ff5555"
-  TEXT="N/A"
-else
-  ICON="󰀂"        # Default icon
-  COLOR="#ffffff"
-  TEXT="${PING} ms"
-
-  # Classify ping and update icon/color
-  if [[ $(echo "$PING < 50" | bc) -eq 1 ]]; then
-    ICON="󰀓"      # Excellent (strong signal)
-    COLOR="#50fa7b"
-  elif [[ $(echo "$PING < 100" | bc) -eq 1 ]]; then
-    ICON="󰖩"      # Okay (average signal)
-    COLOR="#f1fa8c"
-  else
-    ICON="󱂠"      # Bad (high latency)
-    COLOR="#ff5555"
-  fi
-fi
-
-echo "{\"icon\":\"$ICON\",\"text\":\"$TEXT\",\"color\":\"$COLOR\"}"
-'''
+# [[block]]
+# block = "custom"
+# json = true
+# interval = 60
+# format = "$icon $text"
+# command = '''
+# PING=$(ping -c4 1.1.1.1 | tail -n1 | cut -d'/' -f5)
+#
+# # Fallback if ping fails
+# if [[ -z "$PING" ]]; then
+#   ICON="󰪎"        # No network
+#   COLOR="#ff5555"
+#   TEXT="N/A"
+# else
+#   ICON="󰀂"        # Default icon
+#   COLOR="#ffffff"
+#   TEXT="${PING} ms"
+#
+#   # Classify ping and update icon/color
+#   if [[ $(echo "$PING < 50" | bc) -eq 1 ]]; then
+#     ICON="󰀓"      # Excellent (strong signal)
+#     COLOR="#50fa7b"
+#   elif [[ $(echo "$PING < 100" | bc) -eq 1 ]]; then
+#     ICON="󰖩"      # Okay (average signal)
+#     COLOR="#f1fa8c"
+#   else
+#     ICON="󱂠"      # Bad (high latency)
+#     COLOR="#ff5555"
+#   fi
+# fi
+#
+# echo "{\"icon\":\"$ICON\",\"text\":\"$TEXT\",\"color\":\"$COLOR\"}"
+# '''
 
 [[block]]
 block = "custom"
@@ -102,34 +92,33 @@ interval = 60
 # Network
 [[block]]
 block = "net"
-format = " $icon {$signal_strength $ssid|Wired} $speed_down.eng(prefix:K w:4) ↓ $speed_up.eng(prefix:K w:4) ↑ "
-format_alt = " $icon $ip "
-interval = 5
+format = " $icon {$signal_strength $ssid $frequency|Wired connection} via $device "
 
-# Bluetooth
 [[block]]
 block = "bluetooth"
-format = " $icon "
-format_alt = " $icon $name "
+mac = "00:18:09:92:1B:BA"
 disconnected_format = ""
+format = " $icon "
+[block.battery_state]
+"0..20" = "critical"
+"21..70" = "warning"
+"71..100" = "good"
 
-# Volume
 [[block]]
 block = "sound"
-format = " $icon $output_name $volume "
-format_alt = " $icon $output_description "
-headphones_indicator = true
-show_volume_when_muted = false
-max_vol = 100
-step_width = 5
+format = " $icon $output_name{ $volume|} "
+[block.mappings]
+"alsa_output.usb-Harman_Multimedia_JBL_Pebbles_1.0.0-00.analog-stereo" = "Speakers"
+"alsa_output.pci-0000_00_1b.0.analog-stereo" = "Headset"
 
-# Microphone
 [[block]]
 block = "sound"
-driver = "pulse"
+driver = "pulseaudio"
 device_kind = "source"
-format = " $icon $volume "
-hide_when_muted = true
+format = " $icon { $volume|} {$active_port |}"
+[block.active_port_mappings]
+"analog-input-rear-mic" = "" # Mapping to an empty string makes `$active_port` absent
+"analog-input-front-mic" = "ERR!"
 
 [[block]]
 block = "battery"

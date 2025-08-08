@@ -39,6 +39,8 @@
       zoom-us
       opencode
 
+      deskreen
+
       pscircle
       xdg-utils
 

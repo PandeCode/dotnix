@@ -10,14 +10,36 @@
   services.xserver.windowManager.dwm = {
     enable = true;
     package = pkgs.dwm.overrideAttrs (oldAttrs: {
-      src = inputs.dwm-flexipatch;
+      src = ../../../submodules/dwm-flexipatch;
+      # src = inputs.dwm-flexipatch;
       #   pkgs.fetchFromGitHub {
       #     owner = "pandecode";
       #     repo = "dwm-flexipatch";
       #     rev = "b04a46a679e5bbd864516e04dcee50c814816607";
       #     sha256 = "hNr5Vu4KpNE91WncxAF3WNMNPzXRxGoIUoA3aILKk4Y=";
       #   };
-      buildInputs = oldAttrs.buildInputs ++ [pkgs.imlib2Full];
+
+      nativeBuildInputs =
+        oldAttrs.nativeBuildInputs ++ [pkgs.pkg-config];
+
+      buildInputs =
+        oldAttrs.buildInputs
+        ++ (with pkgs; [
+          imlib2Full
+          yajl
+
+          xorg.libX11
+          xorg.libXft
+          xorg.libXinerama
+          xorg.xorgproto
+          xorg.libXfixes
+          xorg.libXi
+
+          fontconfig
+          freetype
+          yajl
+          imlib2Full
+        ]);
     });
   };
 

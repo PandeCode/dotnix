@@ -1,14 +1,8 @@
-{
-  pkgs,
-  lib,
-  config,
-  ...
-}: let
-  cfg = config.sway;
-in {
+{pkgs, ...}: {
   imports = [../wayland/os.nix];
 
   programs.sway = {
+    package = pkgs.swayfx;
     enable = true;
     wrapperFeatures.gtk = true;
   };

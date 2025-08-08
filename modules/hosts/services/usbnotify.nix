@@ -36,7 +36,7 @@
 
             # Send desktop notification if DISPLAY is set
             if [ -n "$DISPLAY" ] && [ -n "$DBUS_SESSION_BUS_ADDRESS" ]; then
-                 su ${sharedConfig.userName} -c "notify-send \"USB Device $event\" \"$device_info\" --icon=device-notifier"
+                 su ${sharedConfig.user} -c "notify-send \"USB Device $event\" \"$device_info\" --icon=device-notifier"
             fi
 
         }

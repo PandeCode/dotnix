@@ -6,6 +6,7 @@
   imports = [
     inputs.hermes.nixosModules.default
     ./nix-ld.nix
+    ./dotbox.nix
   ];
   nixpkgs.config.allowUnfree = true;
 
@@ -127,6 +128,7 @@
 
     # Better Tools
     # axel
+    file
     tldr
     eza
     difftastic

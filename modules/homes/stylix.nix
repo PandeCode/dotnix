@@ -8,56 +8,70 @@
   specialisation = {
     dark.configuration = {
       stylix.base16Scheme = lib.mkForce "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
-      home.sessionVariables.THEME = "dark";
+      home = {
+        sessionVariables.THEME = "dark";
+        activation.setTheme = lib.hm.dag.entryAfter ["writeBoundary"] ''
+          ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface color-scheme "prefer-light"
+        '';
+      };
     };
 
     light.configuration = {
       stylix.base16Scheme = lib.mkForce "${pkgs.base16-schemes}/share/themes/tokyo-night-light.yaml";
-      home.sessionVariables.THEME = "light";
+      home = {
+        sessionVariables.THEME = "light";
+        activation.setTheme = lib.hm.dag.entryAfter ["writeBoundary"] ''
+          ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface color-scheme "prefer-light"
+        '';
+      };
     };
   };
 
-  xdg.configFile."gowall/config.yml".text =
-    lib.strings.toJSON
-    {
-      EnableImagePreviewing = false;
-      themes = [
-        {
-          name = "nix";
-          colors = with config.lib.stylix.colors; map (s: "#" + s) [base00 base01 base02 base03 base04 base05 base06 base07 base08 base09 base0A base0B base0C base0D base0E base0F];
+  xdg.configFile = {
+    "gowall/config.yml".text =
+      lib.strings.toJSON
+      {
+        EnableImagePreviewing = false;
+        themes = [
+          {
+            name = "nix";
+            colors = with config.lib.stylix.colors; map (s: "#" + s) [base00 base01 base02 base03 base04 base05 base06 base07 base08 base09 base0A base0B base0C base0D base0E base0F];
+          }
+        ];
+      };
+
+    "stylix/style.scss".text = with config.lib.stylix.colors;
+    /*
+    scss
+    */
+      ''
+        $base00: #${base00}; $base01: #${base01}; $base02: #${base02}; $base03: #${base03};
+        $base04: #${base04}; $base05: #${base05}; $base06: #${base06}; $base07: #${base07};
+        $base08: #${base08}; $base09: #${base09}; $base0A: #${base0A}; $base0B: #${base0B};
+        $base0C: #${base0C}; $base0D: #${base0D}; $base0E: #${base0E}; $base0F: #${base0F};
+      '';
+    "stylix/style.lua".text = with config.lib.stylix.colors;
+    /*
+    lua
+    */
+      ''
+        return {
+          base00 = '#${base00}', base01 = '#${base01}', base02 = '#${base02}', base03 = '#${base03}',
+          base04 = '#${base04}', base05 = '#${base05}', base06 = '#${base06}', base07 = '#${base07}',
+          base08 = '#${base08}', base09 = '#${base09}', base0A = '#${base0A}', base0B = '#${base0B}',
+          base0C = '#${base0C}', base0D = '#${base0D}', base0E = '#${base0E}', base0F = '#${base0F}'
         }
-      ];
-    };
-
-  xdg.configFile."stylix/style.scss".text = with config.lib.stylix.colors;
-  /*
-  scss
-  */
-    ''
-      $base00: #${base00}; $base01: #${base01}; $base02: #${base02}; $base03: #${base03};
-      $base04: #${base04}; $base05: #${base05}; $base06: #${base06}; $base07: #${base07};
-      $base08: #${base08}; $base09: #${base09}; $base0A: #${base0A}; $base0B: #${base0B};
-      $base0C: #${base0C}; $base0D: #${base0D}; $base0E: #${base0E}; $base0F: #${base0F};
-    '';
-
-  xdg.configFile."stylix/style.lua".text = with config.lib.stylix.colors;
-  /*
-  lua
-  */
-    ''
-      return {
-        base00 = '#${base00}', base01 = '#${base01}', base02 = '#${base02}', base03 = '#${base03}',
-        base04 = '#${base04}', base05 = '#${base05}', base06 = '#${base06}', base07 = '#${base07}',
-        base08 = '#${base08}', base09 = '#${base09}', base0A = '#${base0A}', base0B = '#${base0B}',
-        base0C = '#${base0C}', base0D = '#${base0D}', base0E = '#${base0E}', base0F = '#${base0F}'
-      }
-    '';
+      '';
+  };
 
   home = {
     sessionVariables = {
       XCURSOR_THEME = config.home.pointerCursor.name;
       XCURSOR_SIZE = config.home.pointerCursor.size;
     };
+    home.activation.setTheme = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface color-scheme "prefer-light"
+    '';
     packages = [pkgs.bibata-cursors];
     # pointerCursor = {
     #   gtk.enable = true;

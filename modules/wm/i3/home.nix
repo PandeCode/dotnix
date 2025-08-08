@@ -2,7 +2,6 @@
   pkgs,
   lib,
   config,
-  utils,
   ...
 }:
 with builtins;
@@ -27,8 +26,15 @@ in {
     enable = true;
     extraConfig = ''
       for_window [class="feh"] floating enable, sticky enable, border pixel 0, move absolute position 0 px 0 px
+      for_window [class="Pqiv"] floating enable, sticky enable, border pixel 0, move absolute position 0 px 0 px
 
-      for_window [class="pqiv"] floating enable, sticky enable, border pixel 0, move absolute position 0 px 0 px
+      for_window [title="Picture-in-Picture"] \
+        floating enable, \
+        sticky enable, \
+        border none, \
+        resize set width 480 px height 270 px, \
+        move position 1440 px 24 px
+
     '';
     config = {
       gaps = {
@@ -49,7 +55,7 @@ in {
           position = "top";
           workspaceButtons = true;
           workspaceNumbers = true;
-          statusCommand = "${pkgs.i3status-rust}/bin/i3status-rs ~/.config/i3status-rs/config.toml";
+          statusCommand = "${pkgs.i3status-rust}/bin/i3status-rs ~/.config/i3status-rs/xconfig.toml";
           fonts = {
             names = [font "monospace"];
             size = 8.0;
@@ -116,6 +122,8 @@ in {
           "Mod4+Ctrl+l" = "exec i3ctl.sh resize_r";
           "Mod4+Ctrl+j" = "exec i3ctl.sh resize_d";
           "Mod4+Ctrl+k" = "exec i3ctl.sh resize_u";
+
+          "Mod4+Shift+p" = "floating enable, sticky enable, resize set width 640 px height 360 px, move position 80 px 80 px, border none";
         }
         // flattenListAttrsToAttr
         (

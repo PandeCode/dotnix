@@ -70,10 +70,10 @@
     LC_TELEPHONE = LC_TIME;
   };
 
-  users.users.${sharedConfig.userName} = {
+  users.users.${sharedConfig.user} = {
     isNormalUser = true;
-    description = sharedConfig.userName;
-    extraGroups = ["networkmanager" "wheel" "video" "libvirtd" "input"];
+    description = sharedConfig.user;
+    extraGroups = ["networkmanager" "wheel" "video" "libvirtd" "input" "uinput"];
   };
 
   system.stateVersion = "24.11";

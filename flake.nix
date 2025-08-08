@@ -25,6 +25,8 @@ rec {
   };
 
   inputs = {
+    self.submodules = true;
+
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.05";
 
@@ -53,21 +55,12 @@ rec {
       inputs.hyprland.follows = "hyprland";
     };
 
-    dwm-flexipatch = {
-      url = "github:pandecode/dwm-flexipatch";
-      flake = false;
-    };
-
     # xmonad-contexts = {
     #   url = "github:Procrat/xmonad-contexts";
     #   flake = false;
     # };
 
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
-    iwmenu = {
-      url = "github:e-tho/iwmenu";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
 
     zjstatus = {
       url = "github:dj95/zjstatus";
@@ -83,11 +76,6 @@ rec {
       url = "github:pandecode/hermes";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    # obol = {
-    #   url = "github:PandeCode/obol";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
 
     obolc = {
       url = "github:PandeCode/obolc";
@@ -124,7 +112,6 @@ rec {
       ];
     };
 
-    # created to emulate osConfig with home_manager and to share config between nixos and home-manager
     sharedConfig_kazuha = import ./osConfigs/kazuha.nix;
 
     stateVersion = "24.11";
@@ -158,10 +145,10 @@ rec {
         };
       mkSystemLinux64 = mkSystem systems.x86_64-linux;
     in {
-      # nixiso = mkSystemLinux64 "nixiso" [
-      #   home-manager.nixosModules.home-manager
-      #   inputs.spicetify-nix.nixosModules.default
-      # ];
+      nixiso = mkSystemLinux64 "nixiso" [
+        home-manager.nixosModules.home-manager
+        inputs.spicetify-nix.nixosModules.default
+      ] {sharedConfig = sharedConfig_kazuha;};
       # wslnix = mkSystemLinux64 "wslnix" [inputs.nixos-wsl.nixosModules.default];
 
       kazuha =
@@ -213,49 +200,7 @@ rec {
     #   # "shawn@herta" = mkHomeDarwin "herta" "shawn"; # TODO: New system
     # }j
 
-    checks = forAllSystems (system: {
-      pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
-        src = ./.;
-        hooks = {
-          alejandra.enable = true;
-          check-added-large-files.enable = true;
-          ripsecrets.enable = true;
-          check-json.enable = true;
-          check-shebang-scripts-are-executable.enable = true;
-          check-symlinks.enable = true;
-          check-toml.enable = true;
-          check-yaml.enable = true;
-          end-of-file-fixer.enable = true;
-          mixed-line-endings.enable = true;
-          prettier.enable = true;
-          shellcheck.enable = true;
-          shfmt.enable = true;
-          statix.enable = true;
-          trim-trailing-whitespace.enable = true;
-        };
-      };
-    });
-
-    devShells = forAllSystems (system: {
-      default = nixpkgs.legacyPackages.${system}.mkShell {
-        buildInputs = with nixpkgs.legacyPackages.${system}; [
-          nh
-          alejandra
-          statix
-          deadnix
-          nixd
-          nix-init
-          nix-index
-          nix-fast-build
-
-          # ghc
-        ];
-      };
-
-      pre-commit = nixpkgs.legacyPackages.${system}.mkShell {
-        inherit (self.checks.${system}.pre-commit-check) shellHook;
-        buildInputs = self.checks.${system}.pre-commit-check.enabledPackages;
-      };
-    });
+    checks = forAllSystems ((import ./nix/checks.nix) self);
+    devShells = forAllSystems ((import ./nix/devShells.nix) self);
   };
 }

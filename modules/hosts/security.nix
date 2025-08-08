@@ -1,4 +1,6 @@
 {pkgs, ...}: {
+  hardware.intel-gpu-tools.enable = true;
+
   security = {
     sudo = {
       enable = true;
@@ -9,13 +11,15 @@
               inherit command;
               options = ["NOPASSWD"];
             })
-            [
-              "${pkgs.systemd}/bin/systemctl suspend"
-              "${pkgs.systemd}/bin/systemctl hibernate"
-              "${pkgs.systemd}/bin/reboot"
-              "${pkgs.stacer}/bin/stacer"
-              "${pkgs.systemd}/bin/poweroff"
-            ];
+            (with pkgs; [
+              "${systemd}/bin/systemctl suspend"
+              "${systemd}/bin/systemctl hibernate"
+              "${systemd}/bin/reboot"
+              "${systemd}/bin/poweroff"
+              "${stacer}/bin/stacer"
+              "${systemctl-tui}/bin/systemctl-tui"
+              "${intel-gpu-tools}/bin/intel_gpu_top"
+            ]);
           groups = ["wheel"];
         }
       ];

@@ -2,7 +2,6 @@
   pkgs,
   lib,
   config,
-  sharedConfig,
   ...
 }: let
   cfg = config.services;
@@ -17,10 +16,13 @@ in {
   };
 
   config = {
-    systemd.services.syncthing.environment.STNODEFAULTFOLDER = "true";
     programs = {
       kdeconnect.enable = true;
-      localsend.enable = true;
+      localsend.enable = false;
+      weylus = {
+        enable = true;
+        openFirewall = true;
+      };
     };
 
     services = {
@@ -40,7 +42,7 @@ in {
           };
           folders = {
             "School" = {
-              path = "/home/${sharedConfig.username}/Vaults/School";
+              path = "/home/${config.home.username}/Vaults/School";
               devices = ["device" "chaos"];
               ignorePerms = false;
             };
@@ -57,6 +59,7 @@ in {
         nssmdns4 = true; # printing
         openFirewall = true;
         publish = {
+          enable = true;
           addresses = true;
           workstation = true;
           userServices = true;
@@ -93,60 +96,39 @@ in {
         package = pkgs.ananicy-cpp;
         rulesProvider = pkgs.ananicy-rules-cachyos;
       };
-      udev.extraRules =
-        ''
-          # This rule is needed for basic functionality of the controller in
-          # Steam and keyboard/mouse emulation
-          SUBSYSTEM=="usb", ATTRS{idVendor}=="28de", MODE="0666"
+      # udev rules configuration for gaming controllers and power management
+      udev.extraRules = ''
+        # Steam Controller support
+        # Basic functionality in Steam and keyboard/mouse emulation
+        SUBSYSTEM=="usb", ATTRS{idVendor}=="28de", MODE="0666"
 
-          # This rule is necessary for gamepad emulation; make sure you
-          # replace 'pgriffais' with a group that the user that runs Steam
-          # belongs to
-          KERNEL=="uinput", MODE="0660", GROUP="pgriffais", OPTIONS+="static_node=uinput"
+        # Gamepad emulation support
+        KERNEL=="uinput", MODE="0660", GROUP="shawn", OPTIONS+="static_node=uinput"
 
-          # Valve HID devices over USB hidraw
-          KERNEL=="hidraw*", ATTRS{idVendor}=="28de", MODE="0666"
+        # Weylus tablet input support
+        KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"
 
-          # Valve HID devices over bluetooth hidraw
-          KERNEL=="hidraw*", KERNELS=="*28DE:*", MODE="0666"
+        # Valve HID devices
+        KERNEL=="hidraw*", ATTRS{idVendor}=="28de", MODE="0666"
+        KERNEL=="hidraw*", KERNELS=="*28DE:*", MODE="0666"
 
-          # DualShock 4 over USB hidraw
-          KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="05c4", MODE="0666"
+        # DualShock 4 Controller support
+        # DualShock 4 over USB
+        KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="05c4", MODE="0666"
+        # DualShock 4 wireless adapter over USB
+        KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0ba0", MODE="0666"
+        # DualShock 4 Slim over USB
+        KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="09cc", MODE="0666"
+        # DualShock 4 over Bluetooth
+        KERNEL=="hidraw*", KERNELS=="*054C:05C4*", MODE="0666"
+        # DualShock 4 Slim over Bluetooth
+        KERNEL=="hidraw*", KERNELS=="*054C:09CC*", MODE="0666"
 
-          # DualShock 4 wireless adapter over USB hidraw
-          KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0ba0", MODE="0666"
-
-          # DualShock 4 Slim over USB hidraw
-          KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="09cc", MODE="0666"
-
-          # DualShock 4 over bluetooth hidraw
-          KERNEL=="hidraw*", KERNELS=="*054C:05C4*", MODE="0666"
-
-          # DualShock 4 Slim over bluetooth hidraw
-          KERNEL=="hidraw*", KERNELS=="*054C:09CC*", MODE="0666"
-        ''
-        + (let
-          mkRule = as: lib.concatStringsSep ", " as;
-          mkRules = rs: lib.concatStringsSep "\n" rs;
-        in
-          mkRules [
-            (mkRule [
-              ''ACTION=="add|change"''
-              ''SUBSYSTEM=="block"''
-              ''KERNEL=="sd[a-z]"''
-              ''ATTR{queue/rotational}=="1"''
-              ''RUN+="${pkgs.hdparm}/bin/hdparm -B 90 -S 41 /dev/%k"''
-            ])
-          ]);
+        # Hard drive power management
+        # Set aggressive power saving for rotational drives
+        ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", RUN+="${pkgs.hdparm}/bin/hdparm -B 90 -S 41 /dev/%k"
+      '';
     };
-
-    systemd.sleep.extraConfig = ''
-      HibernateDelaySec=2h
-      AllowSuspend=yes
-      AllowHibernation=yes
-      AllowHybridSleep=yes
-      AllowSuspendThenHibernate=yes
-    '';
 
     services.thermald.enable = true;
 
@@ -161,15 +143,26 @@ in {
     #     turbo = "auto";
     #   };
     # };
-    systemd.services = {
-      journal-resume = {
-        description = "Service description here";
-        wantedBy = ["post-resume.target"];
-        after = ["post-resume.target"];
-        script = ''
-          echo "This should show up in the journal after resuming."
-        '';
-        serviceConfig.Type = "oneshot";
+
+    systemd = {
+      sleep.extraConfig = ''
+        HibernateDelaySec=2h
+        AllowSuspend=yes
+        AllowHibernation=yes
+        AllowHybridSleep=yes
+        AllowSuspendThenHibernate=yes
+      '';
+      services = {
+        syncthing.environment.STNODEFAULTFOLDER = "true";
+        journal-resume = {
+          description = "Service description here";
+          wantedBy = ["post-resume.target"];
+          after = ["post-resume.target"];
+          script = ''
+            echo "This should show up in the journal after resuming."
+          '';
+          serviceConfig.Type = "oneshot";
+        };
       };
     };
   };

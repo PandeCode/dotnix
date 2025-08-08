@@ -10,9 +10,6 @@
     };
   };
 
-  services.avahi.publish.enable = true;
-  services.avahi.publish.userServices = true;
-
   hardware.graphics = {
     enable = true;
     extraPackages = with pkgs; [

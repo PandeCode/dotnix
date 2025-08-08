@@ -1,7 +1,7 @@
 {sharedConfig, ...}: {
   services.globalprotect.enable = true;
   networking = {
-    hostName = sharedConfig.hostName;
+    inherit (sharedConfig) hostName;
 
     # wireless.iwd.enable = true;
     networkmanager = {
