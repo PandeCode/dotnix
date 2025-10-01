@@ -122,7 +122,7 @@ rec {
 
     packages.${system}.default = pkgs.buildEnv {
       name = "cachix";
-      inherit buildInputs;
+      paths = buildInputs;
     };
 
     devShells = {
