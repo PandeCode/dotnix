@@ -104,25 +104,30 @@ rec {
     };
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    ...
-  } @ inputs: let
+  outputs = {nixpkgs, ...} @ inputs: let
     system = "x86_64-linux";
+    pkgs = nixpkgs.legacyPackages.${system};
+
+    buildInputs = [
+      # inputs.charon-shell.packages.${system}.default
+      # inputs.obolc.packages.${system}.default
+      # inputs.hyprland.packages.${system}.hyprland;
+      # inputs.hermes.packages.${system}.default
+      inputs.niri.packages.${system}.niri-unstable
+      inputs.ghostty.packages.${system}.default
+      inputs.zjstatus.packages.${system}.default
+    ];
   in {
     nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
+
+    packages.${system}.default = pkgs.buildEnv {
+      name = "cachix";
+      inherit buildInputs;
+    };
+
     devShells = {
       ${system}.default = nixpkgs.legacyPackages.${system}.mkShell {
-        buildInputs = with inputs; [
-          # inputs.charon-shell.packages.${system}.default
-          # inputs.obolc.packages.${system}.default
-          # inputs.hyprland.packages.${system}.hyprland;
-          # inputs.hermes.packages.${system}.default
-          inputs.niri.packages.${system}.niri-unstable
-          inputs.ghostty.packages.${system}.default
-          inputs.zjstatus.packages.${system}.default
-        ];
+        inherit buildInputs;
       };
     };
   };
