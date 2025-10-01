@@ -7,13 +7,12 @@ git clone --recurse-submodules --depth 1 --shallow-submodules
 
 > Very much a WIP
 
-Building the iso fails locally so git commits beging with "build-iso" trigger and action that build the iso.
-The iso genetated is about 3.7GB and github releases have a max filesize of 2GB.
+The iso genetated is about 3GB+ and github releases have a max filesize of 2GB.
 So I split the iso into compatibale sizes using a prefix of ISO*PART*.
 
 Download the files(curl, wget, axel, Direct Download)
 
-Use cat in a POSIX compliant shell with glob support(or a manual ref).
+Use cat in a shell with glob support(or a manual ref).
 
 ```bash
 cat ISO_PART_* > nixiso.iso
