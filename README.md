@@ -3,6 +3,7 @@ git clone --recurse-submodules --depth 1 --shallow-submodules
 ```
 
 [![Build and Tag ISO](https://github.com/PandeCode/dotnix/actions/workflows/build_iso.yml/badge.svg)](https://github.com/PandeCode/dotnix/actions/workflows/build_iso.yml)
+[![Cachix](https://github.com/PandeCode/dotnix/actions/workflows/ci.yml/badge.svg)](https://github.com/PandeCode/dotnix/blob/cachix/.github/workflows/ci.yml)
 
 > Very much a WIP
 
