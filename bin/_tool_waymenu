@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
 CONFIGDIR=$HOME/dotnix/
-TERMINAL=wezterm
 BROWSER=google-chrome-stable
 EXPLORER=nautilus
-DOTFILES=$HOME/dotfiles # Assuming this is where scripts are stored; adjust if necessary
+DOTFILES=$HOME/dotnix # Assuming this is where scripts are stored; adjust if necessary
 
 # Declare associative array to store menu paths and commands
 declare -A menu_commands

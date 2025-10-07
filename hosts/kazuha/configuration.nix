@@ -19,6 +19,8 @@
 
     ../../modules/hosts/stylix.nix
 
+    ../../modules/hosts/sops.nix
+
     # ../../modules/hosts/virt_manager.nix
     # ../../modules/hosts/osx-kvm.nix
   ];
@@ -73,7 +75,7 @@
   users.users.${sharedConfig.user} = {
     isNormalUser = true;
     description = sharedConfig.user;
-    extraGroups = ["networkmanager" "wheel" "video" "libvirtd" "input" "uinput"];
+    extraGroups = ["networkmanager" "wheel" "video" "libvirtd" "input" "uinput" "docker"];
   };
 
   system.stateVersion = "24.11";

@@ -20,9 +20,11 @@ in
         default = rec {
           inherit (config.wm.shared) terminal workspace_rules explorer;
           startup = [
-            "swww-daemon"
             "wl-paste --type text --watch cliphist store" # Stores only text data
             "wl-paste --type image --watch cliphist store" # Stores only image data
+            "swww-daemon"
+            "bg.sh last"
+            config.wm.shared.terminal
           ];
           _bind = mod: key: exec: {inherit mod key exec;};
           mod = _bind "Super";
@@ -41,8 +43,8 @@ in
               (_bind "Super Shift" "b" "toggle_waybar.sh")
               (_bind "Super Shift" "r" "wayrec.sh")
 
-              (mod "v" "rofi -modi clipboard:cliphist-rofi-img -show clipboard -show-icons")
-              (_bind "Super Shift" "v" "bash -c \"cliphist list | rofi -dmenu | cliphist decode | xargs -I '{}' ydotool type '{}'\"")
+              (mod "v" "rofi-clip.sh")
+              (_bind "Super Shift" "v" "rofi-clip-more.sh")
             ];
           inherit (config.wm.shared) bindexec_el;
         };
@@ -59,7 +61,7 @@ in
       home.packages = with pkgs; [
         wlprop
 
-        (import ../../../derivations/notify-send-py.nix {inherit lib pkgs;})
+        # (import ../../../derivations/notify-send-py.nix {inherit lib pkgs;})
         hyprpicker
         hyprlock
         hyprsunset

@@ -37,6 +37,7 @@
 
     packages = with pkgs; [
       zoom-us
+      kicad
       opencode
 
       deskreen
@@ -60,7 +61,6 @@
       sqlite
       nix-search-cli
 
-      ghostty
       pscircle
 
       (tesseract.override {

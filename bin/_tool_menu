@@ -1,9 +1,8 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-TERMINAL=kitty
 EDIT="$TERMINAL -e nvim"
 
-function getShaders {
+getShaders() {
 	shaderDir="$HOME/.config/picom/shaders"
 	shaders=$( ls "$shaderDir" )
 

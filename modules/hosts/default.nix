@@ -1,8 +1,4 @@
-{
-  pkgs,
-  lib,
-  ...
-}: {
+{sharedConfig, ...}: {
   imports = [
     ./nix.nix
     ./networking.nix
@@ -13,6 +9,10 @@
 
   environment.sessionVariables = {
     NIX_BUILD_CORES = 6;
+    EDITOR = sharedConfig.editor;
+    TERMINAL = sharedConfig.terminal;
+    BROWSER = sharedConfig.browser;
+    DOTFILES = "/home/${sharedConfig.user}/dotnix";
   };
 
   services = {

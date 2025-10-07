@@ -11,25 +11,44 @@
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
 
-  boot.initrd.availableKernelModules = ["xhci_pci" "thunderbolt" "vmd" "nvme" "usb_storage" "sd_mod"];
-  boot.initrd.kernelModules = [];
-  boot.kernelModules = ["kvm-intel"];
-  boot.extraModulePackages = [];
+  boot = {
+    initrd = {
+      availableKernelModules = ["xhci_pci" "thunderbolt" "vmd" "nvme" "usb_storage" "sd_mod"];
+      kernelModules = [];
+    };
 
-  fileSystems."/" = {
-    device = "/dev/disk/by-uuid/8def0567-4745-4356-832f-f9d0161f800c";
-    fsType = "ext4";
+    kernelModules = ["kvm-intel"];
+    extraModulePackages = [];
   };
 
-  fileSystems."/boot" = {
-    device = "/dev/disk/by-uuid/FD98-2F4E";
-    fsType = "vfat";
-    options = ["fmask=0077" "dmask=0077"];
-  };
+  fileSystems = {
+    "/" = {
+      device = "/dev/disk/by-uuid/8def0567-4745-4356-832f-f9d0161f800c";
+      fsType = "ext4";
+    };
 
-  fileSystems."/mnt/win" = {
-    device = "/dev/nvme0n1p3";
-    fsType = "ntfs";
+    "/boot" = {
+      device = "/dev/disk/by-uuid/FD98-2F4E";
+      fsType = "vfat";
+      options = ["fmask=0077" "dmask=0077"];
+    };
+
+    "/mnt/win" = {
+      device = "/dev/nvme0n1p3";
+      fsType = "ntfs";
+    };
+
+    "/mnt/tb" = {
+      device = "/dev/disk/by-label/tb";
+      fsType = "f2fs";
+      options = [
+        "compress_algorithm=zstd"
+        "discard"
+        "noatime"
+        "nofail" # Prevent system from failing if this drive doesn't mount
+        "users" # Allows any user to mount and unmount
+      ];
+    };
   };
 
   # fileSystems."/swap" = {
@@ -53,13 +72,14 @@
   # networking.interfaces.wlo1.useDHCP = lib.mkDefault true;
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-  hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
-  powerManagement = {
-    enable = true;
-    cpuFreqGovernor = "performance";
-    powertop.enable = true;
-    # scsiLinkPolicy = "max_performance";
+  hardware = {
+    cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+
+    nvidia-container-toolkit.mount-nvidia-executables = true;
+
+    nvidia = {
+      nvidiaSettings = true;
+    };
   };
-  # “ondemand”, “powersave”, “performance”
 }

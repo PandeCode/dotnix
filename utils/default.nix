@@ -1,6 +1,8 @@
 pkgs: {
   flattenListAttrsToAttr = pkgs.lib.foldl' (a: b: a // b) {};
 
+  forceAttrs = s: builtins.mapAttrs (_: v: pkgs.lib.mkForce v) s;
+
   mapAttrsWithKeyTransform = f: attrs:
     builtins.listToAttrs (
       builtins.map (

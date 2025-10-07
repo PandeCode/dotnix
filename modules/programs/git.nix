@@ -13,6 +13,7 @@
       userEmail = "pandeshawnbenjamin@gmail.com";
 
       extraConfig = {
+        init.defaultBranch = "main";
         color = {
           ui = "auto";
         };

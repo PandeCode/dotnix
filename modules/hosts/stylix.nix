@@ -16,7 +16,7 @@
           gnome-text-editor.enable = true;
           gnome.enable = true;
           grub.enable = true;
-          grub.useImage = true;
+          grub.useWallpaper = true;
 
           gtk.enable = true;
           kmscon.enable = true;

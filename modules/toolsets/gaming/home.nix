@@ -23,8 +23,6 @@
       wine-staging
       winetricks
 
-      protonup-qt
-
       antimicrox
       mangohud
       gamescope

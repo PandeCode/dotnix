@@ -1,5 +1,10 @@
 {sharedConfig, ...}: {
-  services.globalprotect.enable = true;
+  # services.globalprotect.enable = true; # TODO security
+  services.xrdp = {
+    enable = true;
+    audio.enable = true;
+    openFirewall = true;
+  };
   networking = {
     inherit (sharedConfig) hostName;
 

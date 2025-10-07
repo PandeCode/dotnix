@@ -6,6 +6,9 @@
     wayland-scanner
     libxkbcommon
     libGL
+    glew
+    glfw
+    cmake
     libdrm
     libgbm
     expat

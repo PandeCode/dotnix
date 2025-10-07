@@ -8,8 +8,8 @@
     commands = lib.mkOption {
       default = {
         copy = ''rofi -modi "clipboard:greenclip print" -show clipboard -run-command '{cmd}' '';
-        paste = ''rofi -modi "clipboard:greenclip print" -show clipboard -run-command '{cmd}'  }; sleep 0.5; xdotool type "$(xclip -o -selection clipboard)"'';
-        restart = ''pkill greenclip && greenclip clear && greenclip daemon &'';
+        paste = ''sh -c 'rofi -modi "clipboard:greenclip print" -show clipboard -run-command "{cmd}" && sleep 0.5 && xdotool type "$(xclip -o -selection clipboard)"' '';
+        restart = ''pkill greenclip && greenclip clear && greenclip daemon & disown'';
       };
     };
   };

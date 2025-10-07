@@ -2,13 +2,13 @@
   pkgs,
   lib,
   config,
+  sharedConfig,
   ...
-}: let
-  cfg = config.services;
-in {
+}: {
   imports = [
     # ./services/usbnotify.nix
     # ./services/sunshine.nix
+    ./power.nix
   ];
 
   options = {
@@ -37,12 +37,13 @@ in {
 
         settings = {
           devices = {
+            "small-device" = {id = "DEVICE-ID-GOES-HERE";};
             "device" = {id = "DEVICE-ID-GOES-HERE";};
             "chaos" = {id = "DEVICE-ID-GOES-HERE";};
           };
           folders = {
             "School" = {
-              path = "/home/${config.home.username}/Vaults/School";
+              path = "/home/${sharedConfig.user}/Vaults/School";
               devices = ["device" "chaos"];
               ignorePerms = false;
             };
@@ -70,99 +71,45 @@ in {
         enable = true;
         settings.PermitRootLogin = lib.mkForce "yes";
       };
-      printing.enable = true;
-      qemuGuest.enable = true;
-      # tlp = lib.mkIf cfg.isLaptop {
-      #   enable = true;
-      #   settings = {
-      #     CPU_SCALING_GOVERNOR_ON_AC = "performance";
-      #     CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
-      #
-      #     CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
-      #     CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
-      #
-      #     CPU_MIN_PERF_ON_AC = 0;
-      #     CPU_MAX_PERF_ON_AC = 100;
-      #     CPU_MIN_PERF_ON_BAT = 0;
-      #     CPU_MAX_PERF_ON_BAT = 20;
-      #
-      #     # Optional helps save long term battery health
-      #     START_CHARGE_THRESH_BAT0 = 20; # 40 and bellow it starts to charge
-      #     STOP_CHARGE_THRESH_BAT0 = 90; # 80 and above it stops charging
-      #   };
-      # };
-      ananicy = {
-        enable = true;
-        package = pkgs.ananicy-cpp;
-        rulesProvider = pkgs.ananicy-rules-cachyos;
-      };
+      printing.enable = false;
+
+      qemuGuest.enable = false;
       # udev rules configuration for gaming controllers and power management
-      udev.extraRules = ''
-        # Steam Controller support
-        # Basic functionality in Steam and keyboard/mouse emulation
-        SUBSYSTEM=="usb", ATTRS{idVendor}=="28de", MODE="0666"
+      udev = {
+        packages = with pkgs; [
+          android-udev-rules
+        ];
+        extraRules = ''
+          # Steam Controller support
+          # Basic functionality in Steam and keyboard/mouse emulation
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="28de", MODE="0666"
 
-        # Gamepad emulation support
-        KERNEL=="uinput", MODE="0660", GROUP="shawn", OPTIONS+="static_node=uinput"
+          # Gamepad emulation support
+          KERNEL=="uinput", MODE="0660", GROUP="shawn", OPTIONS+="static_node=uinput"
 
-        # Weylus tablet input support
-        KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"
+          # Weylus tablet input support
+          KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"
 
-        # Valve HID devices
-        KERNEL=="hidraw*", ATTRS{idVendor}=="28de", MODE="0666"
-        KERNEL=="hidraw*", KERNELS=="*28DE:*", MODE="0666"
+          # Valve HID devices
+          KERNEL=="hidraw*", ATTRS{idVendor}=="28de", MODE="0666"
+          KERNEL=="hidraw*", KERNELS=="*28DE:*", MODE="0666"
 
-        # DualShock 4 Controller support
-        # DualShock 4 over USB
-        KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="05c4", MODE="0666"
-        # DualShock 4 wireless adapter over USB
-        KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0ba0", MODE="0666"
-        # DualShock 4 Slim over USB
-        KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="09cc", MODE="0666"
-        # DualShock 4 over Bluetooth
-        KERNEL=="hidraw*", KERNELS=="*054C:05C4*", MODE="0666"
-        # DualShock 4 Slim over Bluetooth
-        KERNEL=="hidraw*", KERNELS=="*054C:09CC*", MODE="0666"
+          # DualShock 4 Controller support
+          # DualShock 4 over USB
+          KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="05c4", MODE="0666"
+          # DualShock 4 wireless adapter over USB
+          KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0ba0", MODE="0666"
+          # DualShock 4 Slim over USB
+          KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="09cc", MODE="0666"
+          # DualShock 4 over Bluetooth
+          KERNEL=="hidraw*", KERNELS=="*054C:05C4*", MODE="0666"
+          # DualShock 4 Slim over Bluetooth
+          KERNEL=="hidraw*", KERNELS=="*054C:09CC*", MODE="0666"
 
-        # Hard drive power management
-        # Set aggressive power saving for rotational drives
-        ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", RUN+="${pkgs.hdparm}/bin/hdparm -B 90 -S 41 /dev/%k"
-      '';
-    };
-
-    services.thermald.enable = true;
-
-    # services.auto-cpufreq.enable = true;
-    # services.auto-cpufreq.settings = {
-    #   battery = {
-    #     governor = "powersave";
-    #     turbo = "never";
-    #   };
-    #   charger = {
-    #     governor = "performance";
-    #     turbo = "auto";
-    #   };
-    # };
-
-    systemd = {
-      sleep.extraConfig = ''
-        HibernateDelaySec=2h
-        AllowSuspend=yes
-        AllowHibernation=yes
-        AllowHybridSleep=yes
-        AllowSuspendThenHibernate=yes
-      '';
-      services = {
-        syncthing.environment.STNODEFAULTFOLDER = "true";
-        journal-resume = {
-          description = "Service description here";
-          wantedBy = ["post-resume.target"];
-          after = ["post-resume.target"];
-          script = ''
-            echo "This should show up in the journal after resuming."
-          '';
-          serviceConfig.Type = "oneshot";
-        };
+          # Hard drive power management
+          # Set aggressive power saving for rotational drives
+          ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", RUN+="${pkgs.hdparm}/bin/hdparm -B 90 -S 41 /dev/%k"
+        '';
       };
     };
   };

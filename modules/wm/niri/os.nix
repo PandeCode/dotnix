@@ -4,6 +4,7 @@
   ...
 }: {
   imports = [
+    ../wayland/os.nix
     inputs.niri.nixosModules.niri
   ];
 

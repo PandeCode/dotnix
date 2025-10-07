@@ -203,7 +203,7 @@ in {
       }))
     )
 
-    (rofi-wayland.override {plugins = [rofi-emoji rofi-calc rofi-games rofi-power-menu rofi-mpd];})
+    (rofi.override {plugins = [rofi-emoji rofi-calc rofi-games rofi-power-menu rofi-mpd];})
 
     rofi-bluetooth
   ];
@@ -223,13 +223,86 @@ in {
     "rofi/nix.rasi".text = let
       c = config.lib.stylix.colors;
     in ''
+
+      configuration {
+        font: "${config.stylix.fonts.sansSerif.name}";
+
+        drun {
+          display-name: "";
+        }
+
+        run {
+          display-name: "";
+        }
+
+        window {
+          display-name: "";
+        }
+
+        timeout {
+          delay: 10;
+          action: "kb-cancel";
+        }
+      }
+
       * {
-          background:     #${c.base00}FF;
-          background-alt: #${c.base01}FF;
-          foreground:     #${c.base05}FF;
-          selected:       #${c.base02}FF;
-          active:         #${c.base03}FF;
-          urgent:         #${c.base0F}FF;
+        border: 0;
+        margin: 0;
+        padding: 0;
+        spacing: 0;
+
+        bg: #${c.base00};
+        bg-alt: #${c.base01};
+        fg: #${c.base03};
+        fg-alt: #${c.base05};
+
+        background-color: @bg;
+        text-color: @fg;
+      }
+
+      window {
+        transparency: "real";
+        width: 700px;
+      }
+
+      mainbox {
+        children: [inputbar, listview];
+      }
+
+      inputbar {
+        background-color: @bg-alt;
+        children: [prompt, entry];
+      }
+
+      entry {
+        background-color: inherit;
+        padding: 12px 3px;
+      }
+
+      prompt {
+        background-color: inherit;
+        padding: 12px;
+      }
+
+      listview {
+        lines: 8;
+      }
+
+      element {
+        children: [element-icon, element-text];
+      }
+
+      element-icon {
+        padding: 10px 10px;
+        size: 20px;
+      }
+
+      element-text {
+        padding: 10px 0;
+      }
+
+      element-text selected {
+        text-color: @fg-alt;
       }
     '';
   };

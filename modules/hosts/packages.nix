@@ -38,8 +38,16 @@
     };
   };
 
+  documentation.dev.enable = true;
+
   environment.systemPackages = with pkgs; [
+    man-pages
+    man-pages-posix
+
     home-manager
+    sops
+
+    appimage-run
 
     xf86_input_wacom
     opentabletdriver

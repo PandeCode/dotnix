@@ -1,8 +1,9 @@
 {
   pkgs,
+  dotutils,
   lib,
   config,
-  # inputs,
+  inputs,
   sharedConfig,
   ...
 }: let
@@ -60,7 +61,7 @@ in {
           ];
 
           ws_1 = ["St" "st" "ghostty" "alacritty" "kitty" "st-256color"];
-          ws_2 = ["Browser" "Firefox" "Google-chrome" "Opera"];
+          ws_2 = ["Browser" "Firefox" "Google-chrome" "Opera" "Navigator" "zen-twilight"];
           ws_3 = ["ModernGL" "Emacs" "emacs" "neovide" "Code" "Code - Insiders" "Blender"];
           ws_4 = ["hakuneko-desktop" "Unity" "unityhub" "UnityHub" "zoom"];
           ws_5 = ["Spotify" "vlc"];
@@ -101,7 +102,7 @@ in {
           (mod "Return" "${terminal}")
           (mod "e" "${explorer}")
 
-          (_bind "super shift" "g" "find ~/Pictures/gifs/ -type f | shuf -n 1 | xargs -I{} pqiv -c -c -i '{}'")
+          (_bind "super shift" "g" "gif.sh")
 
           (nomod "XF86AudioPlay" "_tool_ctrl media toggle")
           (nomod "XF86AudioNext" "_tool_ctrl media next")
@@ -129,10 +130,6 @@ in {
   };
 
   config = {
-    home.sessionVariables = {
-      TERMINAL = config.wm.shared.terminal;
-      EXPLORER = config.wm.shared.explorer;
-    };
     programs = {
       kitty = {
         enable = true;
@@ -149,31 +146,19 @@ in {
         enable = true;
         enableBashIntegration = true;
         enableFishIntegration = true;
-        settings = {
-          background-opacity = lib.mkForce 0.8;
-          background-blur = lib.mkForce true;
-          window-vsync = lib.mkForce true;
-          window-decoration = lib.mkForce "server";
-          clipboard-trim-trailing-spaces = lib.mkForce true;
-          clipboard-paste-protection = lib.mkForce true;
-          confirm-close-surface = lib.mkForce false;
+        settings = dotutils.forceAttrs {
+          background-opacity = 0.8;
+          background-blur = true;
+          window-vsync = true;
+          window-decoration = "server";
+          clipboard-trim-trailing-spaces = true;
+          clipboard-paste-protection = true;
+          confirm-close-surface = false;
 
-          # custom-shader = "./ghostty-shaders/gears-and-belts.glsl";
+          custom-shader = "${../../config/ghostty/shader.glsl}";
         };
       };
       alacritty.enable = true;
-    };
-
-    home = {
-      packages = [
-        pkgs.appimage-run
-        # pkgs.spatial-shell
-
-        # (pkgs.writeShellScriptBin "webcamize" (builtins.readFile (builtins.fetchurl {
-        #   url = "https://github.com/cowtoolz/webcamize/raw/refs/heads/master/webcamize";
-        #   sha256 = "13cqqzj5naw8fw1kash0v5lpxplx5hy887k9cypdz0r6g4inj66r";
-        # })))
-      ];
     };
 
     xdg = {
@@ -218,36 +203,25 @@ in {
         #   categories = ["System" "Utility"];
         # };
       };
-
-      configFile = {
-        "spatial/config-waybar".text = ''
-          status_bar_name "waybar"
-        '';
-        "spatial/config-sway".text = ''
-          status_bar_name "i3blocks"
-        '';
-        "spatial/config-i3".text = ''
-          status_bar_name "i3blocks"
-        '';
-      };
     };
-    services.fusuma = {
-      enable = false;
-      settings = {
-        threshold = {
-          swipe = 0.1;
-        };
-        interval = {
-          swipe = 0.7;
-        };
-        swipe = {
-          "3" = {
-            left = {
-              command = "notify-send fusma left 3";
-            };
-          };
-        };
-      };
-    };
+    # services.fusuma = {
+    #   enable = false;
+    #   settings = {
+    #     threshold = {
+    #       swipe = 0.1;
+    #     };
+    #     interval = {
+    #       swipe = 0.7;
+    #     };
+    #     swipe = {
+    #       "3" = {
+    #         left = {
+    #           command = "notify-send fusma left 3";
+    #         };
+    #       };
+    #     };
+    #   };
+    #
+    # };
   };
 }

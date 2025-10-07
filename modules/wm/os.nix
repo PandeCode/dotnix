@@ -12,7 +12,18 @@
   xdg.portal.enable = lib.mkForce true;
   xdg.portal.extraPortals = [pkgs.xdg-desktop-portal-gtk];
 
+  imports = [inputs.aagl.nixosModules.default];
+  programs.honkers-railway-launcher.enable = true;
+
   security.rtkit.enable = true;
+
+  virtualisation.docker = {
+    # enable = true;
+    rootless = {
+      enable = true;
+      setSocketVariable = true;
+    };
+  };
 
   # services.xserver.desktopManager.gnome.enable = true;
   # services.desktopManager.plasma6.enable = true;
@@ -89,7 +100,6 @@
       neovide
 
       anime4k
-      miru
       hakuneko
       manga-tui
       comic-mandown

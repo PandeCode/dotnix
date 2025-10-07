@@ -1,5 +1,6 @@
-{...}: let
-in {
+{...}: {
+  imports = [../os.nix];
+
   services.xserver = {
     enable = true;
     xkb = {

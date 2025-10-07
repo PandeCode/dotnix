@@ -69,7 +69,7 @@
       XCURSOR_THEME = config.home.pointerCursor.name;
       XCURSOR_SIZE = config.home.pointerCursor.size;
     };
-    home.activation.setTheme = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    activation.setTheme = lib.hm.dag.entryAfter ["writeBoundary"] ''
       ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface color-scheme "prefer-light"
     '';
     packages = [pkgs.bibata-cursors];

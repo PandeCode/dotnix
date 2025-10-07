@@ -22,10 +22,6 @@
     };
   };
 
-  hardware = {
-    graphics.enable = true;
-  };
-
   environment = {
     sessionVariables = {
       NIXOS_OZONE_WL = "1";
@@ -34,7 +30,7 @@
 
     systemPackages = with pkgs; [
       # inputs.charon-shell.packages.${pkgs.system}.default
-      inputs.obolc.packages.${pkgs.system}.default
+      # inputs.obolc.packages.${pkgs.system}.default
 
       brightnessctl
       cliphist

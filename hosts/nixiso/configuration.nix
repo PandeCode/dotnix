@@ -6,7 +6,10 @@
   ...
 }: {
   imports = [
+    "${modulesPath}/installer/cd-dvd/channel.nix"
     "${modulesPath}/installer/cd-dvd/installation-cd-minimal.nix"
+    "${modulesPath}/installer/cd-dvd/installation-cd-graphical-calamares.nix"
+
     ../../modules/hosts/default.nix
 
     ../../modules/wm/default.nix
@@ -18,6 +21,14 @@
   ];
 
   system.stateVersion = "24.05";
+
+  services.isLaptop = lib.mkForce false;
+
+  specialisation = {
+    laptop.configuration = {
+      services.isLaptop = lib.mkForce true;
+    };
+  };
 
   stylix_os = {
     enable = true;

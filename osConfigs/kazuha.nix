@@ -1,8 +1,10 @@
 (import ./defaults.nix)
-// {
+// rec {
   hostName = "kazuha";
+  hostname = hostName;
 
-  userName = "shawn";
-  username = "shawn";
   user = "shawn";
+  username = user;
+
+  isLaptop = true;
 }

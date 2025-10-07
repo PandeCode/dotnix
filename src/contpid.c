@@ -311,7 +311,7 @@ int main(int argc, char *argv[]) {
         processes[process_count++] = new_process;
       }
       // Give the process a moment to start and produce output
-      usleep(100000); // 100ms
+      sleep(100000); // 100ms
       read_from_pipe(new_process.pipe_path);
     }
   }

@@ -3,7 +3,7 @@ rec {
 
   nixConfig = {
     trusted-users = ["root" "shawn"];
-    experimental-features = ["nix-command" "flakes" "pipe-operators"];
+    experimental-features = ["nix-command" "flakes"];
     accept-flake-config = true;
     show-trace = true;
     auto-optimise-store = true;
@@ -14,12 +14,16 @@ rec {
       "https://nix-community.cachix.org"
       "https://hyprland.cachix.org"
       "https://charon.cachix.org"
+      "https://niri.cachix.org"
+      "https://ezkea.cachix.org"
       # "https://cuda-maintainers.cachix.org"
     ];
     extra-trusted-public-keys = [
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
       "charon.cachix.org-1:epdetEs1ll8oi8DT8OG2jEA4whj3FDbqgPFvapEPbY8="
+      "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
+      "ezkea.cachix.org-1:ioBmUbJTZIKsHmWWXPe1FSFbeVe+afhfgqgTSNd34eI="
       # "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
     ];
   };
@@ -42,7 +46,10 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # niri.url = "github:sodiboo/niri-flake";
+    niri = {
+      url = "github:sodiboo/niri-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     hyprland.url = "github:hyprwm/Hyprland";
 
@@ -60,7 +67,10 @@ rec {
     #   flake = false;
     # };
 
-    zen-browser.url = "github:0xc000022070/zen-browser-flake";
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     zjstatus = {
       url = "github:dj95/zjstatus";
@@ -82,80 +92,61 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    pre-commit-hooks.url = "github:cachix/git-hooks.nix";
+    pre-commit-hooks = {
+      url = "github:cachix/git-hooks.nix";
+    };
     stylix.url = "github:danth/stylix";
+
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    ghostty = {
+      url = "github:ghostty-org/ghostty";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    aagl = {
+      url = "github:ezKEa/aagl-gtk-on-nix";
+      inputs.nixpkgs.follows = "nixpkgs"; #
+    };
   };
 
   outputs = {
     self,
     nixpkgs,
-    home-manager,
     ...
   } @ inputs: let
-    inherit (self) outputs;
+    extras =
+      self
+      // rec {
+        inherit nixConfig;
 
-    systems = {
-      x86_64-linux = "x86_64-linux";
-      # aarch64-linux = "aarch64-linux";
-      # x86_64-darwin = "x86_64-darwin";
-      # aarch64-darwin = "aarch64-darwin";
-    };
+        systems = {
+          x86_64-linux = "x86_64-linux";
+          # aarch64-linux = "aarch64-linux";
+          # x86_64-darwin = "x86_64-darwin";
+          # aarch64-darwin = "aarch64-darwin";
+        };
+        supportedSystems = builtins.attrNames systems;
+        forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
-    supportedSystems = builtins.attrNames systems;
-    forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
+        stateVersion = "24.11";
+        dotutils = import ./utils/default.nix nixpkgs;
 
-    overlays = {
-      nixpkgs.overlays = with inputs; [
-        (final: prev: {
-          zjstatus = zjstatus.packages.${prev.system}.default;
-        })
-      ];
-    };
+        sharedConfig_kazuha = import ./osConfigs/kazuha.nix;
 
-    sharedConfig_kazuha = import ./osConfigs/kazuha.nix;
-
-    stateVersion = "24.11";
-    /*
-    WARN: Do not change,
-     Everything BREAKS,
-     So much PTSD, headache and tears. Almost made me quit nix, not related to `nix --version`
-    */
-
-    dotutils = import ./utils/default.nix nixpkgs;
+        overlays = (import ./nix/overlays.nix) inputs;
+      };
   in {
     nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
 
-    nixosConfigurations = let
-      mkSystem = system: sys_name: extra_modules: args:
-        nixpkgs.lib.nixosSystem {
-          specialArgs =
-            {
-              inherit inputs outputs system sys_name dotutils nixConfig;
-              pkgs-stable = inputs.nixpkgs-stable.legacyPackages.${system};
-            }
-            // args;
-          modules =
-            [
-              {nix.settings = nixConfig;}
-              overlays
-              inputs.stylix.nixosModules.stylix
-              ./hosts/${sys_name}/configuration.nix
-            ]
-            ++ extra_modules;
-        };
-      mkSystemLinux64 = mkSystem systems.x86_64-linux;
-    in {
-      nixiso = mkSystemLinux64 "nixiso" [
-        home-manager.nixosModules.home-manager
-        inputs.spicetify-nix.nixosModules.default
-      ] {sharedConfig = sharedConfig_kazuha;};
-      # wslnix = mkSystemLinux64 "wslnix" [inputs.nixos-wsl.nixosModules.default];
-
-      kazuha =
-        mkSystemLinux64 "kazuha" [
-        ] {sharedConfig = sharedConfig_kazuha;};
-      # jinwoo = mkSystemLinux64 "jinwoo " [];
-    };
+    nixosConfigurations = (import ./nix/nixosConfigurations.nix) extras;
+    homeConfigurations = (import ./nix/homeConfigurations.nix) extras;
+    checks = extras.forAllSystems ((import ./nix/checks.nix) extras);
+    devShells = extras.forAllSystems ((import ./nix/devShells.nix) extras);
+    packages = extras.forAllSystems ((import ./nix/packages.nix) extras);
 
     # darwinConfigurations = {
     #   herta = darwin.lib.darwinSystem {/
@@ -164,43 +155,5 @@ rec {
     #     modules = [stylix.darwinModules.stylix ./configuration.nix];
     #   };
     # };
-
-    homeConfigurations = let
-      mkHome = system: sys_name: username:
-        home-manager.lib.homeManagerConfiguration {
-          pkgs = nixpkgs.legacyPackages.${system};
-
-          extraSpecialArgs = {
-            inherit inputs outputs system sys_name username dotutils;
-            sharedConfig = sharedConfig_kazuha;
-            pkgs-stable = inputs.nixpkgs-stable.legacyPackages.${system};
-          };
-
-          modules = [
-            overlays
-            inputs.stylix.homeModules.stylix
-            {
-              nix.package = nixpkgs.legacyPackages.${system}.nix;
-              home = rec {
-                inherit username stateVersion;
-                homeDirectory = "/home/${username}";
-              };
-            }
-            ./homes/${sys_name}/home.nix
-          ];
-        };
-      mkHomeLinux64 = mkHome systems.x86_64-linux;
-      mkHomesLinux64 = names: nixpkgs.lib.genAttrs names (name: let idx = builtins.elemAt (builtins.split "@" name); in mkHomeLinux64 (idx 2) (idx 0));
-    in
-      mkHomesLinux64 ["shawn@kazuha"];
-    # {
-    #   # "shawn@wslnix" = mkHomeLinux64 "wslnix" "shawn";
-    #   "shawn@kazuha" = mkHomeLinux64 "kazuha" "shawn";
-    #   # "shawn@jinwoo" = mkHomeLinux64 "jinwoo" "shawn"; # TODO: New system
-    #   # "shawn@herta" = mkHomeDarwin "herta" "shawn"; # TODO: New system
-    # }j
-
-    checks = forAllSystems ((import ./nix/checks.nix) self);
-    devShells = forAllSystems ((import ./nix/devShells.nix) self);
   };
 }

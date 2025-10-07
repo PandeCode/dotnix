@@ -32,17 +32,27 @@ in {
             "alttab"
             "picom -b"
           ];
-        bindexec =
+        bindexec = let
+          mkscale = v: "sh -c 'xrandr --output $(xrandr | grep connected | grep -v disconnected | awk \\'{print $1}\\') --scale ${v}'";
+        in
           config.wm.shared.bindexec
           ++ [
             (nomod "Print" "maim -s | xclip -selection clipboard -t image/png")
 
-            (mod "v" config.greenclip.commands.copy)
-            (_bind "super shift" "v" config.greenclip.commands.copy)
+            (mod "d" "dunstctl context")
+            (mod_shift "d" "dunstctl close-all")
 
-            (mod "d" "gromit-mpx --toggle && notify-send 'Gromit' 'Gromit-MPX toggled'")
-            (mod_shift "d" "gromit-mpx --clear && notify-send 'Gromit' 'Screen cleared'")
-            (mod_ctrl "d" "bash -c 'pgrep gromit-mpx && pkill gromit-mpx && notify-send 'Gromit' 'Gromit-MPX killed' || (gromit-mpx & notify-send 'Gromit' 'Gromit-MPX started')'")
+            (mod "v" config.greenclip.commands.copy)
+            (mod_shift "v" config.greenclip.commands.paste)
+
+            (mod_ctrl "v" config.greenclip.commands.restart)
+
+            (mod_shift "-" (mkscale "0.8x0.8"))
+            (mod_shift "+" (mkscale "1.2x1.2"))
+
+            # (mod "d" "gromit-mpx --toggle && notify-send 'Gromit' 'Gromit-MPX toggled'")
+            # (mod_shift "d" "gromit-mpx --clear && notify-send 'Gromit' 'Screen cleared'")
+            # (mod_ctrl "d" "bash -c 'pgrep gromit-mpx && pkill gromit-mpx && notify-send 'Gromit' 'Gromit-MPX killed' || (gromit-mpx & notify-send 'Gromit' 'Gromit-MPX started')'")
           ];
 
         inherit (config.wm.shared) bindexec_el;
@@ -61,9 +71,7 @@ in {
           };
         };
       };
-      gromit-mpx = {
-        enable = true;
-      };
+      # gromit-mpx = { enable = false; };
     };
     dotnix = {
       enable = true;
@@ -86,8 +94,7 @@ in {
         xclip
         xorg.xmodmap
         picom-pijulius
-        xflux
-        alttab
+        # alttab
         feh
         scrot
         maim
@@ -96,7 +103,8 @@ in {
         xtitle
         xmenu
 
-        (dmenu-rs-enable-plugins.override {enablePlugins = true;})
+        dmenu
+        # dmenu-rs-enable-plugins
       ];
     };
   };
