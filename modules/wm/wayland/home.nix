@@ -61,7 +61,6 @@ in
       home.packages = with pkgs; [
         wlprop
 
-        # (import ../../../derivations/notify-send-py.nix {inherit lib pkgs;})
         hyprpicker
         hyprlock
         hyprsunset

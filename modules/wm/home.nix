@@ -103,6 +103,7 @@ in {
           (mod "e" "${explorer}")
 
           (_bind "super shift" "g" "gif.sh")
+          (_bind "super ctrl" "v" "clipimg.sh")
 
           (nomod "XF86AudioPlay" "_tool_ctrl media toggle")
           (nomod "XF86AudioNext" "_tool_ctrl media next")

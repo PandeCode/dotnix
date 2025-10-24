@@ -24,11 +24,11 @@
   #     STOP_CHARGE_THRESH_BAT0 = 90; # 80 and above it stops charging
   #   };
   # };
-  # services.ananicy = {
-  #   enable = false;
-  #   package = pkgs.ananicy-cpp;
-  #   rulesProvider = pkgs.ananicy-rules-cachyos;
-  # };
+  services.ananicy = {
+    enable = false;
+    package = pkgs.ananicy-cpp;
+    rulesProvider = pkgs.ananicy-rules-cachyos;
+  };
 
   powerManagement = {
     enable = false;

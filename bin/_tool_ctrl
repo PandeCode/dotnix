@@ -113,15 +113,15 @@ handle_media() {
 	case "$action" in
 	toggle)
 		playerctl play-pause
-		"$script_dir/media_info"
+		"$script_dir/_tool_media_info"
 		;;
 	next)
 		playerctl next
-		"$script_dir/media_info"
+		"$script_dir/_tool_media_info"
 		;;
 	prev | previous)
 		playerctl previous
-		"$script_dir/media_info"
+		"$script_dir/_tool_media_info"
 		;;
 
 	ctrl)

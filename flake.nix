@@ -3,7 +3,7 @@ rec {
 
   nixConfig = {
     trusted-users = ["root" "shawn"];
-    experimental-features = ["nix-command" "flakes"];
+    experimental-features = ["nix-command" "flakes" "pipe-operators"];
     accept-flake-config = true;
     show-trace = true;
     auto-optimise-store = true;
@@ -12,19 +12,11 @@ rec {
 
     extra-substituters = [
       "https://nix-community.cachix.org"
-      "https://hyprland.cachix.org"
       "https://charon.cachix.org"
-      "https://niri.cachix.org"
-      "https://ezkea.cachix.org"
-      # "https://cuda-maintainers.cachix.org"
     ];
     extra-trusted-public-keys = [
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-      "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
       "charon.cachix.org-1:epdetEs1ll8oi8DT8OG2jEA4whj3FDbqgPFvapEPbY8="
-      "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
-      "ezkea.cachix.org-1:ioBmUbJTZIKsHmWWXPe1FSFbeVe+afhfgqgTSNd34eI="
-      # "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
     ];
   };
 

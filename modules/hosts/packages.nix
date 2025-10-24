@@ -148,6 +148,8 @@
     hyperfine
     socat
 
+    newsboat
+
     # Eye Candy
     fastfetch
     imgcat

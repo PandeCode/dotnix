@@ -36,26 +36,26 @@
         reload_style_on_change = true;
 
         modules-right = [
-          "custom/notification"
+          "custom/lyrics"
           "image#album-art"
           "custom/cava"
           "custom/prev"
           "custom/play"
           "custom/next"
-          "custom/lyrics"
+          "custom/notification"
         ];
         modules-center = [
+          "group/name"
           "hyprland/workspaces"
           "hyprland/submap"
-          "group/name"
         ];
         modules-left = [
-          "group/expand"
-          "hyprland/language"
-          "bluetooth"
-          "network"
-          "battery"
           "clock"
+          "battery"
+          "network"
+          "bluetooth"
+          "hyprland/language"
+          "group/expand"
         ];
 
         "custom/prev" = {

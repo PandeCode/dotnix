@@ -1,17 +1,13 @@
-{
-  pkgs,
-  sharedConfig,
-  ...
-}: let
+{pkgs, ...}: let
   image = pkgs.fetchurl {
     url = "https://raw.githubusercontent.com/dharmx/walls/refs/heads/main/architecture/a_bridge_with_lights_on_it.jpg";
     sha256 = "465390cba5d4fa1861f2948b59fabe399bd2d7d53ddd6c896b0739bee4eca2c8";
   };
 in {
   stylix = {
-    enable = true;
-
     inherit image;
+
+    enable = true;
 
     base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
 
@@ -20,8 +16,6 @@ in {
       name = "Bibata-Mordern-Ice";
       size = 12;
     };
-
-    # polarity = "dark";
 
     fonts = rec {
       monospace = {

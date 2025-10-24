@@ -49,6 +49,8 @@
 
       spotifyd
 
+      (callPackage ../../derivations/notify-send-py.nix {})
+
       silicon
 
       ncdu

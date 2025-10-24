@@ -175,8 +175,6 @@ apply_transformations() {
 		done
 	fi
 
-	notify "$img"
-
 	echo "$transformations:$img"
 }
 

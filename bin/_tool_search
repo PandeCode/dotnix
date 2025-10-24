@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+theme=$(rofi-make-config.sh)
+
 # List of options
 options=(
 	"nixpkgs search"
@@ -22,7 +25,7 @@ options=(
 	# "pypi"
 )
 # Prompt the user to pick an option using rofi
-choice=$(printf "%s\n" "${options[@]}" | rofi -dmenu -p "Choose an action")
+choice=$(printf "%s\n" "${options[@]}" | rofi -dmenu -p "Choose an action" -theme "$theme")
 # Exit if no choice was made
 [ -z "$choice" ] && exit 1
 # Function to open a URL in the default browser

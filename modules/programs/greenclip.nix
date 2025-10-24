@@ -7,8 +7,8 @@
   options.greenclip = {
     commands = lib.mkOption {
       default = {
-        copy = ''rofi -modi "clipboard:greenclip print" -show clipboard -run-command '{cmd}' '';
-        paste = ''sh -c 'rofi -modi "clipboard:greenclip print" -show clipboard -run-command "{cmd}" && sleep 0.5 && xdotool type "$(xclip -o -selection clipboard)"' '';
+        copy = ''rofi -modi "clipboard:greenclip print" -show clipboard -run-command '{cmd}' -theme /tmp/launcher.rasi'';
+        paste = ''sh -c 'rofi -modi "clipboard:greenclip print" -show clipboard -run-command "{cmd}" -theme /tmp/launcher.rasi && sleep 0.5 && xdotool type "$(xclip -o -selection clipboard)"' '';
         restart = ''pkill greenclip && greenclip clear && greenclip daemon & disown'';
       };
     };

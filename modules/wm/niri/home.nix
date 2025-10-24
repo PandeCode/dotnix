@@ -145,8 +145,8 @@ in {
           "Super+Shift+h".action = consume-or-expel-window-left;
           "Super+Shift+l".action = consume-or-expel-window-right;
 
-          "Super+Shift+j".action = move-window-to-workspace-down {focus = false;};
-          "Super+Shift+k".action = move-window-to-workspace-up {focus = false;};
+          "Super+Shift+j".action = move-window-to-workspace-down {focus = true;};
+          "Super+Shift+k".action = move-window-to-workspace-up {focus = true;};
 
           "Super+Ctrl+l".action = set-column-width "+10%";
           "Super+Ctrl+h".action = set-column-width "-10%";

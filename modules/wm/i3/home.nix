@@ -2,6 +2,7 @@
   pkgs,
   lib,
   config,
+  sharedConfig,
   ...
 }:
 with builtins;
@@ -25,7 +26,7 @@ in {
   xsession.windowManager.i3 = {
     enable = true;
     extraConfig = ''
-      for_window [class="feh"] floating enable, sticky enable, border pixel 0, move absolute position 0 px 0 px
+      for_window [class="feh"] floating enable, sticky enable, border pixel 0, move absolute position ${toString (sharedConfig.resolution.x - 720 + 20)} px 20 px
       for_window [class="Pqiv"] floating enable, sticky enable, border pixel 0, move absolute position 0 px 0 px
 
       for_window [title="Picture-in-Picture"] \
