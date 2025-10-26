@@ -1,0 +1,34 @@
+auto-reload yes
+reload-on-start yes
+max-items 1000
+browser "xdg-open %u"
+
+show-read-feeds no
+open-in-new-tab no
+scroll-page-lines 6
+wrap-title yes
+wrap-description yes
+
+date-format "%a %b %d %H:%M"
+
+bind-key j down
+bind-key k up
+bind-key J pagedown
+bind-key K pageup
+bind-key o open
+bind-key v view
+bind-key r reload
+bind-key A toggle-article-filters
+bind-key R reload-and-reload-hooks
+bind-key s savefeed
+bind-key m mark-read
+bind-key u mark-unread
+bind-key S toggle-save
+
+show-article-summary 1
+article-sort-order date
+article-sort-reverse yes
+
+status-format "%u | %f feeds | %i items | %l unread"
+
+macro ,r set browser "mpv --no-terminal %u"; open ; set browser "xdg-open %u"

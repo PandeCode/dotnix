@@ -1,0 +1,47 @@
+#!/bin/sh
+
+wm=$(echo "$XDG_CURRENT_DESKTOP $DESKTOP_SESSION $XDG_SESSION_DESKTOP" | tr '[:upper:]' '[:lower:]')
+
+if echo "$wm" | grep -q "hypr"; then
+    # Hyprland branch
+    data=$(slurp -f "%x %y %w %h")
+
+    X=$(echo "$data" | awk '{ print($1) }')
+    Y=$(echo "$data" | awk '{ print($2) }')
+    WIDTH=$(echo "$data" | awk '{ print($3) }')
+    HEIGHT=$(echo "$data" | awk '{ print($4) }')
+
+    hyprctl dispatch setfloating
+    hyprctl dispatch resizeactive exact "$WIDTH" "$HEIGHT"
+    hyprctl dispatch moveactive exact "$X" "$Y"
+
+elif echo "$wm" | grep -q "i3"; then
+    # i3 branch
+    data=$(slop -b 3 -c 0.96,0.5,0.09 -t 0 -f "%x %y %w %h")
+
+    X=$(echo "$data" | awk '{ print($1) }')
+    Y=$(echo "$data" | awk '{ print($2) }')
+    WIDTH=$(echo "$data" | awk '{ print($3) }')
+    HEIGHT=$(echo "$data" | awk '{ print($4) }')
+
+    i3-msg focus prev
+    i3-msg floating enable
+    i3-msg move window position "$X" "$Y"
+    i3-msg resize set "$WIDTH" "$HEIGHT"
+
+elif echo "$wm" | grep -q "sway"; then
+    data=$(slurp -f "%x %y %w %h")
+
+    X=$(echo "$data" | awk '{ print($1) }')
+    Y=$(echo "$data" | awk '{ print($2) }')
+    WIDTH=$(echo "$data" | awk '{ print($3) }')
+    HEIGHT=$(echo "$data" | awk '{ print($4) }')
+
+    swaymsg floating enable
+    swaymsg move position "$X" "$Y"
+    swaymsg resize set "$WIDTH" "$HEIGHT"
+
+else
+    echo "Unsupported or unknown window manager."
+    exit 1
+fi

@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+
+# --- Image clipboard check ---
+clip_is_image() {
+	if [[ $XDG_SESSION_TYPE == "x11" ]]; then
+		xclip -selection clipboard -t image/png -o &>/dev/null
+	else
+		wl-paste --list-types | grep -q "image/png"
+	fi
+}
+
+# --- Show menu with clipboard preview ---
+show_menu() {
+	if clip_is_image; then
+		tmpimg=$(mktemp --suffix=.png)
+		if [[ $XDG_SESSION_TYPE == "x11" ]]; then
+			xclip -selection clipboard -t image/png -o >"$tmpimg"
+		else
+			wl-paste --type image/png >"$tmpimg"
+		fi
+		preview_opt="-theme-str 'window { background-image: url(\"$tmpimg\"); }'"
+	else
+		clip_preview=$(cso | head -c 500 | tr '\n' ' ')
+		preview_opt="-mesg \"Clipboard: $clip_preview\""
+	fi
+	eval "printf '%s\n' \"\${actions[@]}\" | rofi -dmenu -p 'Clipboard Action:' $preview_opt"
+}
+
+# --- Translation submenu ---
+translate_menu() {
+	from=$(printf "auto\nen\nes\nde\nja" | rofi -dmenu -p "Translate FROM:")
+	[[ -z "$from" ]] && exit
+	to=$(printf "en\nes\nde\nja" | rofi -dmenu -p "Translate TO:")
+	[[ -z "$to" ]] && exit
+	new_clip=$(cso | trans -brief -s "$from" -t "$to")
+	printf "%s" "$new_clip" | cs
+	notify-send "Translated ($from → $to)" "$new_clip"
+	exit 0
+}
+
+# --- Actions List ---
+actions=(
+	"Uppercase"
+	"Lowercase"
+	"Trim whitespace"
+	"Reverse text"
+	"Remove newlines"
+	"Base64 encode"
+	"Base64 decode"
+	"QR Encode"
+	"QR Decode"
+	"Image OCR → Text"
+	"Translate (sub menu)"
+	"Cancel"
+)
+
+choice=$(show_menu)
+[[ "$choice" == "Cancel" || -z "$choice" ]] && exit
+
+clip=$(cso)
+
+# --- Action handlers ---
+case "$choice" in
+"Uppercase") new_clip=$(printf "%s" "$clip" | tr '[:lower:]' '[:upper:]') ;;
+"Lowercase") new_clip=$(printf "%s" "$clip" | tr '[:upper:]' '[:lower:]') ;;
+"Trim whitespace") new_clip=$(printf "%s" "$clip" | sed 's/^[ \t]*//;s/[ \t]*$//') ;;
+"Reverse text") new_clip=$(printf "%s" "$clip" | rev) ;;
+"Remove newlines") new_clip=$(printf "%s" "$clip" | tr -d '\n') ;;
+"Base64 encode") new_clip=$(printf "%s" "$clip" | base64) ;;
+"Base64 decode") new_clip=$(printf "%s" "$clip" | base64 --decode 2>/dev/null) ;;
+"QR Encode")
+	tmpqr=$(mktemp --suffix=.png)
+	printf "%s" "$clip" | qrencode -o "$tmpqr"
+	if [[ $XDG_SESSION_TYPE == "x11" ]]; then
+		xclip -selection clipboard -t image/png -i "$tmpqr"
+	else
+		wl-copy --type image/png <"$tmpqr"
+	fi
+	notify-send "Clipboard Updated" "QR code copied as image"
+	exit 0
+	;;
+"QR Decode")
+	tmpimg=$(mktemp --suffix=.png)
+	if [[ $XDG_SESSION_TYPE == "x11" ]]; then
+		xclip -selection clipboard -t image/png -o >"$tmpimg"
+	else
+		wl-paste --type image/png >"$tmpimg"
+	fi
+	new_clip=$(zbarimg --quiet --raw "$tmpimg" 2>/dev/null)
+	;;
+"Image OCR → Text")
+	tmpimg=$(mktemp --suffix=.png)
+	if [[ $XDG_SESSION_TYPE == "x11" ]]; then
+		xclip -selection clipboard -t image/png -o >"$tmpimg"
+	else
+		wl-paste --type image/png >"$tmpimg"
+	fi
+	new_clip=$(tesseract "$tmpimg" - -l eng 2>/dev/null)
+	;;
+"Translate (sub menu)") translate_menu ;;
+*) exit 1 ;;
+esac
+
+# --- Update clipboard ---
+printf "%s" "$new_clip" | cs
+notify-send "Clipboard Updated" "$choice applied"

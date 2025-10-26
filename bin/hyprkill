@@ -1,0 +1,4 @@
+#!/bin/sh
+
+hyprctl dispatch closewindow address:"$(hyprop | jq -r '.address')"
+# hyprctl setprop address:$(hyprop | jq -r '.["address"]') opaque 1

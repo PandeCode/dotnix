@@ -1,0 +1,312 @@
+#!/usr/bin/env bash
+
+CONFIGDIR=$HOME/dotnix/
+BROWSER=google-chrome-stable
+EXPLORER=nautilus
+DOTFILES=$HOME/dotnix # Assuming this is where scripts are stored; adjust if necessary
+
+# Declare associative array to store menu paths and commands
+declare -A menu_commands
+
+# Define the menu structure and populate the associative array
+menu_definition=$(
+	cat <<EOF
+Background
+    Random                                    	 randbg
+    Previous                                  	 prevbg
+    Next                                     	 nextbg
+    Last                                     	 lastbg
+Media
+    Play                                      	 playerctl play
+    Pause                                     	 playerctl pause
+Lang
+    Clipboard To English                      	 $DOTFILES/bin/clipboardToEnglish
+    Clipboard To Speech                       	 $DOTFILES/bin/clipboardToSpeech
+    Clipboard To Speech English               	 $DOTFILES/bin/clipboardToSpeechEn
+    Picture To English                        	 $DOTFILES/bin/pictureToEnglish
+    Picture To Clipboard                      	 $DOTFILES/bin/pictureToClipboard
+    QR Code                                   	 $DOTFILES/bin/qrCodeToClipboard
+ Notifications
+    Notifications Center                      	 kill -s USR0 \$(pidof deadd-notification-center)
+    Highlight On                              	 notify-send.py a --hint boolean:deadd-notification-center:true int:id:-1 boolean:state:true type:string:buttons
+    Highlight Off                             	 notify-send.py a --hint boolean:deadd-notification-center:true int:id:-1 boolean:state:false type:string:buttons
+    Clear Center                              	 notify-send.py a --hint boolean:deadd-notification-center:true string:type:clearInCenter
+    Clear Popups                              	 notify-send.py a --hint boolean:deadd-notification-center:true string:type:clearPopups
+    Pause                                     	 notify-send.py a --hint boolean:deadd-notification-center:true string:type:pausePopups
+    Unpause                                   	 notify-send.py a --hint boolean:deadd-notification-center:true string:type:unpausePopups
+    Reload Style                              	 notify-send.py a --hint boolean:deadd-notification-center:true string:type:reloadStyle
+ Applications
+     Chrome                                  	 $BROWSER
+     Terminal                                	 $TERMINAL
+     Files                                   	 $EXPLORER
+     Keys                                    	 vimb ~/dev/Keys/keys.html
+     School
+         canvas-tui                          	 $TERMINAL -e canvas-tui
+         Zotero                              	 zotero
+         CS                                  	 $TERMINAL -e ranger  ~/Documents/school
+     Comms
+        Discord (GUI)                         	 discord
+        Discord (cordless)                    	 $TERMINAL -e cordless
+         Email (Neomutt)                     	 $TERMINAL -e neomuttjj
+         IRC (weechat)                       	 $TERMINAL -e weechat
+         SMS (kde-connect)                   	 kdeconnect-sms --style gtk1
+         Slack                               	 slack
+         Signal (GUI)                        	 signal-desktop
+         Telegram (GUI)                      	 telegram-desktop
+         Telegram (nctelegram)               	 nctelegram
+     Finance
+         Crypto (TUI)                        	 $TERMINAL -e cointop
+         Stocks (TUI)                        	 $TERMINAL -e mop
+         Stonks (CLI)                        	 $TERMINAL -e mop
+     Utilities
+         Calculator (TUI)                    	 $TERMINAL -e qalq
+         Calculator (GUI)                    	 qalculate-gtk
+         Calendar (khal)                     	 $TERMINAL -e khal interactive
+         Color Picker                        	 gpick
+         Map (TUI)                           	 $TERMINAL -e mapscii
+         System
+             Keyboard (Corsair)              	 ckb-next
+             Fonts                           	 gucharmap
+             Smartphone (kdeconnect)         	 kdeconnect-app --style gtk1
+             Docker (lazydocker)             	 $TERMINAL -e lazydocker
+             Kill Window                     	 xkill
+             Screen Recording (vokoscreenNG) 	 vokoscreenNG
+             Screenshot
+                GUI                           	 flameshot gui
+                All Displays                  	 flameshot screen -d 4999 -n 3 -p $HOME/Photos/screenshots
+                Middle Display                	 flameshot screen -d 4999 -n 0 -p $HOME/Photos/screenshots
+                Right Display                 	 flameshot screen -d 4999 -n 1 -p $HOME/Photos/screenshots
+                Left Display                  	 flameshot screen -d 4999 -n 2 -p $HOME/Photos/screenshots
+         Personal
+             Nextcloud                       	 nextcloud --style gtk1
+             Passwords (keepassxc)           	 keepassxc --style gtk1
+             Keys (Seahorse)                 	 seahorse
+         Theming
+            lxappearance                      	 lxappearance
+            GTK (oomox)                       	 oomox-gui
+            Qt (qt4ct)                        	 qt5ct --style gtk2
+            WPGTK                             	 wpg
+         Monitors
+            System (ytop)                     	 $TERMINAL -e ytop
+            System (bashtop)                  	 $TERMINAL -e bashtop
+            System (glances)                  	 $TERMINAL -e glances
+            Disk Usage (GUI)                  	 baobab
+            Disk Usage (TUI)                  	 $TERMINAL -e ncdu
+            IO (iotop)                        	 $TERMINAL -e iotop
+            Kernel (kmon)                     	 $TERMINAL -e kmon
+            Intel GPU (intel_gpu_top)         	 $TERMINAL -e sudo intel_gpu_top
+            Nvidia GPU (nvtop)                	 $TERMINAL -e nvtop
+            Power (powertop)                  	 $TERMINAL -e powertop
+            DNS (dnstop)                      	 $TERMINAL -e powertop
+            Network Usage (jnettop)           	 $TERMINAL -e jnettop
+            Network Load (nload)              	 $TERMINAL -e nload
+            Bandwidth (bmon)                  	 $TERMINAL -e bmon
+            Media Server                      	 $TERMINAL -e jellyfinips.sh
+         Media
+             EasyTag                         	 easytag
+     Entertainment
+         Media
+            VLC                               	 vlc
+             Podcasts (castero)              	 castero
+             RSS (newsboat)                  	 newsboat
+             Reddit (tuir)                   	 tuir
+             Music (cmus)                    	 cmus
+             Spotify (GUI)                   	 spotify
+             Spotify (spotifytui)            	 spt
+            Soulseek (Nicotine+)              	 nicotine
+         Games
+             Steam                           	 steam
+            Itch                              	 itch
+            Lutris                            	 lutris
+            Tetris                            	 tetris
+            Solitaire                         	 ttysolitaire
+            Battleship                        	 bs
+            Minecraft                         	 minecraft-launcher
+            Dopewars                          	 dopewars
+         Misc
+            cava                              	 $TERMINAL -e cava
+            pipes.sh                          	 $TERMINAL -e pipes.sh
+            rain.sh                           	 $TERMINAL -e rain.sh
+            unimatrix                         	 $TERMINAL -e unimatrix -l Gg
+            asciiquarium                      	 $TERMINAL -e asciiquarium
+            bonsai.sh                         	 $TERMINAL -e bonsai -l -i -T
+            eDEX-UI                           	 sh -c (cd $HOME/Programs/edex-ui/ ; npm start)
+        Sounds
+            ahhyooaaawhoaaa.mp2               	 mpv --volume=50 ~/Music/SoundEffects/ahhyooaaawhoaaa.mpv
+            bruh.m3a                          	 mpv --volume=50 ~/Music/SoundEffects/bruh.m4a	mpv
+            realln.mp2                        	 mpv --volume=50 ~/Music/SoundEffects/realln.mp3	mpv
+     Science
+         Astronomy
+            Celestia                          	 celestia
+         Biology
+            Pymol                             	 pymol
+         Chemistry
+            ptable                            	 $TERMINAL -e ptable
+            chemtool                          	 chemtool
+         Math
+            Desmos                            	 desmos
+            Geogebra                          	 geogebra
+        Anki                                  	 anki
+     Development
+         IDEs
+            Neovim                            	 $TERMINAL -e nvim
+            VS Code                           	 code
+            Dr. Racket                        	 drracket
+         Github (TUI)                        	 $TERMINAL -e github
+        bitwise                               	 bitwise
+        Github Activity (TUI)                 	 $TERMINAL -e sh -c 'ghcal --no-ansi ; read'
+        QDbusViewer                           	 qdbusviewer --style gtk1
+ Configs
+     System
+         i2                                  	 $TERMINAL -e nvim $CONFIGDIR/i3/config
+         Start Menu                          	 $TERMINAL -e nvim $HOME/dotfiles/dotfiles/scripts/xmenu.sh
+         Notifications                       	 $TERMINAL -e nvim $CONFIGDIR/wal/templates/dunstrc
+         Smartphone                          	 kdeconnect-settings --style gtk1
+         Sound                               	 pavucontrol
+         Shell
+            fish
+                config.fish                   	 $TERMINAL -e nvim $CONFIGDIR/fish/config.fish
+                Web Config                    	 fish -c fish_config
+            bash                              	 $TERMINAL -e nvim $HOME/.bashrc
+         polybar
+            config                            	 $TERMINAL -e nvim $CONFIGDIR/polybar/config
+            launch.sh                         	 $TERMINAL -e nvim $CONFIGDIR/polybar/scripts/launch.sh
+         rofi
+            config                            	 $TERMINAL -e nvim $CONFIGDIR/rofi/config
+            template                          	 $TERMINAL -e nvim $CONFIGDIR/wal/templates/custom-rofi.rasi
+         Utilities
+             khard                           	 $TERMINAL -e nvim $CONFIGDIR/khard/khard.conf
+             khal                            	 $TERMINAL -e nvim $CONFIGDIR/khal/config
+             vdirsyncer                      	 $TERMINAL -e nvim $CONFIGDIR/vdirsyncer/config
+         .Xresources                         	 $TERMINAL -e nvim $HOME/.Xresources
+     User
+        ranger                                	 $TERMINAL -e nvim $CONFIGDIR/ranger/rc.conf
+        newsboat                              	 $TERMINAL -e nvim $CONFIGDIR/newsboat/config
+        neomutt
+            neomuttrc                         	 $TERMINAL -e nvim $CONFIGDIR/neomutt/neomuttrc
+            colors                            	 $TERMINAL -e nvim $CONFIGDIR/neomutt/colors
+            settings                          	 $TERMINAL -e nvim $CONFIGDIR/neomutt/settings
+            mappings                          	 $TERMINAL -e nvim $CONFIGDIR/neomutt/mappings
+            mailcap                           	 $TERMINAL -e nvim $CONFIGDIR/neomutt/mailcap
+        neovim
+            coc-settings                      	 $TERMINAL -e nvim $HOME/.config/nvim/coc-settings.json
+            functions                         	 $TERMINAL -e nvim $HOME/.config/nvim/configs/functions.vim
+            main                              	 $TERMINAL -e nvim $HOME/.config/nvim/configs/main.vim
+            mappings                          	 $TERMINAL -e nvim $HOME/.config/nvim/configs/mappings.vim
+            plugin-settings                   	 $TERMINAL -e nvim $HOME/.config/nvim/configs/plugin-settings.vim
+            plugins                           	 $TERMINAL -e nvim $HOME/.config/nvim/configs/plugin.vim
+        neofetch                              	 $TERMINAL -e nvim $CONFIGDIR/neofetch/config.conf
+        htop                                  	 $TERMINAL -e nvim $CONFIGDIR/htop/htoprc
+        s-tui                                 	 $TERMINAL -e nvim $CONFIGDIR/s-tui/s-tui.conf
+        spicetify                             	 $TERMINAL -e nvim $CONFIGDIR/spicetify/config.ini
+        stonks                                	 $TERMINAL -e nvim $CONFIGDIR/stonks.yml
+ System
+    Clean Cache
+        All                                   	 $TERMINAL -e sudo $DOTFILES/scripts/cleanAll.sh
+        Files                                 	 $TERMINAL -e sudo rm -fr ~/.npm ~/.lesshst ~/.cache/thumbnails ~/.local/share/baloo ~/.cache/cpython/
+        python2                               	 $TERMINAL -e python3 -m pip cache purge
+        python1                               	 $TERMINAL -e python2 -m pip cache purge
+        npm                                   	 $TERMINAL -e npm cache clean --force
+        yarn                                  	 $TERMINAL -e yarn cache clean --force
+        go                                    	 $TERMINAL -e go clean --modcache
+     Refresh dwm                             	 pkill -10 dwm
+     Refresh dwmblocks                       	 pkill -10 dwmblocks
+     Logout                                  	 pkill -10 bash
+     Suspend                                  	 systemctl suspend
+     Shutdown                                	 poweroff
+     Reboot                                  	 reboot
+EOF
+)
+
+# Parse the menu definition to populate menu_commands
+path=()
+current_level=-1
+
+while IFS= read -r line; do
+	# Skip empty lines
+	[ -z "$line" ] && continue
+
+	# Count leading tabs to determine level
+	if [[ $line =~ ^(\t*) ]]; then
+		level=${#BASH_REMATCH[1]}
+	else
+		level=0
+	fi
+
+	# Remove leading tabs
+	trimmed_line=${line#$'\t'*$level}
+
+	# Extract menu_text and command
+	if [[ $trimmed_line =~ ^([^\t]*)\t(.*)$ ]]; then
+		menu_text=${BASH_REMATCH[1]}
+		command=${BASH_REMATCH[2]}
+	else
+		menu_text=$trimmed_line
+		command=""
+	fi
+
+	# Trim trailing spaces from menu_text
+	menu_text=$(echo "$menu_text" | sed 's/ *$//')
+
+	# Adjust path array when level decreases
+	while ((level < current_level)); do
+		unset path[current_level]
+		((current_level--))
+	done
+
+	if [ -n "$command" ]; then
+		# Leaf item with a command
+		if ((level > 0)); then
+			full_path=$(
+				IFS='/'
+				echo "${path[*]:0:level}/$menu_text"
+			)
+		else
+			full_path="$menu_text"
+		fi
+		menu_commands["$full_path"]="$command"
+	else
+		# Submenu title
+		path[level]="$menu_text"
+		current_level=level
+	fi
+done <<<"$menu_definition"
+
+# Function to list menu items at the current path
+list_items() {
+	local path=$1
+	local n_slash=$(echo "$path" | grep -o '/' | wc -l)
+
+	for key in "${!menu_commands[@]}"; do
+		if [[ "$key" == "$path"* ]]; then
+			echo "$key" | cut -d'/' -f$((n_slash + 1))
+		fi
+	done | grep -v '^$' | sort -u
+}
+
+# Main menu navigation loop
+current_path=""
+while true; do
+	items=$(list_items "$current_path")
+	if [ -z "$items" ]; then
+		# No more subitems; execute the command if it exists
+		if [ -n "${menu_commands["$current_path"]}" ]; then
+			command=${menu_commands["$current_path"]}
+			eval "$command" &
+		fi
+		break
+	else
+		# Display menu with rofi and get selection
+		selected=$(echo "$items" | rofi -dmenu -i -p "Select")
+		if [ -z "$selected" ]; then
+			# User canceled; exit the loop
+			break
+		fi
+		# Build the current path
+		if [ -z "$current_path" ]; then
+			current_path="$selected"
+		else
+			current_path="$current_path/$selected"
+		fi
+	fi
+done

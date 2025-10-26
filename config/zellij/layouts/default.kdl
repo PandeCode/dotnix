@@ -1,0 +1,88 @@
+simplified_ui false
+pane_frames false
+
+layout {
+    tab name="HOME" focus=true borderless=true
+    default_tab_template {
+        pane size=1 borderless=true {
+            plugin location="file:~/.config/zellij/plugins/zjstatus.wasm" {
+        		format_left   "{mode} #[fg=white]󰝚 {command_music}"
+        		format_center "{tabs}"
+        		format_right  "{command_git_branch} {command_ping} {command_weather} {command_cpu} {command_memo} {datetime}"
+        		format_space  ""
+
+        		border_enabled  "false"
+        		border_char     "─"
+        		border_format   "#[fg=#6C7086]{char}"
+        		border_position "top"
+
+// mode_normal        "#[bg=#89B4FA] T <(•ᴗ•)>"
+// mode_locked        "#[bg=#89B4FA] L <(•o•)>"
+// mode_resize        "#[bg=#89B4FA] R {name} "
+// mode_pane          "#[bg=#89B4FA] P {name} "
+// mode_tab           "#[bg=#89B4FA] T {name} "
+// mode_scroll        "#[bg=#89B4FA] S {name} "
+// mode_enter_search  "#[bg=#89B4FA]ES {name} "
+// mode_search        "#[bg=#89B4FA] S {name} "
+// mode_rename_tab    "#[bg=#89B4FA]RT {name} "
+// mode_rename_pane   "#[bg=#89B4FA]RP {name} "
+// mode_session       "#[bg=#89B4FA]SE {name} "
+// mode_move          "#[bg=#89B4FA] M {name} "
+// mode_prompt        "#[bg=#89B4FA]PR {name} "
+// mode_tmux          "#[bg=#ffc387]TM (>*-*)>"
+
+// 						v = "(v•-•)v",
+// 						[""] = "(v•-•)>",
+// 						V = "(>•-•)>",
+// 						no = "<(•ᴗ•)>",
+// 						[""] = kirby_default,
+// 						cv = "<(•ᴗ•)>",
+// 						ce = "<(•ᴗ•)>",
+// 						["!"] = "<(•ᴗ•)>",
+// 						t = "<(•ᴗ•)>",
+//
+
+        		mode_normal  "#[bg=blue]<(•ᴗ•)>"
+        		mode_tmux    "#[bg=#ffc387](>*-*)>"
+
+        		tab_normal   "#[fg=#6C7086] {name} "
+        		tab_active   "#[fg=#9399B2,bold,italic] {name} "
+
+        		command_memo_command    "bash -c ~/.config/zellij/shell/mem.sh"
+        		command_memo_format     "#[fg=blue]  {stdout}"
+        		command_memo_interval   "5"
+        		command_memo_rendermode "dynamic"
+
+        		command_cpu_command    "bash -c ~/.config/zellij/shell/usage.sh"
+        		command_cpu_format     " {stdout}"
+        		command_cpu_interval   "6"
+        		command_cpu_rendermode "dynamic"
+
+				command_ping_command    "bash -c ~/.config/zellij/shell/ping.sh"
+        		command_ping_format     "{stdout}"
+        		command_ping_interval   "60"
+        		command_ping_rendermode "dynamic"
+
+        		command_weather_command     "bash -c ~/.config/zellij/shell/weather.sh"
+        		command_weather_format      "{stdout}"
+        		command_weather_interval    "21600"
+        		command_weather_rendermode  "dynamic"
+
+				command_git_branch_command     "git rev-parse --abbrev-ref HEAD"
+                command_git_branch_format      "#[fg=blue] {stdout} "
+                command_git_branch_interval    "10"
+                command_git_branch_rendermode  "static"
+
+        		command_music_command     "lyrics-line.sh"
+        		command_music_format      "{stdout}"
+        		command_music_interval    "2"
+        		command_music_rendermode  "static"
+
+        		datetime        "#[fg=#6C7086,bold] {format} "
+        		datetime_format "%a %d %b %H:%M"
+        		datetime_timezone "America/Toronto"
+    		}
+        }
+        children
+    }
+}

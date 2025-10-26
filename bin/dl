@@ -1,0 +1,184 @@
+#!/usr/bin/env bash
+
+# auto_download.sh - Automatically download content based on URL type
+# Usage: ./auto_download.sh [URL]
+
+# Check if a URL is provided
+if [ -z "$1" ]; then
+	echo "Usage: $0 [URL]"
+	echo "Examples:"
+	echo "  $0 https://github.com/username/repo/blob/branch/path/to/file"
+	echo "  $0 https://github.com/username/repo/tree/branch/path/to/directory"
+	echo "  $0 https://www.youtube.com/watch?v=VIDEO_ID"
+	exit 1
+fi
+
+URL="$1"
+
+# Function to check if a command exists
+command_exists() {
+	command -v "$1" >/dev/null 2>&1
+}
+
+# Check for required dependencies
+check_dependencies() {
+	local missing_deps=()
+
+	if ! command_exists curl; then
+		missing_deps+=("curl")
+	fi
+
+	if ! command_exists jq; then
+		missing_deps+=("jq")
+	fi
+
+	if echo "$URL" | grep -q "youtube\|youtu\.be" && ! command_exists yt-dlp; then
+		missing_deps+=("yt-dlp")
+	fi
+
+	if [ ${#missing_deps[@]} -ne 0 ]; then
+		echo "ERROR: The following dependencies are missing:"
+		for dep in "${missing_deps[@]}"; do
+			echo "  - $dep"
+		done
+		echo "Please install these dependencies and try again."
+		exit 1
+	fi
+}
+
+# Convert GitHub blob URLs to raw URLs
+github_file_download() {
+	local github_url="$1"
+	# Convert GitHub blob URL to raw URL
+	local raw_url="${github_url/github.com/raw.githubusercontent.com}"
+	raw_url="${raw_url/blob\//}"
+
+	local filename=$(basename "$github_url")
+	echo "Downloading file: $filename"
+	curl -L -o "$filename" "$raw_url"
+
+	if [ $? -eq 0 ]; then
+		echo "Successfully downloaded: $filename"
+	else
+		echo "Failed to download file from $github_url"
+		exit 1
+	fi
+}
+
+# Download GitHub directory
+github_dir_download() {
+	local github_url="$1"
+
+	# Extract repo, owner, branch and path from URL
+	local repo_path=$(echo "$github_url" | sed -E 's|https://github.com/([^/]+)/([^/]+)/tree/([^/]+)/(.*)|\1/\2/\3/\4|')
+	local owner=$(echo "$repo_path" | cut -d'/' -f1)
+	local repo=$(echo "$repo_path" | cut -d'/' -f2)
+	local branch=$(echo "$repo_path" | cut -d'/' -f3)
+	local path=$(echo "$repo_path" | cut -d'/' -f4-)
+
+	# Create directory to store files
+	local dir_name=$(basename "$path")
+	mkdir -p "$dir_name"
+	cd "$dir_name"
+
+	echo "Downloading directory: $dir_name"
+
+	# Use GitHub API to get directory contents
+	local api_url="https://api.github.com/repos/$owner/$repo/contents/$path?ref=$branch"
+	local contents=$(curl -s "$api_url")
+
+	# Check if API call was successful
+	if echo "$contents" | grep -q "message.*Not Found"; then
+		echo "Error: Directory not found at $github_url"
+		cd ..
+		rm -rf "$dir_name"
+		exit 1
+	fi
+
+	# Process each file in the directory
+	echo "$contents" | jq -r '.[] | .name + "," + .type + "," + .download_url' | while IFS=, read -r name type download_url; do
+		if [ "$type" = "file" ] && [ "$download_url" != "null" ]; then
+			printf "\rDownloading file: $name"
+			curl -s -L -o "$name" "$download_url"
+			printf "\rDownloaded file: $name"
+		elif [ "$type" = "dir" ]; then
+			# Uncomment below for recursive download of subdirectories
+			mkdir -p "$name"
+			cd "$name" || echo "Failed to download subdirectory $name"
+			github_dir_download "https://github.com/$owner/$repo/tree/$branch/$path/$name"
+			cd ..
+		fi
+	done
+
+	cd ..
+	echo "Directory download complete: $dir_name/"
+}
+
+# Download YouTube video
+youtube_download() {
+	local youtube_url="$1"
+
+	echo "Downloading YouTube video: $youtube_url"
+	yt-dlp "$youtube_url"
+
+	if [ $? -eq 0 ]; then
+		echo "Successfully downloaded video from $youtube_url"
+	else
+		echo "Failed to download video from $youtube_url"
+		exit 1
+	fi
+}
+
+# Main function to handle different URL types
+process_url() {
+	local url="$1"
+
+	# Handle GitHub URLs
+	if echo "$url" | grep -q "github.com"; then
+		if echo "$url" | grep -q "/blob/"; then
+			# GitHub file
+			github_file_download "$url"
+		elif echo "$url" | grep -q "/tree/"; then
+			# GitHub directory
+			github_dir_download "$url"
+		else
+			# Try to detect if it's a file or directory by querying the API
+			local repo_path=$(echo "$url" | sed -E 's|https://github.com/([^/]+)/([^/]+)(/.*)|\1/\2\3|')
+			local owner=$(echo "$repo_path" | cut -d'/' -f1)
+			local repo=$(echo "$repo_path" | cut -d'/' -f2)
+			local path=$(echo "$repo_path" | cut -d'/' -f3-)
+			local branch="main" # Default to main branch
+
+			# If path contains a branch reference, extract it
+			if echo "$path" | grep -q "/"; then
+				branch=$(echo "$path" | cut -d'/' -f2)
+				path=$(echo "$path" | cut -d'/' -f3-)
+			fi
+
+			local api_url="https://api.github.com/repos/$owner/$repo/contents/$path?ref=$branch"
+			local response=$(curl -s "$api_url")
+
+			if echo "$response" | jq -e 'type == "array"' >/dev/null; then
+				# It's a directory
+				github_dir_download "$url"
+			elif echo "$response" | jq -e 'type == "object" and has("type") and .type == "file"' >/dev/null; then
+				# It's a file
+				github_file_download "$url"
+			else
+				echo "Unable to determine if URL is a file or directory: $url"
+				exit 1
+			fi
+		fi
+	# Handle YouTube URLs
+	elif echo "$url" | grep -q "youtube\|youtu\.be"; then
+		youtube_download "$url"
+	else
+		echo "Unsupported URL type: $url"
+		echo "Supported types: GitHub files, GitHub directories, YouTube videos"
+		exit 1
+	fi
+}
+
+# Start program
+check_dependencies
+process_url "$URL"

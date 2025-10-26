@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+if [ "$#" -lt 1 ]; then
+	echo "Usage: $0 /nix/store/your-path [file-inside-store]"
+	exit 1
+fi
+
+TARGET="$1"
+FILE="$2"
+
+# Make store path writable
+echo "Making $TARGET writable..."
+sudo chmod -R u+w "$TARGET"
+
+# If a file is specified, edit that, otherwise open the whole path
+if [ -n "$FILE" ]; then
+	nvim "$TARGET/$FILE"
+else
+	nvim "$TARGET"
+fi

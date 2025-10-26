@@ -1,0 +1,7 @@
+[[block]]
+block = "custom"
+command = '''xtitle "$@" \
+  | sed -E 's/ — Zen Twilight//; s/ - Nvim//; s/Zellij \([^)]*\) - //; s/^[[:space:]]+|[[:space:]]+$//g; s/^(.{50}).*$/\1…/' '''
+interval = 1
+format = "$text"
+hide_when_empty = true

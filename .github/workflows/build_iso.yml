@@ -1,0 +1,49 @@
+name: Build and Tag ISO
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-iso:
+    if: startsWith(github.event.head_commit.message, 'build-iso')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Generate Tag Name
+        run: |
+          echo "TAG_NAME=$(date +"iso-%Y%m%d-%H%M%S")" >> $GITHUB_ENV
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Build ISO
+        run: |
+          ISO_PATH=$(NIX_BUILD_CORES=$(nproc) nix run nixpkgs#nixos-generators --accept-flake-config -- --format iso --flake .#nixiso -o result)
+          echo "$ISO_PATH : $(du -h $ISO_PATH)"
+
+          echo $ISO_PATh > iso_path
+
+          split $ISO_PATH -b 1900000000 ISO_PART_
+
+          for PART in ISO_PART_*; do
+            sha256sum $PART > "sha256_${PART}"
+          done
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          prerelease: true
+          name: ${{ env.TAG_NAME }}
+          tag_name: ${{ env.TAG_NAME }}
+          files: |
+            ISO_PART_*
+            sha256_*

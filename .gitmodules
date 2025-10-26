@@ -1,0 +1,3 @@
+[submodule "submodules/dwm-flexipatch"]
+	path = submodules/dwm-flexipatch
+	url = https://github.com/pandecode/dwm-flexipatch

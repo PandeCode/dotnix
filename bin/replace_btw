@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+if [ "$#" -ne 3 ]; then
+	echo "Usage: some_output | replace_btw \"<start_pattern>\" \"<end_pattern>\" <file>"
+	exit 1
+fi
+
+start_pattern=$1
+end_pattern=$2
+file=$3
+temp_file=$(mktemp)
+
+awk -v start="$start_pattern" -v end="$end_pattern" '
+BEGIN {inside=0}
+{
+    if ($0 ~ start) {
+        print;
+        inside=1;
+        while ((getline line < "-" ) > 0) {
+            print line;
+        }
+    }
+    if ($0 ~ end) {
+        inside=0;
+    }
+    if (!inside) {
+        print;
+    }
+}' "$file" >"$temp_file"
+
+mv "$temp_file" "$file"

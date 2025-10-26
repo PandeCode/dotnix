@@ -1,0 +1,3 @@
+
+          clonec = "xclip -selection clipboard -o | xargs git clone --depth 1";
+          wgetc = "xclip -selection clipboard -o | xargs wget -c ";

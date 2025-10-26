@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+file="${1:-/dev/null}"
+
+if [[ $XDG_SESSION_TYPE == "x11" ]]; then
+	xclip -sel clip -o | tee "$file"
+elif [[ $XDG_SESSION_TYPE == "wayland" ]]; then
+	wl-paste | tee "$file"
+fi

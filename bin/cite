@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+LC_ALL=en_US.utf8
+LC_TIME=en_US
+
+# Check if file path is provided
+if [ $# -eq 0 ]; then
+	echo "Usage: $0 <file_with_urls>"
+	exit 1
+fi
+
+# Check if file exists
+if [ ! -f "$1" ]; then
+	echo "Error: File '$1' not found."
+	exit 1
+fi
+
+# Function to get page title
+get_title() {
+	local url="$1"
+	curl -s "$url" | grep -o '<title>.*</title>' | sed 's/<title>\(.*\)<\/title>/\1/' | tr -d '\n'
+}
+
+# Function to get current date in MLA format (Day Month Year)
+get_date() {
+	date "+%-d %B %Y"
+}
+
+# Process each URL
+while IFS= read -r url || [ -n "$url" ]; do
+	# Skip empty lines
+	[ -z "$url" ] && continue
+
+	# Get website title
+	title=$(get_title "$url")
+
+	# If title is empty, use URL as title
+	if [ -z "$title" ]; then
+		title="$url"
+	fi
+
+	# Extract domain name for publisher
+	domain=$(echo "$url" | sed -E 's|^https?://([^/]+).*|\1|' | sed 's/^www\.//')
+
+	# Format domain name to look like a publisher (capitalize words)
+	publisher=$(echo "$domain" | tr '.' ' ' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)} 1')
+
+	# Get current date
+	access_date=$(get_date)
+
+	# Generate MLA citation
+	echo "\"$title.\" $publisher, Accessed $access_date, $url."
+
+done <"$1"

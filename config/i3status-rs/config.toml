@@ -1,0 +1,95 @@
+[[block]]
+block = "custom"
+command = "lyrics-line.sh"
+interval = 3
+format = "$text"
+hide_when_empty = true
+
+[[block]]
+block = "custom"
+format = "$icon $text"
+command = "ping-json.sh"
+json = true
+interval =60
+
+[[block]]
+block = "cpu"
+interval = 5
+format = " $icon $barchart $utilization "
+format_alt = " $icon $frequency{ $boost|} "
+info_cpu = 20
+warning_cpu = 50
+critical_cpu = 90
+
+# Memory usage
+[[block]]
+block = "memory"
+format = " $icon $mem_used.eng(w:3)/$mem_total.eng(w:3) "
+format_alt = " $icon_swap $swap_used.eng(w:3)/$swap_total.eng(w:3) "
+warning_mem = 80.0
+critical_mem = 95.0
+interval = 5
+
+# Disk space
+[[block]]
+block = "disk_space"
+path = "/"
+format = " $icon $used.eng(w:2)/$total.eng(w:2) ($percentage) "
+info_type = "available"
+warning = 20.0
+alert = 10.0
+interval = 60
+
+# Network
+[[block]]
+block = "net"
+format = "$icon {$signal_strength $ssid $frequency|Eth}"
+
+[[block]]
+block = "sound"
+format = " $icon $output_name{ $volume|} "
+[block.mappings]
+"bluez_output.08_EB_ED_13_30_46.1"           = "" # Bluetooth + Headset
+"bluez_output.B4.84_D5_C2_77_1F.1"           = "" # Bluetooth + Headset
+"alsa_output.pci-0000_00_1b.0.analog-stereo" = "" # nf-fa-headphones
+"alsa_output.usb-Harman_Multimedia_JBL_Pebbles_1.0.0-00.analog-stereo" = "" # nf-fa-volume-up
+"alsa_output.pci-0000_00_1f.3.analog-stereo" = "󰓃" # nf-md-laptop-speaker
+
+[[block]]
+block = "custom"
+command = "cava.sh"
+interval = "once"
+format = " $text "
+persistent = true
+
+[[block]]
+block = "sound"
+driver = "pulseaudio"
+device_kind = "source"
+format = " $icon { $volume|} {$active_port |}"
+[block.active_port_mappings]
+"analog-input-internal-mic" = "" # Mapping to an empty string makes `$active_port` absent
+"analog-input-rear-mic" = "" # Mapping to an empty string makes `$active_port` absent
+"analog-input-front-mic" = "ERR!"
+
+[[block]]
+block = "battery"
+format = " $icon $percentage {$time |}"
+info = 60
+good = 60
+warning = 30
+critical = 15
+
+[[block]]
+block = "backlight"
+format = "$brightness"
+device = "intel_backlight"
+minimum = 5
+maximum = 100
+cycle = [5, 25, 50, 75, 100]
+
+
+[[block]]
+block = "time"
+interval = 5
+format = " $timestamp.datetime(f:'%a %d/%m %R') "

@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+# De-Nixifies paths, removing hashes and versions from .drv and store paths.
+# Usage:
+#   ./denixify-nixdrv.sh [-c] [file or text]
+
+copy=false
+
+# Handle -c flag
+if [[ "$1" == "-c" ]]; then
+	copy=true
+	shift
+fi
+
+denixify() {
+	sed -E '
+    s#/nix/store/[a-z0-9]{32}-##g;                 # Strip /nix/store hashes
+    s#[a-z0-9]{32}-##g;                            # Strip standalone hashes
+    s#([a-zA-Z0-9+]+)-[0-9][^-]*(-[0-9]*)?\.drv#\1#g;  # Remove versions in .drv
+    s#([a-zA-Z0-9+]+)-[0-9]+(\.[0-9]+)*(-[0-9]*)?#\1#g; # Remove trailing versions
+    s#\.drv##g;                                     # Remove .drv suffix
+  '
+}
+
+copy_to_clipboard() {
+	if command -v wl-copy &>/dev/null; then
+		wl-copy
+	elif command -v xclip &>/dev/null; then
+		xclip -selection clipboard
+	else
+		echo "Warning: No clipboard utility (wl-copy or xclip) found." >&2
+	fi
+}
+
+main() {
+	local input
+
+	if [ "$#" -eq 0 ]; then
+		input=$(cat)
+	else
+		input=""
+		for arg in "$@"; do
+			if [ -f "$arg" ]; then
+				input+=$(cat "$arg")$'\n'
+			else
+				input+="$arg"$'\n'
+			fi
+		done
+	fi
+
+	local output
+	output=$(echo "$input" | denixify)
+
+	if [ "$copy" = true ]; then
+		echo "$output" | copy_to_clipboard
+	fi
+
+	echo "$output"
+}
+
+main "$@"
