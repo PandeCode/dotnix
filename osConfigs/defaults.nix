@@ -15,7 +15,7 @@
     i3.enable = true;
     dwm.enable = false;
     river.enable = false;
-    niri.enable = false; # issue https://github.com/sodiboo/niri-flake/issues/1018
+    niri.enable = true; # issue https://github.com/sodiboo/niri-flake/issues/1018
     # dwm.enable = true;
     # xmonad.enable = true;
     # bspwm.enable = true;
