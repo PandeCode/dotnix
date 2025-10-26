@@ -13,7 +13,7 @@
   xdg.portal.extraPortals = [pkgs.xdg-desktop-portal-gtk];
 
   imports = [inputs.aagl.nixosModules.default];
-  programs.honkers-railway-launcher.enable = true;
+  programs.honkers-railway-launcher.enable = false;
 
   security.rtkit.enable = true;
 
@@ -81,6 +81,8 @@
 
   environment = {
     systemPackages = with pkgs; [
+      freerdp
+
       libnotify
 
       onlyoffice-bin

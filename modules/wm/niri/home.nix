@@ -173,7 +173,7 @@ in {
           "Super+Slash".action = show-hotkey-overlay;
           "Alt+f4".action = close-window;
 
-          "Print".action = screenshot {show-pointer = false;};
+          # "Print".action = screenshot {show-pointer = false;};
         };
     };
   };

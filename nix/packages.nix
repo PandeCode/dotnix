@@ -23,6 +23,7 @@ in
             # hermes
             ghostty
             zjstatus
+            inputs.zen-browser.packages."${system}".twilight
           ])
       );
     };

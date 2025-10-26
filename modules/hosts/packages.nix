@@ -84,7 +84,7 @@
     bat-extras.batpipe
     bat-extras.batman
     bat-extras.batdiff
-    bat-extras.batgrep
+    # bat-extras.batgrep
     bat-extras.batwatch
 
     expect # unbuffer command

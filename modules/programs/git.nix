@@ -9,6 +9,7 @@
       package = pkgs.gitAndTools.gitFull;
       enable = true;
 
+      # settings = {
       userName = "PandeCode";
       userEmail = "pandeshawnbenjamin@gmail.com";
 
@@ -62,6 +63,7 @@
         #     line-numbers-zero-style = "\"#3b4261\"";
         #   };
       };
+      # };
     };
     gh = {
       enable = true;
