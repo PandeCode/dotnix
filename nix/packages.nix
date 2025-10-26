@@ -11,7 +11,7 @@ in
       name = "cachix";
       paths = with inputs; (
         [
-          niri.packages.${system}.niri-unstable
+          # niri.packages.${system}.niri-unstable
           # hyprland.packages.${system}.hyprland;
         ]
         ++ (map (
