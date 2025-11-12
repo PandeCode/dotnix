@@ -21,47 +21,20 @@
     extraModulePackages = [];
   };
 
-  fileSystems = {
-    "/" = {
-      device = "/dev/disk/by-uuid/8def0567-4745-4356-832f-f9d0161f800c";
+  fileSystems."/" =
+    { device = "/dev/disk/by-uuid/22c100c7-3caa-4c03-87d7-b98a945251d8";
       fsType = "ext4";
     };
 
-    "/boot" = {
-      device = "/dev/disk/by-uuid/FD98-2F4E";
+  fileSystems."/boot" =
+    { device = "/dev/disk/by-uuid/0499-6E9A";
       fsType = "vfat";
-      options = ["fmask=0077" "dmask=0077"];
+      options = [ "fmask=0077" "dmask=0077" ];
     };
 
-    "/mnt/win" = {
-      device = "/dev/nvme0n1p3";
-      fsType = "ntfs";
-    };
-
-    "/mnt/tb" = {
-      device = "/dev/disk/by-label/tb";
-      fsType = "f2fs";
-      options = [
-        "compress_algorithm=zstd"
-        "discard"
-        "noatime"
-        "nofail" # Prevent system from failing if this drive doesn't mount
-        "users" # Allows any user to mount and unmount
-      ];
-    };
-  };
-
-  # fileSystems."/swap" = {
-  #   device = "";
-  #   fsType = "ext4";
-  # };
-
-  swapDevices = [
-    {
-      device = "/dev/nvme0n1p5";
-      # size = 8956; # MB
-    }
-  ];
+  swapDevices =
+    [ { device = "/dev/disk/by-uuid/291a4626-6e59-41ab-9637-386ff5ec3d20"; }
+    ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's
@@ -77,7 +50,6 @@
     cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
     nvidia-container-toolkit.mount-nvidia-executables = true;
-
     nvidia = {
       nvidiaSettings = true;
     };

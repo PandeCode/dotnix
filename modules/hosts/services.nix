@@ -76,16 +76,19 @@
       qemuGuest.enable = false;
       # udev rules configuration for gaming controllers and power management
       udev = {
-        packages = with pkgs; [
-          android-udev-rules
+        packages = [
+          # android-udev-rules
         ];
         extraRules = ''
+          # Arduino
+          KERNEL=="ttyACM[0-9]*", MODE="0666"
+
           # Steam Controller support
           # Basic functionality in Steam and keyboard/mouse emulation
           SUBSYSTEM=="usb", ATTRS{idVendor}=="28de", MODE="0666"
 
           # Gamepad emulation support
-          KERNEL=="uinput", MODE="0660", GROUP="shawn", OPTIONS+="static_node=uinput"
+          KERNEL=="uinput", MODE="0660", GROUP="${sharedConfig.user}", OPTIONS+="static_node=uinput"
 
           # Weylus tablet input support
           KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"

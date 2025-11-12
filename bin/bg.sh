@@ -230,7 +230,7 @@ process_wallpaper() {
 			hyprctl hyprpaper preload "$img"
 			hyprctl hyprpaper wallpaper "eDP-1,$img"
 			log "INFO" "Set wallpaper (Wayland/hyprpaper): $img" true
-		elif pgrep -x "swww-daemon" &>/dev/null; then
+		elif pgrep -x ".swww-daemon-wr" &>/dev/null; then
 			swww img "$img" --transition-type wipe >/dev/null 2>&1
 			log "INFO" "Set wallpaper (Wayland/swww): $img" true
 		elif pgrep -x "swaybg" &>/dev/null; then
@@ -263,6 +263,10 @@ process_wallpaper() {
 
 	# Save notification ID for future replacements
 	echo "$BG_ID" >"$BG_ID_FILE"
+
+	if [ -x ~/dotnix/bin/rofi-make-config.sh ]; then
+	  ~/dotnix/bin/rofi-make-config.sh
+	fi
 
 	return 0
 }

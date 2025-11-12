@@ -96,7 +96,11 @@
 
     fish
     zellij
+    tmux
     zoxide
+
+    zip
+    rlwrap
 
     fzf
     glow

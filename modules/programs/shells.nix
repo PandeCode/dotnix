@@ -88,7 +88,7 @@
         cmb = "cmake --build Debug/";
         cmc = "rm -fr CMakeCache.txt CMakeFiles Debug/ compile_commands.json";
       }
-      # // (
+      # // pkgs.lib.if config.isWindows (
       #   if config.wsl.enable
       #   then {
       #     pwsh = "pwsh.exe";
