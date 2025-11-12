@@ -1,6 +1,6 @@
 {
   pkgs,
-  config,
+  sharedConfig,
   ...
 }: {
   home.packages = with pkgs; [
@@ -17,7 +17,7 @@
   programs = {
     rbw = {
       enable = true;
-      settings.email = config.programs.git.user.email;
+      settings.email = sharedConfig.git.user.email;
       package = pkgs.rofi-rbw-wayland;
     };
   };
