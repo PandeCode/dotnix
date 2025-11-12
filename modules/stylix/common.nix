@@ -27,7 +27,7 @@ in {
       sansSerif = monospace;
 
       emoji = {
-        package = pkgs.noto-fonts-emoji;
+        package = pkgs.noto-fonts-color-emoji;
         name = "noto color emoji";
       };
     };

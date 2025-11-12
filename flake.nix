@@ -53,7 +53,6 @@ rec {
     #   url = "github:VirtCode/hypr-dynamic-cursors";
     #   inputs.hyprland.follows = "hyprland";
     # };
-
     # xmonad-contexts = {
     #   url = "github:Procrat/xmonad-contexts";
     #   flake = false;
@@ -61,11 +60,6 @@ rec {
 
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    zjstatus = {
-      url = "github:dj95/zjstatus";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

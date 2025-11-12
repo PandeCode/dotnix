@@ -17,7 +17,7 @@
   programs = {
     rbw = {
       enable = true;
-      settings.email = config.programs.git.userEmail;
+      settings.email = config.programs.git.user.email;
       package = pkgs.rofi-rbw-wayland;
     };
   };

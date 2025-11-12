@@ -1,5 +1,5 @@
 {pkgs, ...}: let
-  sddm-custom-theme = pkgs.callPackage ../../derivations/sddm-custom-theme.nix {};
+  inherit (((import ../../derivations/default.nix) pkgs.callPackage)) sddm-custom-theme;
 in {
   environment.systemPackages = [sddm-custom-theme];
   services = {

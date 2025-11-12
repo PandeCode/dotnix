@@ -4,7 +4,7 @@
   python3,
   fetchPypi,
   gtk3,
-  wrapGAppsHook,
+  wrapGAppsHook3,
   gobject-introspection,
 }:
 python3.pkgs.buildPythonApplication rec {
@@ -29,7 +29,7 @@ python3.pkgs.buildPythonApplication rec {
   ];
 
   nativeBuildInputs = [
-    wrapGAppsHook
+    wrapGAppsHook3
     gobject-introspection
   ];
 
