@@ -23,7 +23,7 @@ in
             # obolc
             hermes
             ghostty
-            inputs.zen-browser.packages."${system}".twilight
+            # inputs.zen-browser.packages."${system}".twilight
           ])
       );
     };
