@@ -6,7 +6,7 @@
 }: {
   imports = [
     ./shells.nix
-    ./zellij.nix
+    ./tmux.nix
 
     ./spicetify.nix
     ./wezterm.nix
@@ -35,7 +35,9 @@
     #   };
     # };
 
-    packages = with pkgs; [
+    packages = with pkgs; let
+      inherit (((import ../../derivations/default.nix) pkgs.callPackage)) notify-send-py;
+    in [
       # zoom-us
       # kicad
       # opencode
@@ -49,7 +51,7 @@
 
       spotifyd
 
-      (callPackage ../../derivations/notify-send-py.nix {})
+      notify-send-py
 
       silicon
 

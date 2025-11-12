@@ -10,9 +10,12 @@
       # theme = "PlymouthTheme-Cat";
       # extraConfig = /* ini */ '' DeviceScale=1 '';
 
-      themePackages = [
-        # (pkgs.callPackage ../../derivations/plymouth-theme-cat.nix {})
-        (pkgs.callPackage ../../derivations/plymouth-theme-custom.nix {})
+      themePackages = let
+        inherit (((import ../../derivations/default.nix) pkgs.callPackage)) plymouth-theme-custom;
+        # inherit (((import ../../derivations/default.nix) pkgs.callPackage)) plymouth-theme-cat;
+      in [
+        # plymouth-theme-cat
+        plymouth-theme-custom
       ];
     };
 

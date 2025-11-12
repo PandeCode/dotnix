@@ -14,6 +14,7 @@ in
           niri.packages.${system}.niri-unstable
           # hyprland.packages.${system}.hyprland;
         ]
+        ++ (builtins.attrValues ((import ../derivations/default.nix) pkgs.callPackage))
         ++ (map (
             v:
               v.packages.${system}.default
@@ -22,8 +23,7 @@ in
             # obolc
             hermes
             ghostty
-            zjstatus
-            # inputs.zen-browser.packages."${system}".twilight
+            inputs.zen-browser.packages."${system}".twilight
           ])
       );
     };

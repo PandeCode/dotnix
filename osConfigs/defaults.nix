@@ -1,4 +1,9 @@
 {
+  git.user = {
+    name = "PandeCode";
+    email = "pandeshawnbenjamin@gmail.com";
+  };
+
   terminal = "ghostty";
   explorer = "nautilus";
   browser = "zen";

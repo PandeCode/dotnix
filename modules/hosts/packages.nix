@@ -22,11 +22,7 @@
 
     light.enable = true;
 
-    coolercontrol = {
-      enable = true;
-      nvidiaSupport = true;
-    };
-
+    coolercontrol.enable = true;
     mtr.enable = true;
   };
 
@@ -67,8 +63,8 @@
     # stacer
 
     gnupg
-    pinentry
 
+    pinentry-curses
     nix-prefetch-github
     nix-init
     nurl
@@ -95,7 +91,6 @@
     p7zip
 
     fish
-    zellij
     tmux
     zoxide
 

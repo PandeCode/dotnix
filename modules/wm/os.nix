@@ -88,7 +88,7 @@
 
       libnotify
 
-      onlyoffice-bin
+      onlyoffice-desktopeditors
       # libreoffice-qt6
 
       cage
@@ -124,7 +124,6 @@
       vesktop
       vscode
       google-chrome
-      whatsapp-for-linux
       qbittorrent-enhanced-nox
 
       xwayland-satellite
