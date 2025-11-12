@@ -6,45 +6,13 @@
   boot = {
     plymouth = {
       enable = true;
-      # theme = "Custom";
-      theme = "PlymouthTheme-Cat";
+      theme = "PlymouthTheme-Custom";
+      # theme = "PlymouthTheme-Cat";
+      # extraConfig = /* ini */ '' DeviceScale=1 '';
 
-      extraConfig =
-        /*
-        ini
-        */
-        ''
-          DeviceScale=2
-        '';
-
-      # theme = "SimulatedUniverse";
-      # theme = "chain";
-
-      themePackages = with pkgs; [
-        # (
-        #   pkgs.callPackage ../../derivations/plymouth-theme-custom.nix {
-        #     video = builtins.fetchurl {
-        #       url = "https://github.com/PandeCode/dotnix/raw/refs/heads/media/bootanimations/the_drive.mp4";
-        #       sha256 = "0fhvjdps9r7wvzqy9xpni9fds8f9h5gxn5izj0kpzg5k49331qz3";
-        #     };
-        #   }
-        # )
-
-        #   # video = builtins.fetchurl {
-        #   #   url = "https://github.com/PandeCode/dotnix/raw/refs/heads/media/boot.mkv";
-        #   #   sha256 = "0chfw9w7jwl6dpkm56b3n8nqyrqc7y1a3d6wdbvkxxgxb322jmwy";
-        #   # };
-
-        # (import ../../derivations/hsr-plymouth.nix {inherit stdenvNoCC fetchFromGitHub lib unstableGitUpdater;})
-        (import ../../derivations/plymouth-theme-cat.nix {inherit stdenvNoCC fetchFromGitHub lib unstableGitUpdater;})
-        # (import ../../derivations/plymouth-theme-chain.nix {
-        #   inherit pkgs stdenvNoCC fetchFromGitHub lib unstableGitUpdater;
-        #   config = {
-        #     background = null;
-        #     main = null;
-        #     secondary = null;
-        #   };
-        # })
+      themePackages = [
+        # (pkgs.callPackage ../../derivations/plymouth-theme-cat.nix {})
+        (pkgs.callPackage ../../derivations/plymouth-theme-custom.nix {})
       ];
     };
 

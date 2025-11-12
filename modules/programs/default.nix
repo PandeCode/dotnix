@@ -28,19 +28,19 @@
       "${sessionVariables.GOPATH}/bin"
     ];
 
-    file = {
-      ".gdbinit".source = builtins.fetchurl {
-        url = "https://github.com/cyrus-and/gdb-dashboard/raw/master/.gdbinit";
-        sha256 = "8bd249b8642977fd9c07a7ff5727d9de3556c48cf56712dbd23e5498cff410b2";
-      };
-    };
+    # file = {
+    #   ".gdbinit".source = builtins.fetchurl {
+    #     url = "https://github.com/cyrus-and/gdb-dashboard/raw/master/.gdbinit";
+    #     sha256 = "8bd249b8642977fd9c07a7ff5727d9de3556c48cf56712dbd23e5498cff410b2";
+    #   };
+    # };
 
     packages = with pkgs; [
-      zoom-us
-      kicad
-      opencode
+      # zoom-us
+      # kicad
+      # opencode
 
-      deskreen
+      # deskreen
 
       pscircle
       xdg-utils

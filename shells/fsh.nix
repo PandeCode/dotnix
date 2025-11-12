@@ -1,6 +1,7 @@
 {pkgs ? import <nixpkgs> {}}: let
   buildInputs = with pkgs;
     [
+      sdl3
       # Wayland dependencies
       wayland
       wayland-protocols
