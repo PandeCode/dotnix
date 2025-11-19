@@ -28,6 +28,14 @@
   virtualisation.waydroid.enable = false;
   zramSwap.enable = true;
 
+  environment.extraInit =
+    /*
+    sh
+    */
+    ''
+      export PATH=/home/shawn/dotnix/bin:$PATH
+    '';
+
   # hardware = {
   #   enable = true;
   #   graphics.extraPackages = [
@@ -38,19 +46,13 @@
   boot = {
     kernelPackages = pkgs.linuxPackages_zen;
     loader = {
-      systemd-boot.enable = true;
-      # systemd-boot.windows = {
-      #   "11" = {
-      #     title = "Windows 11";
-      #     efiDeviceHandle = "/dev/nvme0n1p2";
-      #   };
-      # };
-      # grub = {
-      #   enable = true;
-      #   useOSProber = true;
-      #   device = "nodev";
-      #   efiSupport = true;
-      # };
+      systemd-boot.enable = false;
+      grub = {
+        enable = true;
+        useOSProber = true;
+        device = "nodev";
+        efiSupport = true;
+      };
 
       efi.canTouchEfiVariables = true;
     };

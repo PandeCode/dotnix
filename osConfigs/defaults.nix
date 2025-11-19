@@ -10,6 +10,7 @@
   editor = "nvim";
 
   isLaptop = false;
+  isWSL = false;
 
   virt_manager.enable = false;
   osx-kvm.enable = false;
@@ -36,5 +37,48 @@
     switch = false;
     wallpaperengine = false;
     wii = false;
+  };
+
+  shellAliases = {
+    neo = "neovide $(fzf) 2>&1  > /dev/null & disown";
+    ns = "nix-shell shell.nix --command 'fish'";
+    nsp = "nix-shell --command 'fish' -p";
+
+    gamescopehdr = "DXVK_HDR=1 gamescope -f --hdr-enabled -- ";
+    steamhdr = "ENABLE_HDR_WSI=1 DXVK_HDR=1 DISPLAY= ";
+    winehdr = "ENABLE_HDR_WSI=1 DXVK_HDR=1 DISPLAY= wine ";
+    mpvhdr = "ENABLE_HDR_WSI=1 mpv --vo=gpu-next --target-colorspace-hint --gpu-api=vulkan --gpu-context=waylandvk ";
+
+    ls = "ls --color=auto";
+    sl = "ls --color=auto";
+    l = "ls --color=auto -latr";
+    j = "z";
+
+    mkdir = "mkdir";
+    mkdri = "mkdir";
+    mkidr = "mkdir";
+    mdkir = "mkdir";
+    dmkir = "mkdir";
+    cp = "cp -ir";
+    free = "free -m";
+    sizeof = "bash -c 'du -h --max-depth=0'";
+    tree = "tre";
+
+    clonec = "cso | xargs git clone --depth 1";
+    wgetc = "cso | xargs wget -c ";
+
+    gti = "git";
+
+    ":e" = "nvim";
+    e = "nvim";
+    ff = "bash -c 'selection=$(fzf --print0) && [ -n \"$selection\" ] && echo -n \"$selection\" | xargs -0 -o nvim'";
+    ":q" = "exit";
+    eixt = "exit";
+    f = "fuck";
+    nivm = "nvim";
+    py = "python3";
+
+    cls = "clear";
+    tls = "tmux clear-history; clear";
   };
 }

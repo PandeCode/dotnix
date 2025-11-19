@@ -4,6 +4,24 @@ float getSdfRectangle(in vec2 p, in vec2 xy, in vec2 b)
     return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
 }
 
+// float getSdfRectangle( in vec2 p,in vec2 xy, in vec2 b)
+// {
+//      float chamfer  = 0.5;
+//     p = abs(p - xy)-b;
+//
+//     p = (p.y>p.x) ? p.yx : p.xy;
+//     p.y += chamfer;
+//
+//     const float k = 1.0-sqrt(2.0);
+//     if( p.y<0.0 && p.y+p.x*k<0.0 )
+//         return p.x;
+//
+//     if( p.x<p.y )
+//         return (p.x+p.y)*sqrt(0.5);
+//
+//     return length(p);
+// }
+
 // Based on Inigo Quilez's 2D distance functions article: https://iquilezles.org/articles/distfunctions2d/
 // Potencially optimized by eliminating conditionals and loops to enhance performance and reduce branching
 
