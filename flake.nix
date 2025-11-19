@@ -3,7 +3,7 @@ rec {
 
   nixConfig = {
     trusted-users = ["root" "shawn"];
-    experimental-features = ["nix-command" "flakes" "pipe-operators"];
+    experimental-features = ["nix-command" "flakes"];
     accept-flake-config = true;
     show-trace = true;
     auto-optimise-store = true;
