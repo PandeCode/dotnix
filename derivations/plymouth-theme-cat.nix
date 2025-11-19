@@ -16,7 +16,6 @@ stdenvNoCC.mkDerivation {
   };
 
   postPatch = ''
-    # Remove not needed files
     rm -fr README LICENSE
   '';
 

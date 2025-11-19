@@ -12,8 +12,8 @@
   xdg.portal.enable = lib.mkForce true;
   xdg.portal.extraPortals = [pkgs.xdg-desktop-portal-gtk];
 
-  imports = [inputs.aagl.nixosModules.default];
-  programs.honkers-railway-launcher.enable = false;
+  # imports = [inputs.aagl.nixosModules.default];
+  # programs.honkers-railway-launcher.enable = false;
 
   security.rtkit.enable = true;
 
@@ -127,10 +127,6 @@
       qbittorrent-enhanced-nox
 
       xwayland-satellite
-
-      # inputs.zen-browser.packages."${system}".beta
-      inputs.zen-browser.packages."${system}".twilight
-      # inputs.zen-browser.packages."${system}".twilight-official
 
       gparted
       blueman

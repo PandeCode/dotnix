@@ -1,0 +1,69 @@
+{
+  pkgs,
+  sharedConfig,
+  ...
+}: {
+  programs = let
+    enable_shells = {
+      enable = true;
+      enableBashIntegration = true;
+      enableFishIntegration = true;
+    };
+  in rec {
+    zoxide = enable_shells;
+    nix-index = enable_shells;
+    direnv =
+      enable_shells
+      // {
+        nix-direnv.enable = true;
+      };
+
+    bat. enable = true;
+    starship.settings = {
+      enable = true;
+      add_newline = true;
+      character = {
+        success_symbol = "[➜](bold green)";
+        error_symbol = "[➜](bold red)";
+      };
+    };
+
+    bash = {
+      enable = true;
+      inherit (sharedConfig) shellAliases;
+      # interactiveShellInit = ''
+      #   if [[ $(${pkgs.procps}/bin/ps --no-header --pid=$PPID --format=comm) != "fish" && -z ''${BASH_EXECUTION_STRING} ]]
+      #   then
+      #     shopt -q login_shell && LOGIN_OPTION='--login' || LOGIN_OPTION=""
+      #     exec ${pkgs.fish}/bin/fish $LOGIN_OPTION
+      #   fi
+      # '';
+    };
+    fish = {
+      enable = true;
+      inherit (sharedConfig) shellAliases;
+      interactiveShellInit =
+        /*
+        fish
+        */
+        ''
+          set fish_greeting
+
+          set -g fish_emoji_width 1
+          set -g fish_ambiguous_width 1
+          set -gx GPG_TTY (tty)
+
+          set fish_cursor_default block
+          set fish_cursor_insert line
+          set fish_cursor_replace_one underscore
+          set fish_cursor_visual block
+
+          fish_vi_key_bindings
+
+          function cmd
+          	eval {mkdir,cd}\ $argv\;
+          end
+        '';
+    };
+  };
+}

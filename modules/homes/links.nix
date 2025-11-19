@@ -28,6 +28,7 @@ in {
       example = [
         ["~/dotnix/config/picom/picom.conf" "~/.config/picom/picom.conf"]
         ["~/dotnix/config/nvim" "~/.config/nvim"]
+        ["~/dotnix/config/.fdignore" "~/.fdignore"]
       ];
       description = ''
         List of [source, destination] pairs to create symlinks.

@@ -6,16 +6,16 @@
   boot = {
     plymouth = {
       enable = true;
-      theme = "PlymouthTheme-Custom";
-      # theme = "PlymouthTheme-Cat";
+      # theme = "plymouth-theme-custom";
+      theme = "PlymouthTheme-Cat";
       # extraConfig = /* ini */ '' DeviceScale=1 '';
 
       themePackages = let
-        inherit (((import ../../derivations/default.nix) pkgs.callPackage)) plymouth-theme-custom;
-        # inherit (((import ../../derivations/default.nix) pkgs.callPackage)) plymouth-theme-cat;
+        # inherit (((import ../../derivations/default.nix) pkgs.callPackage)) plymouth-theme-custom;
+        inherit (((import ../../derivations/default.nix) pkgs.callPackage)) plymouth-theme-cat;
       in [
-        # plymouth-theme-cat
-        plymouth-theme-custom
+        plymouth-theme-cat
+        # plymouth-theme-custom
       ];
     };
 

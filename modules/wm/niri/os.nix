@@ -11,6 +11,7 @@
   nixpkgs.overlays = [inputs.niri.overlays.niri];
 
   systemd.user.services.niri-flake-polkit.enable = false;
+  niri-flake.cache.enable = false;
 
   programs.niri = {
     enable = true;

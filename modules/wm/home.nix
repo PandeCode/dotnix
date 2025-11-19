@@ -13,6 +13,7 @@
 in {
   imports = [
     ../programs/rofi.nix
+    ../programs/zen.nix
     # ../programs/swhkd.nix
   ];
 
@@ -156,7 +157,7 @@ in {
           clipboard-paste-protection = true;
           confirm-close-surface = false;
 
-          custom-shader = "${../../config/ghostty/shader.glsl}";
+          custom-shader = "/home/${sharedConfig.user}/dotnix/config/ghostty/shader.glsl";
         };
       };
       alacritty.enable = true;

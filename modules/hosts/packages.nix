@@ -137,7 +137,6 @@
     # axel
     file
     tldr
-    eza
     difftastic
     just
     duf
