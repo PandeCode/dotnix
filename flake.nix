@@ -3,7 +3,7 @@ rec {
 
   nixConfig = {
     trusted-users = ["root" "shawn"];
-    experimental-features = ["nix-command" "flakes"];
+    experimental-features = ["nix-command" "flakes" "pipe-operators"];
     accept-flake-config = true;
     show-trace = true;
     auto-optimise-store = true;
@@ -93,10 +93,10 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # aagl = {
-    #   url = "github:ezKEa/aagl-gtk-on-nix";
-    #   inputs.nixpkgs.follows = "nixpkgs"; #
-    # };
+    aagl = {
+      url = "github:ezKEa/aagl-gtk-on-nix";
+      inputs.nixpkgs.follows = "nixpkgs"; #
+    };
   };
 
   outputs = {
