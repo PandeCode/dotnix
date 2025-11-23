@@ -45,7 +45,7 @@ in {
       # Keyboard input
       input type:keyboard {
         xkb_options ctrl:nocaps,grp:win_space_toggle
-        xkb_layout us,es
+        # xkb_layout us,es
       }
 
       ${builtins.readFile ../../../config/sway/swayfx.conf}

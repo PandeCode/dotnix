@@ -1,4 +1,5 @@
 {
+  inputs,
   lib,
   pkgs,
   sharedConfig,
@@ -23,7 +24,9 @@
 
     # ../../modules/hosts/virt_manager.nix
     # ../../modules/hosts/osx-kvm.nix
+    inputs.aagl.nixosModules.default
   ];
+  programs.honkers-railway-launcher.enable = true;
 
   virtualisation.waydroid.enable = false;
   zramSwap.enable = true;
@@ -77,7 +80,7 @@
   users.users.${sharedConfig.user} = {
     isNormalUser = true;
     description = sharedConfig.user;
-    extraGroups = ["networkmanager" "wheel" "video" "libvirtd" "input" "uinput" "docker"];
+    extraGroups = ["networkmanager" "wheel" "video" "libvirtd" "input" "uinput" "docker" "kvm" "adbusers"];
   };
 
   system.stateVersion = "25.05";

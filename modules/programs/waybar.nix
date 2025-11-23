@@ -54,7 +54,7 @@
           "battery"
           "network"
           "bluetooth"
-          "hyprland/language"
+          # "hyprland/language"
           "group/expand"
         ];
 

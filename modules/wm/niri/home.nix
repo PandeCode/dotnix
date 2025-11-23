@@ -60,7 +60,7 @@ in {
       input = {
         keyboard = {
           xkb = {
-            layout = "us,es";
+            # layout = "us,es";
             options = "grp:win_space_toggle,ctrl:nocaps";
           };
         };

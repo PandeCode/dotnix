@@ -12,9 +12,6 @@
   xdg.portal.enable = lib.mkForce true;
   xdg.portal.extraPortals = [pkgs.xdg-desktop-portal-gtk];
 
-  # imports = [inputs.aagl.nixosModules.default];
-  # programs.honkers-railway-launcher.enable = false;
-
   security.rtkit.enable = true;
 
   virtualisation.docker = {
