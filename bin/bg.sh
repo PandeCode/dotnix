@@ -485,6 +485,10 @@ case "$1" in
 "get-resetbg" | "get-reset")
 	handle_last_wallpaper true
 	;;
+"color")
+	convert -size 1x1 "xc:$2" "/tmp/bg-sh-$2.png"
+	handle_set_image "/tmp/bg-sh-$2.png" false
+	;;
 "set")
 	if [[ -z "$2" ]]; then
 		log "ERROR" "No image path provided for set command" true

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+if [ ! -f /tmp/launcher.rasi ]; then
+    ~/dotnix/bin/rofi-make-config.sh
+fi
+
+if [ ! -f /tmp/launcher.rasi ]; then
+    ~/.nix-profile/bin/rofi -config ~/dotnix/config/rofi/config.rasi -theme ~/dotnix/config/rofi/theme.rasi "$@"
+else
+    ~/.nix-profile/bin/rofi -config ~/dotnix/config/rofi/config.rasi -theme /tmp/launcher.rasi "$@"
+fi

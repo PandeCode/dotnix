@@ -13,6 +13,7 @@ pytest_cache
 .clangd
 .ccls-cache
 .nox
+deps
 
 dist
 dist-newstyle
