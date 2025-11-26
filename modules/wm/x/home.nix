@@ -103,6 +103,8 @@ in {
         xtitle
         xmenu
 
+        xwinwrap
+
         dmenu
         # dmenu-rs-enable-plugins
       ];

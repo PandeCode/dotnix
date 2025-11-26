@@ -1,12 +1,13 @@
 configuration {
 	/*---------- General setting ----------*/
-	modi: "drun,run,filebrowser,window";
+	modi: "drun,run,filebrowser,window,calc";
 	case-sensitive: false;
 	cycle: true;
 	filter: "";
 	scroll-method: 0;
 	normalize-match: true;
 	show-icons: true;
+	font: "Mono 12";
 	icon-theme: "Papirus";
 /*	cache-dir: ;*/
 	steal-focus: false;

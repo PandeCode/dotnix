@@ -1,14 +1,11 @@
-#!/usr/bin/env bash
-
-image=$(bg.sh get-last)
-font=$(cat ~/.config/stylix/font)
-
-source "$HOME/.config/stylix/style.sh"
-
-cat <<EOF > /tmp/launcher.rasi
 configuration {
-  font: "$font";
+  font: "FantasqueSansM Nerd Font Mono";
   modi: "drun,run,filebrowser,window,calc";
+  drun { display-name: ""; }
+  run { display-name: ""; }
+  window { display-name: ""; }
+  filebrowser { display-name: ""; }
+  calc { display-name: ""; }
 }
 
 * {
@@ -17,12 +14,12 @@ configuration {
   padding: 0;
   spacing: 0;
 
-  bg: $base01;
-  bg-alt: $base02;
-  fg: $base05;
-  fg-alt: $base07;
-  accent: $base0D;
-  active: $base0A;
+  bg: #16161e;
+  bg-alt: #2f3549;
+  fg: #a9b1d6;
+  fg-alt: #d5d6db;
+  accent: #2ac3de;
+  active: #0db9d7;
 
   background-color: @bg;
   text-color: @fg;
@@ -44,7 +41,7 @@ mainbox {
 imagebox {
   padding: 20px;
   background-color: transparent;
-  background-image: url("$image", height);
+  background-image: url("/home/shawn/Pictures/walls/chainsaw.png", height);
   orientation: vertical;
   children: [inputbar];
 }
@@ -115,6 +112,3 @@ element-text {
 element-text selected {
   text-color: @accent;
 }
-EOF
-
-echo /tmp/launcher.rasi
