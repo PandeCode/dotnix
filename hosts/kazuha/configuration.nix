@@ -24,9 +24,9 @@
 
     # ../../modules/hosts/virt_manager.nix
     # ../../modules/hosts/osx-kvm.nix
-    inputs.aagl.nixosModules.default
+    # inputs.aagl.nixosModules.default
   ];
-  programs.honkers-railway-launcher.enable = true;
+  # programs.honkers-railway-launcher.enable = true;
 
   virtualisation.waydroid.enable = false;
   zramSwap.enable = true;
