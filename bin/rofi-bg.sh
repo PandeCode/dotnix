@@ -4,9 +4,9 @@ BG_SCRIPT="bg.sh"
 
 OPTIONS=(
 	"last"
+	"random"
 	"prev"
 	"next"
-	"random"
 	"reset"
 	"set"
 )

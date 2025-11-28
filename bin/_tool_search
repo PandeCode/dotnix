@@ -8,6 +8,7 @@ options=(
 	"bg"
 	"audio"
 	"lock"
+	"picom"
 	"color"
 	"home-manager options"
 	"bluetooth"
@@ -38,6 +39,7 @@ case "$choice" in
 "audio") rofi-pulse.sh ;;
 "kill") rofi-kill.sh ;;
 "bg") rofi-bg.sh ;;
+"picom") neovide ~/.config/picom/picom.conf ;;
 
 "lock")
 	lock.sh
