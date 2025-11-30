@@ -37,6 +37,22 @@
   documentation.dev.enable = true;
 
   environment.systemPackages = with pkgs; [
+    # to make nix-shell faster but not pollute my path when i dont need them
+    (stdenvNoCC.mkDerivation {
+      pname = "ensure-installed";
+      version = "0.0.0";
+      buildInputs = [clang clang-tools cargo gdb bear];
+      src = null;
+      dontUnpack = true;
+      dontBuild = true;
+      dontFixup = true;
+      installPhase = ''
+        mkdir -p $out/bin;
+        echo echo Ensure Install > $out/bin/.ensure-install;
+        chmod +x $out/bin/.ensure-install;
+      '';
+    })
+
     man-pages
     man-pages-posix
 

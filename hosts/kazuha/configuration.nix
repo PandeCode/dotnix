@@ -28,7 +28,7 @@
   ];
   # programs.honkers-railway-launcher.enable = true;
 
-  virtualisation.waydroid.enable = false;
+  virtualisation.waydroid.enable = true;
   zramSwap.enable = true;
 
   environment.extraInit =

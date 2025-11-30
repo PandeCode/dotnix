@@ -49,8 +49,6 @@
 
       statix
 
-      spotifyd
-
       notify-send-py
 
       silicon

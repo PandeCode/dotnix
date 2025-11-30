@@ -12,9 +12,9 @@ in {
     base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
 
     cursor = {
-      package = pkgs.bibata-cursors;
-      name = "Bibata-Mordern-Ice";
-      size = 12;
+      name = "capitaine-cursors";
+      package = pkgs.capitaine-cursors;
+      size = 10;
     };
 
     fonts = rec {

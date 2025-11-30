@@ -252,21 +252,8 @@ handle_player() {
 	fi
 
 	case "$player" in
-		spotify | .spotify-wrappe)
-			PLAYER=spotify
-			if ! lrclib | current_line "$(get_position)"; then
-				playerctl metadata --format "{{title}} - {{artist}}"
-			fi
-			;;
-		spotifyd | spotifyd*)
-			PLAYER=spotifyd
-			if ! lrclib | current_line "$(get_position)"; then
-				playerctl metadata --format "{{title}} - {{artist}}"
-			fi
-
-			;;
-		spotify_player | spotify_player*)
-			PLAYER=spotify_player
+		spotify | spotifyd | spotify_player)
+			PLAYER=$player
 			if ! lrclib | current_line "$(get_position)"; then
 				playerctl metadata --format "{{title}} - {{artist}}"
 			fi

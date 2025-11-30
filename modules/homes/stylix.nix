@@ -89,52 +89,35 @@
       '';
   };
 
-  specialisation = {
+  specialisation = let
+    mkconfig = THEME: {
+      sessionVariables.THEME = THEME;
+      activation.setTheme =
+        lib.mkForce
+        (lib.hm.dag.entryAfter ["writeBoundary"] ''
+          ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface color-scheme "prefer-${THEME}"
+        '');
+    };
+  in {
     dark.configuration = {
       stylix.base16Scheme = lib.mkForce "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
-      home = {
-        sessionVariables.THEME = "dark";
-        activation.setTheme =
-          lib.mkForce
-          <| lib.hm.dag.entryAfter ["writeBoundary"] ''
-            ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
-          '';
-      };
+      home = mkconfig "dark";
     };
 
     light.configuration = {
       stylix.base16Scheme = lib.mkForce "${pkgs.base16-schemes}/share/themes/tokyo-night-light.yaml";
-      home = {
-        sessionVariables.THEME = "light";
-        activation.setTheme =
-          lib.mkForce
-          <| lib.hm.dag.entryAfter ["writeBoundary"] ''
-            ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface color-scheme "prefer-light"
-          '';
-      };
+      home = mkconfig "light";
     };
   };
 
   home = {
     sessionVariables = {
-      XCURSOR_THEME = config.home.pointerCursor.name;
-      XCURSOR_SIZE = config.home.pointerCursor.size;
+      XCURSOR_THEME = config.stylix.cursor.name;
+      XCURSOR_SIZE = config.stylix.cursor.size;
     };
     activation.setTheme = lib.hm.dag.entryAfter ["writeBoundary"] ''
       ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
     '';
-    # updateFontsCache = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    #   echo "🔄 Rebuilding font cache..."
-    #   ${pkgs.fontconfig}/bin/fc-cache -fv
-    # '';
-    packages = [pkgs.bibata-cursors];
-    pointerCursor = lib.mkForce {
-      gtk.enable = true;
-      x11.enable = true;
-      size = 48;
-      package = pkgs.bibata-cursors;
-      name = "Bibata-Mordern-Ice";
-    };
   };
 
   stylix =

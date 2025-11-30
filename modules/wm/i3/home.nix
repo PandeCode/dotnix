@@ -59,7 +59,7 @@ in {
           statusCommand = "${pkgs.i3status-rust}/bin/i3status-rs ~/.config/i3status-rs/xconfig.toml";
           fonts = {
             names = [font "monospace"];
-            size = 8.0;
+            size = 10.0;
           };
           trayOutput = "primary";
           colors = {

@@ -12,6 +12,7 @@
   nomod = _bind "";
 in {
   imports = [
+    ../programs/spotify.nix
     ../programs/rofi.nix
     ../programs/zen.nix
     # ../programs/swhkd.nix
