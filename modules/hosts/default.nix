@@ -17,6 +17,10 @@
     DOTFILES = "/home/${sharedConfig.user}/dotnix";
   };
 
+  # environment.etc.inputrc.text = ''
+  #   ${builtins.readFile ../../config/inputrc}
+  # '';
+
   services = {
     isLaptop = true;
   };

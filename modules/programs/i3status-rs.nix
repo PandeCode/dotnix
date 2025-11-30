@@ -30,21 +30,22 @@
     # end_separator = ""
 
     [icons]
-    icons = "awesome6"
+    icons            = "awesome6"
     [icons.overrides]
-    ban = "\uf05e"          # fa-ban
-    wifi = "\uf1eb"         # fa-wifi
-    signal = "\uf012"       # fa-signal
-    exchange = "\uf362"     # fa-exchange-alt
-    tachometer = "\uf0e4"   # fa-tachometer
-    volume_empty = "\ue04e" # volume_mute
-    volume_full = "\ue050" # volume_up
-    volume_half = "\ue04d" # volume_down
-    volume_muted = "\ue04f" # volume_off
-    microphone_full = "\ue029" # mic
-    microphone_half = "\ue029" # mic
+    ban              = "\uf05e" # fa-ban
+    wifi             = "\uf1eb" # fa-wifi
+    signal           = "\uf012" # fa-signal
+    exchange         = "\uf362" # fa-exchange-alt
+    tachometer       = "\uf0e4" # fa-tachometer
+    volume_empty     = "\ue04e" # volume_mute
+    volume_full      = "\ue050" # volume_up
+    volume_half      = "\ue04d" # volume_down
+    volume_muted     = "\ue04f" # volume_off
+    microphone_full  = "\ue029" # mic
+    microphone_half  = "\ue029" # mic
     microphone_empty = "\ue02a" # mic_none
     microphone_muted = "\ue02b" # mic_off
+
   '';
 in {
   xdg.configFile = {
