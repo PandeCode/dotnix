@@ -21,20 +21,20 @@
     extraModulePackages = [];
   };
 
-  fileSystems."/" =
-    { device = "/dev/disk/by-uuid/22c100c7-3caa-4c03-87d7-b98a945251d8";
-      fsType = "ext4";
-    };
+  fileSystems."/" = {
+    device = "/dev/disk/by-uuid/22c100c7-3caa-4c03-87d7-b98a945251d8";
+    fsType = "ext4";
+  };
 
-  fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/0499-6E9A";
-      fsType = "vfat";
-      options = [ "fmask=0077" "dmask=0077" ];
-    };
+  fileSystems."/boot" = {
+    device = "/dev/disk/by-uuid/0499-6E9A";
+    fsType = "vfat";
+    options = ["fmask=0077" "dmask=0077"];
+  };
 
-  swapDevices =
-    [ { device = "/dev/disk/by-uuid/291a4626-6e59-41ab-9637-386ff5ec3d20"; }
-    ];
+  swapDevices = [
+    {device = "/dev/disk/by-uuid/291a4626-6e59-41ab-9637-386ff5ec3d20";}
+  ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's
@@ -48,10 +48,5 @@
 
   hardware = {
     cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-
-    nvidia-container-toolkit.mount-nvidia-executables = true;
-    nvidia = {
-      nvidiaSettings = true;
-    };
   };
 }

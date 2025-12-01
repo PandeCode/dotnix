@@ -55,30 +55,6 @@
   # };
   # };
 
-  specialisation = lib.mkIf config.services.isLaptop {
-    nvidia.configuration = {
-      services.xserver.videoDrivers = ["nvidia"];
-      hardware = {
-        graphics.enable = true;
-        nvidia = {
-          open = true;
-          nvidiaSettings = true;
-          powerManagement.enable = false;
-          package = config.boot.kernelPackages.nvidiaPackages.stable;
-
-          # nvidia-drm.modeset=1 is required for some wayland compositors, e.g. sway
-          modesetting.enable = true;
-
-          prime = {
-            sync.enable = true;
-            intelBusId = "PCI:0:2:0";
-            nvidiaBusId = "PCI:1:0:0";
-          };
-        };
-      };
-    };
-  };
-
   systemd = {
     sleep.extraConfig = ''
       HibernateDelaySec=2h

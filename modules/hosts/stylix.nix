@@ -15,7 +15,7 @@
 
           gnome-text-editor.enable = true;
           gnome.enable = true;
-          grub.enable = true;
+          grub.enable = false;
           grub.useWallpaper = true;
 
           gtk.enable = true;

@@ -1,6 +1,7 @@
 {
   pkgs,
   inputs,
+  sharedConfig,
   ...
 }: {
   imports = [
@@ -10,8 +11,14 @@
   ];
   nixpkgs.config.allowUnfree = true;
 
-  nvim = {
-    enable = true;
+  nvim.enable = true;
+  system.userActivationScripts = {
+    emmyLua = {
+      text = ''
+        cd /home/${sharedConfig.user}
+        nvim --cmd 'autocmd VimEnter * lua rewriteEmmyLuaJsonExit()'
+      '';
+    };
   };
 
   programs = {

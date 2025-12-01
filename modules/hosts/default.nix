@@ -13,7 +13,6 @@
     EDITOR = sharedConfig.editor;
     TERMINAL = sharedConfig.terminal;
     BROWSER = sharedConfig.browser;
-    VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/intel_icd.x86_64.json";
     DOTFILES = "/home/${sharedConfig.user}/dotnix";
   };
 
