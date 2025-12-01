@@ -1,85 +1,133 @@
-{
-  pkgs,
-  lib,
-  config,
-  ...
-}: let
+{pkgs, ...}: let
   libs = with pkgs;
     [
-      # Core C/C++ runtime
-      stdenv.cc.cc.lib
-      glibc
-      zlib
-      bzip2
-      xz
-      zstd
-      llvmPackages.libcxx
-
-      # System
-      dbus
-      systemd
-      libudev0-shim
-
-      # Graphics
-      libGL
-      libglvnd
-      libdrm
-      mesa
-
-      # X11
-      # Wayland
-      wayland
-      libxkbcommon
-
-      # Audio
+      acl
       alsa-lib
-      pulseaudio
-      libpulseaudio
-
-      # GUI / GTK
+      atk
+      attr
+      bzip2
+      cairo
+      coreutils
+      cups
+      curl
+      dbus
+      dbus-glib
+      e2fsprogs
+      expat
+      ffmpeg
+      flac
+      fontconfig
+      freeglut
+      freetype
+      fuse
+      fuse3
+      gamemode
+      gdk-pixbuf
+      glew110
+      glib
+      glibc
+      gnome2.GConf
+      gsettings-desktop-schemas
+      gtk2
       gtk3
       gtk4
-      gdk-pixbuf
-      cairo
-      pango
-      freetype
-      fontconfig
-
-      # Input
-      libwacom
+      icu
+      libappindicator-gtk2
+      libcaca
+      libcanberra
+      libcap
+      libdbusmenu-gtk2
+      libdrm
+      libelf
+      libgbm
+      libgcrypt
+      libGL
+      libglvnd
+      libidn
+      libindicator-gtk2
       libinput
-
-      # FS / Utils
-      fuse3
-      e2fsprogs
-      util-linux
-      curl
-      expat
-      gamemode
-
-      # Media
-      ffmpeg
+      libjpeg
+      libmikmod
+      libnotify
+      libogg
+      libpng
+      libpng12
+      libpulseaudio
+      librsvg
+      libsamplerate
+      libsodium
+      libssh
+      libtheora
+      libtiff
+      libudev0-shim
+      libusb1
       libva
       libvdpau
+      libvorbis
+      libvpx
+      libwacom
+      libxcrypt
+      libxkbcommon
+      libxml2
+      llvmPackages.libcxx
+      mesa
+      networkmanager
+      nspr
+      nss
+      openssl
+      pango
+      pciutils
+      pipewire
+      pixman
+      pulseaudio
+      SDL
+      SDL2
+      SDL2_image
+      SDL2_mixer
+      SDL2_ttf
+      sdl3
+      SDL_image
+      SDL_mixer
+      SDL_ttf
+      speex
+      stdenv.cc.cc
+      stdenv.cc.cc.lib
+      systemd
+      tbb
+      util-linux
+      # vulkan-loader
+      wayland
+      xz
+      zenity
+      zlib
+      zstd
     ]
     ++ (
       with pkgs.xorg; [
+        libICE
+        libSM
         libX11
-        libXext
-        libXrender
-        libXfixes
-        libXi
-        libXrandr
-        libXcursor
-        libXinerama
-        libXcomposite
-        libXdamage
-        libXScrnSaver
         libxcb
+        libXcomposite
+        libXcursor
+        libXdamage
+        libXext
+        libXfixes
+        libXft
+        libXi
+        libXinerama
+        libXmu
+        libXrandr
+        libXrender
+        libXScrnSaver
+        libxshmfence
+        libXt
+        libXtst
+        libXxf86vm
         xcbutil
+        xcbutilcursor
         xcbutilimage
         xcbutilkeysyms
-        xcbutilcursor
         xcbutilwm
       ]
     );
@@ -88,10 +136,4 @@ in {
     enable = true;
     libraries = libs;
   };
-
-  # Optional: remove this unless you know you need it manually
-  # environment.sessionVariables = {
-  #   LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath libs}";
-  #   INCLUDE_PATH = "${pkgs.lib.makeIncludePath libs}";
-  # };
 }

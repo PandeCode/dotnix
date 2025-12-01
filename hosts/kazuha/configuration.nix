@@ -9,6 +9,8 @@
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
 
+    ../../modules/hosts/gpu.nix
+
     ../../modules/hosts/default.nix
 
     ../../modules/toolsets/gaming/os.nix
@@ -55,6 +57,7 @@
         useOSProber = true;
         device = "nodev";
         efiSupport = true;
+        theme = (((import ../../derivations/default.nix) pkgs.callPackage)).grub-custom-theme;
       };
 
       efi.canTouchEfiVariables = true;
