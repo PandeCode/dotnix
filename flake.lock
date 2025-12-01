@@ -306,11 +306,11 @@
         "plugins-vlime": "plugins-vlime"
       },
       "locked": {
-        "lastModified": 1764485685,
-        "narHash": "sha256-HotHnn86kH0MKalVF3kL53XeX4ESde9bekaBXvANQmc=",
+        "lastModified": 1764563976,
+        "narHash": "sha256-ZIm/uWtXi1TH/9CEpCb1wZ+vmOesM2vSGFsrGKBbSxM=",
         "owner": "pandecode",
         "repo": "hermes",
-        "rev": "fbe22eaeda5a08c7c7d956b25e8d24fc16f65871",
+        "rev": "81fd52dae1da410bc43e77f71925be5ab30b824d",
         "type": "github"
       },
       "original": {
