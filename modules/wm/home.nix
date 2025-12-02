@@ -1,9 +1,7 @@
 {
-  pkgs,
   dotutils,
   lib,
   config,
-  inputs,
   sharedConfig,
   ...
 }: let

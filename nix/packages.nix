@@ -22,6 +22,7 @@ in
           ) [
             # charon-shell
             # obolc
+            nix-alien
             hermes
             ghostty
             # inputs.zen-browser.packages."${system}".twilight
