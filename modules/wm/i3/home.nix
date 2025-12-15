@@ -61,7 +61,7 @@ in {
             names = [font "monospace"];
             size = 10.0;
           };
-          trayOutput = "primary";
+          # trayOutput = "primary";
           colors = {
             background = "#${c.base00}";
             statusline = "#${c.base05}";

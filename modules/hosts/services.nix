@@ -69,7 +69,10 @@
 
       openssh = {
         enable = true;
-        settings.PermitRootLogin = lib.mkForce "yes";
+        settings = {
+          PermitRootLogin = lib.mkForce "no";
+          X11Forwarding = true;
+        };
       };
       printing.enable = false;
 

@@ -4,4 +4,5 @@ callPackage: {
   plymouth-theme-cat = callPackage ../derivations/plymouth-theme-cat.nix {};
   notify-send-py = callPackage ../derivations/notify-send-py.nix {};
   grub-custom-theme = callPackage ../derivations/grub-custom-theme.nix {};
+  xdg-xmenu = callPackage ../derivations/xdg-xmenu.nix {};
 }

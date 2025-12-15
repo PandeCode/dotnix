@@ -1,6 +1,9 @@
 {pkgs ? import <nixpkgs> {}}: let
-  buildInputs = with pkgs;
-    [
+  buildInputs =
+    (with pkgs; [
+      _0xpropo
+      openssl
+
       sdl3
       # Wayland dependencies
       wayland
@@ -48,8 +51,10 @@
       libnotify
 
       _0xproto
-    ]
-    ++ (with xorg; [
+      libxinerama
+    ])
+    ++ (with pkgs.xorg; [
+      xorgproto
       libxkbfile
       libXcomposite
       libXdamage

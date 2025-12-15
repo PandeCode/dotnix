@@ -4,7 +4,7 @@
   config,
   ...
 }: {
-  services.tlp.enable = true;
+  services.tlp.enable = false;
   # tlp = lib.mkIf cfg.isLaptop {
   #   enable = true;
   #   settings = {

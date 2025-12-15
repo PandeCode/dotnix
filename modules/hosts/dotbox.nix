@@ -24,5 +24,6 @@
 in {
   environment.systemPackages = [
     (mkBoxTool "contpid")
+    (mkBoxTool "sizes")
   ];
 }

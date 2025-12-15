@@ -1,3 +1,8 @@
 #!/usr/bin/env bash
 
-cso > /tmp/image.png && feh /tmp/image.png
+set -e
+
+hash=$(date +'%Y-%m-%d-%H-%M-%S')
+csoi > /tmp/image-$hash.png && feh /tmp/image-$hash.png &
+echo /tmp/image-$hash.png | cs
+notify-send "Clip image" "/tmp/image-$hash.png"

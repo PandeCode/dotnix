@@ -94,3 +94,73 @@ cycle = [5, 25, 50, 75, 100]
 block = "time"
 interval = 5
 format = " $timestamp.datetime(f:'%a %d/%m %R') "
+
+[[block]]
+block = "custom"
+interval = 1
+command = '''
+IFACE="wlo1"
+STATE_FILE="/tmp/i3status_net_${IFACE}_mode"
+
+# Read current mode (default: total)
+MODE=$(cat ${STATE_FILE} 2>/dev/null || echo "total")
+
+# Read current values
+rx_curr=$(cat /sys/class/net/${IFACE}/statistics/rx_bytes 2>/dev/null || echo 0)
+tx_curr=$(cat /sys/class/net/${IFACE}/statistics/tx_bytes 2>/dev/null || echo 0)
+
+# Format function
+format_bytes() {
+  awk -v b=$1 -v suffix="$2" 'BEGIN {
+    rate=1024;
+    if(b < rate)
+      printf("%.1f%sB%s", b, suffix, suffix ? "" : "")
+    else if(b < rate*rate)
+      printf("%.1f%sK%s", b/rate, suffix, suffix ? "" : "B")
+    else if(b < rate*rate*rate)
+      printf("%.1f%sM%s", b/(rate*rate), suffix, suffix ? "" : "B")
+    else if(b < rate*rate*rate*rate)
+      printf("%.1f%sG%s", b/(rate*rate*rate), suffix, suffix ? "" : "B")
+    else
+      printf("%.1f%sT%s", b/(rate*rate*rate*rate), suffix, suffix ? "" : "B")
+  }'
+}
+
+if [ "$MODE" = "rate" ]; then
+  # Show rates
+  RX_FILE="/tmp/i3status_rx_${IFACE}"
+  TX_FILE="/tmp/i3status_tx_${IFACE}"
+
+  rx_prev=$(cat ${RX_FILE} 2>/dev/null || echo ${rx_curr})
+  tx_prev=$(cat ${TX_FILE} 2>/dev/null || echo ${tx_curr})
+
+  rx_rate=$((rx_curr - rx_prev))
+  tx_rate=$((tx_curr - tx_prev))
+
+  echo ${rx_curr} > ${RX_FILE}
+  echo ${tx_curr} > ${TX_FILE}
+
+  rx_fmt=$(format_bytes ${rx_rate} "/s")
+  tx_fmt=$(format_bytes ${tx_rate} "/s")
+
+  echo "↓${rx_fmt} ↑${tx_fmt}"
+else
+  # Show totals
+  rx_fmt=$(format_bytes ${rx_curr} "")
+  tx_fmt=$(format_bytes ${tx_curr} "")
+
+  echo "↓${rx_fmt} ↑${tx_fmt}"
+fi
+'''
+[[block.click]]
+button = "left"
+cmd = '''
+IFACE="wlo1"
+STATE_FILE="/tmp/i3status_net_${IFACE}_mode"
+MODE=$(cat ${STATE_FILE} 2>/dev/null || echo "total")
+if [ "$MODE" = "total" ]; then
+  echo "rate" > ${STATE_FILE}
+else
+  echo "total" > ${STATE_FILE}
+fi
+'''

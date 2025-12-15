@@ -30,7 +30,7 @@
             "spinner" = base0C;
           }))
         )
-        + " --highlight-line  --info=inline-right  --ansi  --layout=reverse  --border=none --preview 'fzf-preview.sh {}'";
+        + " --highlight-line --info=inline-right --ansi --layout=reverse --border=none --preview 'fzf-preview.sh {}'";
       FZF_DEFAULT_COMMAND = "fd --type f --strip-cwd-prefix --hidden --follow --exclude .git";
     };
   };
