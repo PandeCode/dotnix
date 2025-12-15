@@ -88,6 +88,7 @@ in {
         keycode 66 = Control_L Caps_Lock NoSymbol NoSymbol
       '';
       packages = with pkgs; [
+        xdo
         libxcvt
         slurp
         grim

@@ -3,6 +3,12 @@
   sharedConfig,
   ...
 }: {
+  services.linux-wallpaperengine =
+    if sharedConfig.gaming.wallpaperengine
+    then {
+      enable = true;
+    }
+    else {};
   home.packages = with pkgs; let
     enable_if = var: list:
       if sharedConfig.gaming.${var}

@@ -34,6 +34,7 @@
   };
 
   services.xserver.wacom.enable = true;
+  programs.xppen.enable = true;
   hardware = {
     opentabletdriver = {
       enable = true;
@@ -102,6 +103,18 @@
     wget
 
     bat
+    # (bat.overrideAttrs (oldAttrs: {
+    #   patches =
+    #     oldAttrs.patches
+    #     ++ [
+    #       (fetchpatch {
+    #         name = "theme-thing";
+    #         url = "https://github.com/sharkdp/bat/pull/3456/commits/d81ed9c4788d421280536526a0fe8ccd950980ca.diff";
+    #         sha256 = "sha256-g+fq6Ozf+0apVb7f/i1AyWp5W4Kup2ubN/o9Vwd3kY0=";
+    #       })
+    #     ];
+    # }))
+
     bat-extras.batpipe
     bat-extras.batman
     bat-extras.batdiff

@@ -64,7 +64,7 @@
     sizeof = "bash -c 'du -h --max-depth=0'";
     tree = "tre";
 
-    clonec = "cso | xargs git clone --depth 1";
+    clonec = "git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch -j$(nproc) $(cso)";
     wgetc = "cso | xargs wget -c ";
 
     gti = "git";
@@ -78,7 +78,8 @@
     nivm = "nvim";
     py = "python3";
 
+    man = "batman";
     cls = "clear";
-    tls = "tmux clear-history; clear";
+    tls = "clear ; tmux clear-history";
   };
 }

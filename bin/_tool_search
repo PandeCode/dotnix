@@ -6,6 +6,7 @@ theme=$(rofi-make-config.sh)
 options=(
 	"nixpkgs search"
 	"bg"
+	"clipimg"
 	"audio"
 	"lock"
 	"picom"
@@ -40,6 +41,7 @@ case "$choice" in
 "kill") rofi-kill.sh ;;
 "bg") rofi-bg.sh ;;
 "picom") neovide ~/.config/picom/picom.conf ;;
+"clipimg") ~/dotnix/bin/clipimg.sh ;;
 
 "lock")
 	lock.sh

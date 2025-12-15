@@ -15,7 +15,7 @@
     osu = false;
     ps2 = false;
     switch = false;
-    wallpaperengine = false;
+    wallpaperengine = true;
     wii = false;
   };
 

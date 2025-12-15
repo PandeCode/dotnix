@@ -24,6 +24,8 @@
 
     ../../modules/hosts/sops.nix
 
+    inputs.nix-index-database.nixosModules.default
+
     # ../../modules/hosts/virt_manager.nix
     # ../../modules/hosts/osx-kvm.nix
     # inputs.aagl.nixosModules.default
@@ -38,7 +40,7 @@
     sh
     */
     ''
-      export PATH=/home/shawn/dotnix/bin:$PATH
+      export PATH=/home/${sharedConfig.user}/dotnix/bin:$PATH
     '';
 
   # hardware = {
@@ -49,7 +51,7 @@
   # };
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_zen;
+    kernelPackages = pkgs.linuxPackages_xanmod;
     loader = {
       systemd-boot.enable = false;
       grub = {
@@ -57,7 +59,7 @@
         useOSProber = true;
         device = "nodev";
         efiSupport = true;
-        theme = (((import ../../derivations/default.nix) pkgs.callPackage)).grub-custom-theme;
+        theme = ((import ../../derivations/default.nix) pkgs.callPackage).grub-custom-theme;
       };
 
       efi.canTouchEfiVariables = true;

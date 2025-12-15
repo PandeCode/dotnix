@@ -3,7 +3,7 @@
 file="${1:-/dev/null}"
 
 if [[ $XDG_SESSION_TYPE == "x11" ]]; then
-	xclip -sel clip -o | tee "$file"
+	xclip -sel clip -t image/png -o | tee "$file"
 elif [[ $XDG_SESSION_TYPE == "wayland" ]]; then
-	wl-paste "$@" | tee "$file"
+	wl-paste -t image/png  | tee "$file"
 fi

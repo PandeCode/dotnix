@@ -22,7 +22,7 @@
     };
   };
 
-  # services.xserver.desktopManager.gnome.enable = true;
+  services.xserver.desktopManager.gnome.enable = true;
   # services.desktopManager.plasma6.enable = true;
   # services.xserver.desktopManager.plasma6.enable = true;
 
@@ -57,7 +57,11 @@
       settings = {
         General = {
           Enable = "Source,Sink,Media,Socket";
-          # Experimental = true; # Show battery # WARN: Arch Wiki warns for bugs
+          Experimental = true; # Show battery # WARN: Arch Wiki warns for bugs
+          # FastConnectable = true; # WARN power
+        };
+        Policy = {
+          AutoEnable = true;
         };
       };
     };

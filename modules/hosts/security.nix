@@ -46,7 +46,7 @@
 
     polkit.extraConfig =
       /*
-      js
+      bash
       */
       ''
         polkit.addRule(function(action, subject) {
