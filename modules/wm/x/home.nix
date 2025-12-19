@@ -2,6 +2,7 @@
   pkgs,
   lib,
   config,
+  inputs,
   ...
 }: let
   _bind = mod: key: exec: {inherit mod key exec;};
@@ -105,6 +106,8 @@ in {
         xmenu
 
         xwinwrap
+
+        inputs.boomer.packages.${pkgs.system}.default
 
         dmenu
         # dmenu-rs-enable-plugins

@@ -195,12 +195,12 @@ tooltip {
   padding-right: 10px;
 }
 
-window#waybar.wezterm {
+window#waybar.ghostty {
   background-color: #111111;
   color: #ffffff;
 }
 
-window#waybar.chrome {
+window#waybar.firefox {
   background-color: #eeeeee;
   color: #000000;
 }

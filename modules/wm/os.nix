@@ -83,6 +83,7 @@
   environment = {
     systemPackages = with pkgs; [
       mesa-demos
+      virtualglLib
       vulkan-tools
 
       freerdp

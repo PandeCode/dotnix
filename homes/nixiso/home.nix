@@ -9,11 +9,9 @@
 in {
   imports = [
     ../../modules/programs/default.nix
-    ../../modules/wm/hyprland/home.nix
     ../../modules/homes/stylix.nix
   ];
 
-  hyprland_home.enable = true;
   spicetify.enable = true;
 
   stylix_home = {
