@@ -15,7 +15,6 @@
     ../../modules/wm/default.nix
     ../../modules/wm/sddm.nix
     ../../modules/wm/plymouth.nix
-    ../../modules/wm/hyprland/os.nix
 
     ../../modules/hosts/stylix.nix
   ];

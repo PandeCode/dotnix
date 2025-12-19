@@ -10,7 +10,7 @@
 
   gaming = {
     enable = true;
-    epic = false;
+    epic = true;
     minecraft = true;
     osu = false;
     ps2 = false;

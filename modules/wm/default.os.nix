@@ -8,11 +8,9 @@
   mkAll = l: builtins.concatLists (map (n: mk n) l);
 in {
   imports = mkAll [
-    "hyprland"
     "niri"
     "sway"
     "river"
     "i3"
-    "dwm"
   ];
 }

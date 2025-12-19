@@ -16,10 +16,8 @@
   osx-kvm.enable = false;
 
   wms = {
-    hyprland.enable = false;
     sway.enable = false;
     i3.enable = true;
-    dwm.enable = false;
     river.enable = false;
     niri.enable = true; # issue https://github.com/sodiboo/niri-flake/issues/1018
     # dwm.enable = true;

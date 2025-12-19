@@ -9,7 +9,6 @@
     ./tmux.nix
 
     ./spicetify.nix
-    ./wezterm.nix
 
     ./git.nix
   ];

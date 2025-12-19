@@ -12,8 +12,6 @@ in
       paths = with inputs; (
         [
           niri.packages.${system}.niri-unstable
-          # aagl.packages.${system}.honkers-railway-launcher
-          # hyprland.packages.${system}.hyprland;
         ]
         ++ (builtins.attrValues ((import ../derivations/default.nix) pkgs.callPackage))
         ++ (map (
@@ -24,6 +22,7 @@ in
             # obolc
             nix-alien
             hermes
+            boomer
             ghostty
             # inputs.zen-browser.packages."${system}".twilight
           ])

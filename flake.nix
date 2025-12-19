@@ -21,20 +21,10 @@ rec {
   };
 
   inputs = {
-    self.submodules = true;
+    # self.submodules = true;
 
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.05";
-
-    # nixos-wsl = {
-    #   url = "github:nix-community/NixOS-WSL/main";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-
-    # darwin = {
-    #   url = "github:LnL7/nix-darwin";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
 
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -56,21 +46,6 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # hyprland.url = "github:hyprwm/Hyprland";
-    #
-    # hyprland-plugins = {
-    #   url = "github:hyprwm/hyprland-plugins";
-    #   inputs.hyprland.follows = "hyprland";
-    # };
-    # hypr-dynamic-cursors = {
-    #   url = "github:VirtCode/hypr-dynamic-cursors";
-    #   inputs.hyprland.follows = "hyprland";
-    # };
-    # xmonad-contexts = {
-    #   url = "github:Procrat/xmonad-contexts";
-    #   flake = false;
-    # };
-
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -86,15 +61,14 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    obolc = {
-      url = "github:PandeCode/obolc";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     pre-commit-hooks = {
       url = "github:cachix/git-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
-    stylix.url = "github:danth/stylix";
+    stylix = {
+      url = "github:danth/stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     sops-nix = {
       url = "github:Mic92/sops-nix";
@@ -106,10 +80,7 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    aagl = {
-      url = "github:ezKEa/aagl-gtk-on-nix";
-      inputs.nixpkgs.follows = "nixpkgs"; #
-    };
+    boomer.url = "github:nilp0inter/boomer";
   };
 
   outputs = {

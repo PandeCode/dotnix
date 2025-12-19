@@ -17,14 +17,6 @@ options=(
 	"wifi"
 	"youtube"
 	"kill"
-	# "chatgpt"
-	# "claude"
-	# "deepseek"
-	# "google search"
-	# "grok"
-	# "nh search"
-	# "perplexity"
-	# "pypi"
 )
 # Prompt the user to pick an option using rofi
 choice=$(printf "%s\n" "${options[@]}" | rofi -dmenu -p "Choose an action" -theme "$theme")
@@ -40,27 +32,16 @@ case "$choice" in
 "audio") rofi-pulse.sh ;;
 "kill") rofi-kill.sh ;;
 "bg") rofi-bg.sh ;;
+"bluetooth") rofi-bluetooth ;;
+"wifi") rofi-wifi-menu ;;
 "picom") neovide ~/.config/picom/picom.conf ;;
 "clipimg") ~/dotnix/bin/clipimg.sh ;;
-
-"lock")
-	lock.sh
-	;;
+"lock") lock.sh ;;
 "color")
 	sleep 1
 	color=$(hyprpicker)
 	echo "$color" | cs
 	notify-send Color "$color"
-	;;
-
-"bluetooth")
-	rofi-bluetooth
-	;;
-"wifi")
-	rofi-wifi-menu
-	;;
-"chatgpt")
-	open_browser "https://chat.openai.com/"
 	;;
 "google search")
 	query=$(rofi -dmenu -p "Enter Google query")
@@ -81,22 +62,6 @@ case "$choice" in
 "home-manager options")
 	query=$(rofi -dmenu -p "Enter home-manager query")
 	[ -z "$query" ] || open_browser "https://home-manager-options.extranix.com/?release=master&query=$(printf "%s" "$query" | jq -sRr @uri)"
-	;;
-"nh search")
-	query=$(rofi -dmenu -p "Enter nh query")
-	[ -z "$query" ] || wezterm start --always-new-process bash -c "nh '$query' | bat --paging=always"
-	;;
-"grok")
-	open_browser "https://x.com/i/grok"
-	;;
-"claude")
-	open_browser "https://claude.ai/new"
-	;;
-"deepseek")
-	open_browser "https://chat.deepseek.com/"
-	;;
-"perplexity")
-	open_browser "https://www.perplexity.ai/"
 	;;
 "youtube")
 	query=$(rofi -dmenu -p "Enter YouTube search")
