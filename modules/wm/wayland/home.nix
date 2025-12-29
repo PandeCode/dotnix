@@ -34,7 +34,7 @@ in
             config.wm.shared.bindexec
             ++ [
               (mod "n" "swaync-client -t -sw")
-              (mod "z" "woomer")
+              (mod "b" "woomer")
 
               (_bind "Super Ctrl Shift" "c" "hyprpicker -a")
 

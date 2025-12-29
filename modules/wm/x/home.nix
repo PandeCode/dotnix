@@ -43,6 +43,8 @@ in {
             (mod "d" "dunstctl context")
             (mod_shift "d" "dunstctl close-all")
 
+            (mod "b" "boomer")
+
             (mod "v" config.greenclip.commands.copy)
             (mod_shift "v" config.greenclip.commands.paste)
 

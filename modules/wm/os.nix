@@ -39,7 +39,7 @@
       enable = true;
       touchpad = {
         middleEmulation = true;
-        disableWhileTyping = true;
+        disableWhileTyping = false;
         tapping = true;
 
         additionalOptions = ''
