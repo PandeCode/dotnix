@@ -3,3 +3,7 @@ result
 .direnv
 .gdb_history
 allpackages.txt
+
+.ccls-cache
+.cache
+.clangd
