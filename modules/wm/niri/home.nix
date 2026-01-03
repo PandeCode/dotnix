@@ -5,7 +5,7 @@
   inputs,
   ...
 }: let
-  h = "/home/${config.home.username}";
+  HOME = "/home/${config.home.username}";
 in {
   imports = [
     ../wayland/home.nix
@@ -16,9 +16,13 @@ in {
   nixpkgs.overlays = [inputs.niri.overlays.niri];
 
   dotnix.symlinkPairs = [
-    ["${h}/dotnix/config/niri/shaders/open.glsl" "${h}/.config/niri/shaders/open.glsl"]
-    ["${h}/dotnix/config/niri/shaders/close.glsl" "${h}/.config/niri/shaders/close.glsl"]
-    ["${h}/dotnix/config/niri/shaders/resize.glsl" "${h}/.config/niri/shaders/resize.glsl"]
+    ["${HOME}/dotnix/config/niri/shaders/open.glsl" "${HOME}/.config/niri/shaders/open.glsl"]
+    ["${HOME}/dotnix/config/niri/shaders/close.glsl" "${HOME}/.config/niri/shaders/close.glsl"]
+    ["${HOME}/dotnix/config/niri/shaders/resize.glsl" "${HOME}/.config/niri/shaders/resize.glsl"]
+  ];
+
+  home.packages = with pkgs; [
+    nirius
   ];
 
   programs.niri = {
@@ -39,8 +43,9 @@ in {
       prefer-no-csd = true;
 
       spawn-at-startup = map (v: {argv = v;}) ([
+          ["niriusd"]
           ["xwayland-satellite"]
-          ["bash" "-c" "waybar -c $(get_niri_waybar.sh)"]
+          ["sh" "-c" "waybar -c $(get_niri_waybar.sh)"]
         ]
         ++ map splitBySpace config.wayland.shared.startup);
       switch-events = {
@@ -75,21 +80,21 @@ in {
       };
       animations = {
         window-open = {
-          custom-shader = "${h}/.config/niri/shaders/open.glsl";
+          custom-shader = "${HOME}/.config/niri/shaders/open.glsl";
           kind.easing = {
             curve = "linear";
             duration-ms = 250;
           };
         };
         window-close = {
-          custom-shader = "${h}/.config/niri/shaders/close.glsl";
+          custom-shader = "${HOME}/.config/niri/shaders/close.glsl";
           kind.easing = {
             curve = "linear";
             duration-ms = 250;
           };
         };
         window-resize = {
-          custom-shader = "${h}/.config/niri/shaders/resize.glsl";
+          custom-shader = "${HOME}/.config/niri/shaders/resize.glsl";
           kind.easing = {
             curve = "linear";
             duration-ms = 250;
@@ -173,7 +178,11 @@ in {
           "Super+Slash".action = show-hotkey-overlay;
           "Alt+f4".action = close-window;
 
-          # "Print".action = screenshot {show-pointer = false;};
+          "Super+Print".action.screenshot-screen = {show-pointer = false;};
+          "Super+Shift+Print".action.screenshot = {show-pointer = false;};
+          "Super+a".action.spawn = ["nirius" "toggle-follow-mode"];
+          # "Super+a".action.spawn = ["sh" "-c" "kill -s USR1 $(cat /tmp/niritools)"];
+          # "Super+shift+a".action.spawn = ["sh" "-c" "kill -s USR2 $(cat /tmp/niritools)"];
         };
     };
   };

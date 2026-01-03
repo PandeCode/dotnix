@@ -98,7 +98,11 @@
     nh
     nix-output-monitor
 
-    busybox
+    pciutils
+    usbutils
+    cyme
+    psmisc
+    # busybox
     inetutils
     wget
 

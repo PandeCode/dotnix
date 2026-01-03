@@ -24,6 +24,7 @@ in
             "wl-paste --type image --watch cliphist store" # Stores only image data
             "swww-daemon"
             "bg.sh last"
+            "sunsetr"
             config.wm.shared.terminal
           ];
           _bind = mod: key: exec: {inherit mod key exec;};
@@ -42,6 +43,7 @@ in
 
               (_bind "Super Shift" "b" "toggle_waybar.sh")
               (_bind "Super Shift" "r" "wayrec.sh")
+              (_bind "Super Shift" "p" "hyprlock")
 
               (mod "v" "rofi-clip.sh")
               (_bind "Super Shift" "v" "rofi-clip-more.sh")
@@ -53,17 +55,16 @@ in
 
     config = {
       services.hyprpolkitagent.enable = true;
+      programs.hyprlock. enable = true;
 
-      programs.hyprlock = {
-        enable = true;
-      };
+      xdg.configFile."sunsetr/sunsetr.toml".text = builtins.readFile ../../../config/sunsetr/sunsetr.toml;
 
       home.packages = with pkgs; [
         wlprop
+        sunsetr
 
         hyprpicker
         hyprlock
-        hyprsunset
 
         wayvnc # TODO: own file
       ];

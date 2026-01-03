@@ -62,6 +62,7 @@
 
     bash = {
       enable = true;
+      blesh.enable = true;
       inherit (sharedConfig) shellAliases;
       # interactiveShellInit = ''
       #   if [[ $(${pkgs.procps}/bin/ps --no-header --pid=$PPID --format=comm) != "fish" && -z ''${BASH_EXECUTION_STRING} ]]
