@@ -49,7 +49,7 @@
     (stdenvNoCC.mkDerivation {
       pname = "ensure-installed";
       version = "0.0.0";
-      buildInputs = [clang clang-tools cargo gdb bear];
+      buildInputs = [clang clang-tools cargo gdb bear zig zls pkg-config rr];
       src = null;
       dontUnpack = true;
       dontBuild = true;
