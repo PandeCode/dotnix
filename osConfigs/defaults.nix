@@ -1,4 +1,4 @@
-{
+rec {
   git.user = {
     name = "PandeCode";
     email = "pandeshawnbenjamin@gmail.com";
@@ -37,7 +37,12 @@
     wii = false;
   };
 
-  shellAliases = {
+  fishShellAliases = {
+    j = "z";
+    ff = "bash -c 'selection=$(fzf --print0) && [ -n \"$selection\" ] && echo -n \"$selection\" | xargs -0 -o nvim'";
+  };
+
+  fishShellAbbrs = {
     neo = "neovide $(fzf) 2>&1  > /dev/null & disown";
     ns = "nix-shell shell.nix --command 'fish'";
     nsp = "nix-shell --command 'fish' -p";
@@ -50,7 +55,6 @@
     ls = "ls --color=auto";
     sl = "ls --color=auto";
     l = "ls --color=auto -latr";
-    j = "z";
 
     mkdir = "mkdir";
     mkdri = "mkdir";
@@ -69,7 +73,6 @@
 
     ":e" = "nvim";
     e = "nvim";
-    ff = "bash -c 'selection=$(fzf --print0) && [ -n \"$selection\" ] && echo -n \"$selection\" | xargs -0 -o nvim'";
     ":q" = "exit";
     eixt = "exit";
     f = "fuck";
@@ -80,4 +83,8 @@
     cls = "clear";
     tls = "clear ; tmux clear-history";
   };
+
+  shellAliases =
+    fishShellAbbrs
+    // fishShellAliases;
 }

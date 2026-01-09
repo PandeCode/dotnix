@@ -74,7 +74,8 @@
     };
     fish = {
       enable = true;
-      inherit (sharedConfig) shellAliases;
+      shellAliases = sharedConfig.fishShellAliases;
+      shellAbbrs = sharedConfig.fishShellAbbrs;
       interactiveShellInit =
         /*
         fish
