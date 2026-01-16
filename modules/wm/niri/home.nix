@@ -63,6 +63,10 @@ in {
         scale = 1;
       };
       input = {
+        mouse = {
+          accel-speed = 0.2;
+          accel-profile = "flat";
+        };
         keyboard = {
           xkb = {
             # layout = "us,es";

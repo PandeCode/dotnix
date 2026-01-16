@@ -1,16 +1,27 @@
 {
   pkgs,
-  inputs,
   lib,
   sharedConfig,
   ...
 }: {
-  # nixpkgs.config.permittedInsecurePackages = [
-  # "adobe-reader-9.5.5"
-  # ];
-
-  xdg.portal.enable = lib.mkForce true;
-  xdg.portal.extraPortals = [pkgs.xdg-desktop-portal-gtk];
+  xdg.portal = {
+    enable = lib.mkForce true;
+    wlr = {
+      enable = true;
+      settings = {
+        screencast = {
+          output_name = "eDP-1";
+          max_fps = 30;
+          exec_before = "disable_notifications.sh";
+          exec_after = "enable_notifications.sh";
+          chooser_type = "simple";
+          chooser_cmd = "${pkgs.slurp}/bin/slurp -f 'Monitor: %o' -or";
+        };
+      };
+    };
+    extraPortals = [pkgs.xdg-desktop-portal-gtk];
+    xdgOpenUsePortal = true;
+  };
 
   security.rtkit.enable = true;
 
@@ -22,7 +33,7 @@
     };
   };
 
-  services.xserver.desktopManager.gnome.enable = true;
+  services.xserver.desktopManager.gnome.enable = false;
   # services.desktopManager.plasma6.enable = true;
   # services.xserver.desktopManager.plasma6.enable = true;
 

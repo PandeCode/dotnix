@@ -137,6 +137,7 @@
     zoxide
 
     zip
+    unzip
     rlwrap
 
     fzf

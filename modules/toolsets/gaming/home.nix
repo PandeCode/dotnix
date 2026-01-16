@@ -4,7 +4,7 @@
   ...
 }: {
   services = {
-    arrpc.enable = false;
+    arrpc.enable = true;
     linux-wallpaperengine =
       if sharedConfig.gaming.wallpaperengine
       then {
