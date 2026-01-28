@@ -128,7 +128,7 @@
     expect # unbuffer command
 
     jq
-    pipr
+    # pipr
     htmlq
     p7zip
 
@@ -138,6 +138,7 @@
 
     zip
     unzip
+    pigz
     rlwrap
 
     fzf
@@ -170,6 +171,8 @@
 
     gh
     delta
+    codeberg-cli
+    codeberg-pages
 
     pre-commit
     lazygit
@@ -178,6 +181,8 @@
 
     # Better Tools
     # axel
+    ((import ../../derivations/default.nix) pkgs.callPackage).surge-downloader
+
     file
     tldr
     difftastic
@@ -190,6 +195,8 @@
     socat
 
     newsboat
+
+    lm_sensors
 
     # Eye Candy
     fastfetch

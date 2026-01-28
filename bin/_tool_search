@@ -6,6 +6,7 @@ theme=$(rofi-make-config.sh)
 options=(
 	"nixpkgs search"
 	"bg"
+	"factorio"
 	"clipimg"
 	"audio"
 	"lock"
@@ -66,6 +67,9 @@ case "$choice" in
 "youtube")
 	query=$(rofi -dmenu -p "Enter YouTube search")
 	[ -z "$query" ] || open_browser "https://www.youtube.com/results?search_query=$(printf "%s" "$query" | jq -sRr @uri)"
+	;;
+"factorio")
+	rofi-factorio.sh
 	;;
 *)
 	notify-send "Unknown choice: $choice"

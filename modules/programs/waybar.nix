@@ -12,66 +12,65 @@
   programs.waybar = {
     enable = true;
     style = let
-      c = config.lib.stylix.colors;
       font = config.stylix.fonts.sansSerif.name;
     in
+      with config.lib.stylix.colors;
       #css
-      ''
-        @define-color foreground #${c.base04};
-        @define-color background #${c.base01};
-        @define-color cursor #${c.base04};
+        ''
+          @define-color foreground #${base04};
+          @define-color background #${base01};
+          @define-color cursor #${base04};
 
-        @define-color color0 #${c.base00}; @define-color color1 #${c.base01}; @define-color color2 #${c.base02}; @define-color color3 #${c.base03};
-        @define-color color4 #${c.base04}; @define-color color5 #${c.base05}; @define-color color6 #${c.base06}; @define-color color7 #${c.base07};
-        @define-color color8 #${c.base08}; @define-color color9 #${c.base09}; @define-color color10 #${c.base10}; @define-color color11 #${c.base11};
-        @define-color color12 #${c.base12}; @define-color color13 #${c.base13}; @define-color color14 #${c.base14}; @define-color color15 #${c.base15};
-        * { font-size: 15px; font-family: "${font}"; }
+          @define-color color0 #${base00}; @define-color color1 #${base01}; @define-color color2 #${base02}; @define-color color3 #${base03};
+          @define-color color4 #${base04}; @define-color color5 #${base05}; @define-color color6 #${base06}; @define-color color7 #${base07};
+          @define-color color8 #${base08}; @define-color color9 #${base09}; @define-color color10 #${base10}; @define-color color11 #${base11};
+          @define-color color12 #${base12}; @define-color color13 #${base13}; @define-color color14 #${base14}; @define-color color15 #${base15};
+          * { font-size: 15px; font-family: "${font}"; }
 
-        ${builtins.readFile ../../config/waybar/style.css}
-      '';
+          ${builtins.readFile ../../config/waybar/style.css}
+        '';
     settings = [
       {
         layer = "top";
         position = "top";
         reload_style_on_change = true;
 
+        modules-left = [
+          "hyprland/submap"
+          "group/name"
+        ];
+        modules-center = [
+          "hyprland/workspaces"
+        ];
         modules-right = [
           "custom/lyrics"
           "image#album-art"
-          "custom/cava"
-          "custom/prev"
-          "custom/play"
-          "custom/next"
-          "custom/notification"
-        ];
-        modules-center = [
-          "group/name"
-          "hyprland/workspaces"
-          "hyprland/submap"
-        ];
-        modules-left = [
-          "clock"
-          "battery"
-          "network"
-          "bluetooth"
+          "cava"
+
+          "backlight/slider"
+          "pulseaudio/slider"
+
           # "hyprland/language"
           "group/expand"
+          "network"
+          "bluetooth"
+          "battery"
+          "clock"
         ];
 
-        "custom/prev" = {
-          format = " ⏮ ";
-          on-click = "_tool_ctrl media prev";
-          on-click-right = "_tool_ctrl media ctrl";
+        "pulseaudio/slider" = {
+          min = 0;
+          max = 100;
+          orientation = "horizontal";
+          device = "pulseaudio";
+          scroll-step = 1;
         };
-        "custom/play" = {
-          format = "⏯ ";
-          on-click = "_tool_ctrl media toggle";
-          on-click-right = "_tool_ctrl media ctrl";
-        };
-        "custom/next" = {
-          format = "⏭ ";
-          on-click = "_tool_ctrl media next";
-          on-click-right = "_tool_ctrl media ctrl";
+
+        "backlight/slider" = {
+          min = 0;
+          max = 100;
+          orientation = "horizontal";
+          device = "intel_backlight";
         };
 
         "image#album-art" = {
@@ -88,6 +87,37 @@
         "custom/cava" = {
           format = "{}";
           exec = "cava.sh";
+        };
+
+        cava = {
+          # cava_config = "~/dotnix/config/cava/shell";
+          framerate = 60;
+          autosens = 1;
+          bars = 14;
+          lower_cutoff_freq = 50;
+          higher_cutoff_freq = 10000;
+          method = "pulse";
+          source = "auto";
+          stereo = true;
+          reverse = false;
+          bar_delimiter = 0;
+          monstercat = false;
+          waves = false;
+          noise_reduction = 0.77;
+          input_delay = 2;
+          format-icons = [
+            "▁"
+            "▂"
+            "▃"
+            "▄"
+            "▅"
+            "▆"
+            "▇"
+            "█"
+          ];
+          actions = {
+            on-click-right = "mode";
+          };
         };
 
         "hyprland/workspaces" = {

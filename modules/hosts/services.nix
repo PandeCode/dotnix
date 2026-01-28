@@ -37,14 +37,14 @@
 
         settings = {
           devices = {
-            "small-device" = {id = "DEVICE-ID-GOES-HERE";};
-            "device" = {id = "DEVICE-ID-GOES-HERE";};
-            "chaos" = {id = "DEVICE-ID-GOES-HERE";};
+            # "smalldevice" = {id = "DEVICE-ID-GOES-HERE";};
+            "rdevice" = {id = "5BOTQET-XOI5KOV-LOPRNME-LZ4CTNA-5FKYHKS-QHFBMNZ-B2D5MRY-4NBEUQA";};
+            # "chaos" = {id = "DEVICE-ID-GOES-HERE";};
           };
           folders = {
-            "School" = {
-              path = "/home/${sharedConfig.user}/Vaults/School";
-              devices = ["device" "chaos"];
+            "main" = {
+              path = "/home/${sharedConfig.user}/vaults/main";
+              devices = ["rdevice"];
               ignorePerms = false;
             };
           };

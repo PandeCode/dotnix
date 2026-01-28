@@ -163,7 +163,18 @@ in {
     };
 
     xdg = {
+      mimeApps = {
+        enable = true;
+        defaultApplications = {
+          "image/png" = "feh.desktop";
+          "application/pdf" = "org.pwmt.zathura.desktop";
+        };
+      };
       desktopEntries = {
+        # feh = {
+        #   name = "feh";
+        #   exec = "${pkgs.feh}/bin/feh";
+        # };
         systemctl-tui = {
           name = "Systemctl TUI";
           comment = "Launch systemctl-tui in terminal";

@@ -16,7 +16,7 @@ stdenvNoCC.mkDerivation {
   };
 
   postPatch = ''
-    rm -fr README LICENSE
+    rm -fr README.md LICENSE
   '';
 
   dontBuild = true;

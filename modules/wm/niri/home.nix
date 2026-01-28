@@ -40,7 +40,10 @@ in {
           )
           + b) "" (splitBySpace v);
     in {
+      hotkey-overlay.skip-at-startup = true;
       prefer-no-csd = true;
+
+      layout.border.width = lib.mkForce 1;
 
       spawn-at-startup = map (v: {argv = v;}) ([
           ["niriusd"]

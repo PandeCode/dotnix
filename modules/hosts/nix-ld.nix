@@ -3,6 +3,7 @@
     enable = true;
     libraries = with pkgs;
       [
+        openxr-loader
         acl
         alsa-lib
         atk

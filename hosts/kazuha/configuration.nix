@@ -31,17 +31,24 @@
     # inputs.aagl.nixosModules.default
   ];
   # programs.honkers-railway-launcher.enable = true;
+  services.wivrn.enable = true;
+  programs.nix-index-database.comma.enable = true;
 
   virtualisation.waydroid.enable = true;
+
   zramSwap.enable = true;
 
-  environment.extraInit =
-    /*
-    sh
-    */
-    ''
-      export PATH=/home/${sharedConfig.user}/dotnix/bin:$PATH
-    '';
+  environment = {
+    systemPackages = with pkgs; [
+      android-tools
+    ];
+    wordlist.enable = true;
+    extraInit =
+      /*
+      sh
+      */
+      ''export PATH=/home/${sharedConfig.user}/dotnix/bin:$PATH '';
+  };
 
   # hardware = {
   #   enable = true;
@@ -67,6 +74,14 @@
     supportedFilesystems = lib.mkForce ["btrfs" "reiserfs" "vfat" "f2fs" "xfs" "ntfs" "cifs"];
   };
 
+  services = {
+    supergfxd.enable = true;
+    asusd = {
+      enable = true;
+      enableUserService = true;
+    };
+  };
+
   time.timeZone = "America/Toronto";
   i18n.defaultLocale = "en_US.UTF-8";
   i18n.extraLocaleSettings = rec {
@@ -88,5 +103,6 @@
     extraGroups = ["networkmanager" "wheel" "video" "libvirtd" "input" "uinput" "docker" "kvm" "adbusers"];
   };
 
+  systemd.coredump.enable = false;
   system.stateVersion = "25.05";
 }

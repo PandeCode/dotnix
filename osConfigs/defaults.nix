@@ -43,6 +43,13 @@ rec {
   };
 
   fishShellAbbrs = {
+    lsblk = "lsblk | bat -l conf -p";
+    ps = "ps | bat -l conf -p";
+    lscpu = "ps | bat -l cpuinfo -p";
+    sensors = "ps | bat -l cpuinfo -p";
+
+    dirflake = "echo 'use flake' > .envrc; direnv allow";
+    dirnix = "echo 'use nix' > .envrc; direnv allow";
     neo = "neovide $(fzf) 2>&1  > /dev/null & disown";
     ns = "nix-shell shell.nix --command 'fish'";
     nsp = "nix-shell --command 'fish' -p";

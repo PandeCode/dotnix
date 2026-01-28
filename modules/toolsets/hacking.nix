@@ -1,6 +1,6 @@
 {pkgs, ...}: {
   home.packages = with pkgs; [
-    pipr
+    # pipr
     whois
     holehe
     lemmeknow
