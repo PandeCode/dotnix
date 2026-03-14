@@ -11,7 +11,6 @@
   ];
   nixpkgs.config.allowUnfree = true;
 
-  nvim.enable = true;
   system.userActivationScripts = {
     emmyLua = {
       text = ''
@@ -27,8 +26,6 @@
       enableSSHSupport = true;
     };
 
-    light.enable = true;
-
     coolercontrol.enable = true;
     mtr.enable = true;
   };
@@ -36,6 +33,8 @@
   services.xserver.wacom.enable = true;
   programs.xppen.enable = true;
   hardware = {
+    acpilight.enable = true;
+
     opentabletdriver = {
       enable = true;
       daemon.enable = true;

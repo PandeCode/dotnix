@@ -47,8 +47,10 @@
           "image#album-art"
           "cava"
 
-          "backlight/slider"
-          "pulseaudio/slider"
+          "cffi/cffi-blk"
+
+          # "backlight/slider"
+          # "pulseaudio/slider"
 
           # "hyprland/language"
           "group/expand"
@@ -57,6 +59,10 @@
           "battery"
           "clock"
         ];
+
+        "cffi/cffi-blk" = {
+          "module-path" = "cffi_blk/target/debug/libcffi_blk.so";
+        };
 
         "pulseaudio/slider" = {
           min = 0;

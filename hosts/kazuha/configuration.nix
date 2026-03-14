@@ -76,10 +76,6 @@
 
   services = {
     supergfxd.enable = true;
-    asusd = {
-      enable = true;
-      enableUserService = true;
-    };
   };
 
   time.timeZone = "America/Toronto";

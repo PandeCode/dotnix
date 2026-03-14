@@ -56,13 +56,13 @@
   # };
 
   systemd = {
-    sleep.extraConfig = ''
-      HibernateDelaySec=2h
-      AllowSuspend=yes
-      AllowHibernation=yes
-      AllowHybridSleep=yes
-      AllowSuspendThenHibernate=yes
-    '';
+    sleep.settings.Sleep = {
+      HibernateDelaySec = "2h";
+      AllowSuspend = "yes";
+      AllowHibernation = "yes";
+      AllowHybridSleep = "yes";
+      AllowSuspendThenHibernate = "yes";
+    };
     services = {
       syncthing.environment.STNODEFAULTFOLDER = "true";
       journal-resume = {
