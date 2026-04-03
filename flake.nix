@@ -80,6 +80,11 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nix-matlab = {
+      url = "gitlab:doronbehar/nix-matlab";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     boomer.url = "github:nilp0inter/boomer";
   };
 

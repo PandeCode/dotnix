@@ -61,7 +61,7 @@
         ];
 
         "cffi/cffi-blk" = {
-          "module-path" = "cffi_blk/target/debug/libcffi_blk.so";
+          "module_path" = "cffi_blk/zig-out/lib/libcffi_blk.so";
         };
 
         "pulseaudio/slider" = {
