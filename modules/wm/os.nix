@@ -33,7 +33,7 @@
     };
   };
 
-  services.xserver.desktopManager.gnome.enable = false;
+  # services.xserver.desktopManager.gnome.enable = false;
   # services.desktopManager.plasma6.enable = true;
   # services.xserver.desktopManager.plasma6.enable = true;
 

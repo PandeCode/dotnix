@@ -4,16 +4,13 @@
   config,
   inputs,
   ...
-}: let
-  cfg = config.spicetify;
-in {
+}: {
   imports = [
     inputs.spicetify-nix.homeManagerModules.default
   ];
   programs.spicetify = let
-    spicePkgs = inputs.spicetify-nix.legacyPackages.${pkgs.system};
+    spicePkgs = inputs.spicetify-nix.legacyPackages.${pkgs.stdenv.hostPlatform.system};
   in {
-    # theme = lib.mkForce spicePkgs.themes.hazy;
     enable = true;
     enabledCustomApps = with spicePkgs.apps; [
       newReleases

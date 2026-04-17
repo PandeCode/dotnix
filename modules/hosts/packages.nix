@@ -30,8 +30,8 @@
     mtr.enable = true;
   };
 
-  services.xserver.wacom.enable = true;
-  programs.xppen.enable = true;
+  services.xserver.wacom.enable = false;
+  programs.xppen.enable = false;
   hardware = {
     acpilight.enable = true;
 

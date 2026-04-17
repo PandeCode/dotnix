@@ -5,7 +5,7 @@
     else []
   );
   mk = name: ifl sharedConfig.wms.${name}.enable ../../modules/wm/${name}/home.nix;
-  mkAll = l: builtins.concatLists (map (n: mk n) l);
+  mkAll = l: builtins.concatLists (map mk l);
 in {
   imports = mkAll [
     "niri"

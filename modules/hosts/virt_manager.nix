@@ -1,4 +1,4 @@
-{...}: {
+_: {
   programs.virt-manager.enable = true;
   # services.qemuGuest.enable = true;
   users.groups.libvirtd.members = ["shawn"];

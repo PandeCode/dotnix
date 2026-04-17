@@ -123,7 +123,7 @@
   stylix =
     (import ../stylix/common.nix all).stylix
     // {
-      icon = {
+      icons = {
         enable = true;
         package = pkgs.arc-icon-theme;
         dark = "Arc-Dark";

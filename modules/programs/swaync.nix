@@ -1,5 +1,4 @@
-{...}: let
-in {
+_: {
   # xdg.configFile = {
   # "swaync/rc.lua".text = builtins.readFile ../../config/swaync/style.css;
   # "swaync/rc.lua".text = builtins.readFile ../../config/swaync/style.css;

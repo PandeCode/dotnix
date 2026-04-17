@@ -9,7 +9,7 @@
     enable = true;
     enable32Bit = true;
   };
-  environment.systemPackages = with pkgs.nvtopPackages; [intel];
+  # environment.systemPackages = with pkgs.nvtopPackages; [intel];
   environment.sessionVariables = {
     VK_ICD_FILENAMES = builtins.concatStringsSep ":" [
       "/run/opengl-driver/share/vulkan/icd.d/nvidia_icd.x86_64.json"
@@ -19,7 +19,7 @@
   specialisation = lib.mkIf config.services.isLaptop {
     nvidia.configuration = {
       services.xserver.videoDrivers = ["nvidia"];
-      environment.systemPackages = with pkgs.nvtopPackages; [nvidia];
+      # environment.systemPackages = with pkgs.nvtopPackages; [nvidia];
       hardware = {
         nvidia-container-toolkit.mount-nvidia-executables = true;
         nvidia = {

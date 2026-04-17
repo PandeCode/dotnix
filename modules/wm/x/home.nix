@@ -109,7 +109,7 @@ in {
 
         xwinwrap
 
-        inputs.boomer.packages.${pkgs.system}.default
+        inputs.boomer.packages.${pkgs.stdenv.hostPlatform.system}.default
 
         dmenu
         # dmenu-rs-enable-plugins

@@ -39,7 +39,6 @@ rec {
 
   fishShellAliases = {
     j = "z";
-    ff = "bash -c 'selection=$(fzf --print0) && [ -n \"$selection\" ] && echo -n \"$selection\" | xargs -0 -o nvim'";
   };
 
   fishShellAbbrs = {

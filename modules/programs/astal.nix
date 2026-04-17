@@ -6,14 +6,14 @@
   ...
 }: let
   cfg = config.astal;
-  astal = inputs.astal;
+  inherit (inputs) astal;
   mkAstal = name:
     astal.lib.mkLuaPackage {
       inherit pkgs;
       name = "astal-${name}";
       src = ../../config/astal/${name};
       extraPackages = [
-        astal.packages.${pkgs.system}.battery
+        astal.packages.${pkgs.stdenv.hostPlatform.system}.battery
         pkgs.dart-sass
       ];
     };
@@ -21,7 +21,7 @@ in {
   options.astal.enable = lib.mkEnableOption "enable astal";
 
   config = lib.mkIf cfg.enable {
-    home.packages = with astal.packages.${pkgs.system}; [
+    home.packages = with astal.packages.${pkgs.stdenv.hostPlatform.system}; [
       default
       battery
       io
