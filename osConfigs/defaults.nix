@@ -7,7 +7,7 @@ rec {
   terminal = "ghostty";
   explorer = "nautilus";
   browser = "zen";
-  editor = "nvim";
+  editor = "hx";
 
   isLaptop = false;
   isWSL = false;

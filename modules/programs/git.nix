@@ -2,6 +2,7 @@
   programs = {
     git = {
       enable = true;
+      signing.format = null;
       settings = {
         inherit (sharedConfig.git) user;
         init.defaultBranch = "main";

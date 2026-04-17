@@ -12,7 +12,6 @@ IMG_DIR="${WALLPAPER_DIR:-$HOME/Pictures/walls/walls-main/anime}"
 IMG_INDEX_FILE="$CACHE_DIR/wallpaper-index.txt"
 BG_ID_FILE="$CACHE_DIR/current-bg-id"
 
-
 notify() {
 	if [ -n "${SILENT}" ]; then
 		echo "$@" >&2
@@ -190,13 +189,13 @@ process_wallpaper() {
 			hyprctl hyprpaper preload "$img"
 			hyprctl hyprpaper wallpaper "eDP-1,$img"
 			log "INFO" "Set wallpaper (Wayland/hyprpaper): $img" true
-		elif pgrep -x ".swww-daemon-wr" &>/dev/null; then
-			if [ -z "$NIRI_NAMESPACE" ];then
-				swww img "$img" --transition-type wipe >/dev/null 2>&1
-				log "INFO" "Set wallpaper (Wayland/swww): $img" true
+		elif pgrep -x ".awww-daemon-wr" &>/dev/null; then
+			if [ -z "$NIRI_NAMESPACE" ]; then
+				awww img "$img" --transition-type wipe >/dev/null 2>&1
+				log "INFO" "Set wallpaper (Wayland/awww): $img" true
 			else
-				swww -n $NIRI_NAMESPACE img "$img" --transition-type wipe >/dev/null 2>&1
-				log "INFO" "Set wallpaper (Wayland/swww) (Niri: $NIRI_NAMESPACE): $img" true
+				awww -n $NIRI_NAMESPACE img "$img" --transition-type wipe >/dev/null 2>&1
+				log "INFO" "Set wallpaper (Wayland/awww) (Niri: $NIRI_NAMESPACE): $img" true
 			fi
 		elif pgrep -x "swaybg" &>/dev/null; then
 			killall -9 swaybg >/dev/null 2>&1
@@ -227,7 +226,7 @@ process_wallpaper() {
 	echo "$BG_ID" >"$BG_ID_FILE"
 
 	if [ -x ~/dotnix/bin/rofi-make-config.sh ]; then
-	  ~/dotnix/bin/rofi-make-config.sh
+		~/dotnix/bin/rofi-make-config.sh
 	fi
 
 	return 0
@@ -300,7 +299,6 @@ get_random_wallpaper() {
 		return 1
 	fi
 }
-
 
 handle_last_wallpaper() {
 	local get_only="${1:-false}"
@@ -390,7 +388,6 @@ Notes:
 
 EOF
 }
-
 
 initialize
 

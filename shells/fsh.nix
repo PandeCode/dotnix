@@ -1,6 +1,5 @@
 {pkgs ? import <nixpkgs> {}}: let
-  buildInputs =
-    (with pkgs; [
+  buildInputs = pkgs: ((with pkgs; [
       _0xpropo
       openssl
 
@@ -67,12 +66,12 @@
       libXinerama
       libXrandr
       libXext
-    ]);
+    ]));
 in
   (pkgs.buildFHSEnv {
     name = "fsh-env";
     targetPkgs = pkgs:
-      buildInputs
+      (buildInputs pkgs)
       ++ (with pkgs; [
         gobject-introspection
         # Additional packages that might be needed

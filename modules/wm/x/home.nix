@@ -96,7 +96,7 @@ in {
         slurp
         grim
         xclip
-        xorg.xmodmap
+        xmodmap
         picom-pijulius
         # alttab
         feh

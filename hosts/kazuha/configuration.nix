@@ -99,6 +99,6 @@
     extraGroups = ["networkmanager" "wheel" "video" "libvirtd" "input" "uinput" "docker" "kvm" "adbusers"];
   };
 
-  systemd.coredump.enable = false;
+  # systemd.coredump.enable = false;
   system.stateVersion = "25.05";
 }

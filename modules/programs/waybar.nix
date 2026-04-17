@@ -3,6 +3,7 @@
   lib,
   config,
   inputs,
+  sharedConfig,
   ...
 }: {
   home.packages = with pkgs; [
@@ -29,7 +30,9 @@
 
           ${builtins.readFile ../../config/waybar/style.css}
         '';
-    settings = [
+    settings = let
+      c = config.lib.stylix.colors.withHashtag;
+    in [
       {
         layer = "top";
         position = "top";
@@ -47,7 +50,8 @@
           "image#album-art"
           "cava"
 
-          "cffi/cffi-blk"
+          "cffi/cffi-blk-vol"
+          "cffi/cffi-blk-light"
 
           # "backlight/slider"
           # "pulseaudio/slider"
@@ -56,12 +60,64 @@
           "group/expand"
           "network"
           "bluetooth"
-          "battery"
+
+          "cffi/cffi-blk-bat"
+
           "clock"
         ];
 
-        "cffi/cffi-blk" = {
-          "module_path" = "cffi_blk/zig-out/lib/libcffi_blk.so";
+        "cffi/cffi-blk-vol" = {
+          "module_path" = "/home/${sharedConfig.user}/.config/waybar/waybar_circular_progress_cffi_blk/zig-out/lib/libwaybar_circular_progress_cffi_blk.so";
+          "value" = "pamixer --get-volume";
+          "interval" = "5";
+          "on-click" = "pamixer --toggle-mute";
+          "on-scroll-up" = "pamixer --increase 10";
+          "on-scroll-down" = "pamixer --decrease 10";
+          "colors" = {
+            "0" = "${c.base08}";
+            "50" = "${c.base0E}";
+            "100" = "${c.base0B}";
+          };
+          "actions" = {
+            "on-click" = "refresh";
+            "on-scroll-down" = "refresh";
+            "on-scroll-up" = "refresh";
+          };
+        };
+
+        "cffi/cffi-blk-light" = {
+          "module_path" = "/home/${sharedConfig.user}/.config/waybar/waybar_circular_progress_cffi_blk/zig-out/lib/libwaybar_circular_progress_cffi_blk.so";
+          "value" = "light";
+          "interval" = "5";
+          "on-click" = "sunsetr p day";
+          "on-scroll-up" = "light -A 5";
+          "on-scroll-down" = "light -U 5";
+          "colors" = {
+            "0" = "${c.base01}";
+            "50" = "${c.base0E}";
+            "100" = "${c.base05}";
+          };
+          "actions" = {
+            "on-click" = "refresh";
+            "on-scroll-down" = "refresh";
+            "on-scroll-up" = "refresh";
+          };
+        };
+
+        "cffi/cffi-blk-bat" = {
+          "module_path" = "/home/${sharedConfig.user}/.config/waybar/waybar_circular_progress_cffi_blk/zig-out/lib/libwaybar_circular_progress_cffi_blk.so";
+          "value" = "cat /sys/class/power_supply/BAT0/capacity";
+          "interval" = "30";
+          "on-click" = "notify-send TODO bat";
+          "colors" = {
+            "0" = "${c.base08}";
+            "20" = "${c.base0E}";
+            "50" = "${c.base0B}";
+            "100" = "${c.base0B}";
+          };
+          "actions" = {
+            "on-click" = "mode";
+          };
         };
 
         "pulseaudio/slider" = {

@@ -59,7 +59,7 @@
       woomer
       xdg-utils
 
-      swww # linux-wallpaperengine hyprpaper swaybg wpaperd mpvpaper
+      awww # linux-wallpaperengine hyprpaper swaybg wpaperd mpvpaper
       gowall
       swaybg
 

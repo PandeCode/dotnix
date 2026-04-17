@@ -9,6 +9,8 @@
     ./tmux.nix
 
     ./spicetify.nix
+    ./newsboat.nix
+    ./helix.nix
 
     ./git.nix
   ];

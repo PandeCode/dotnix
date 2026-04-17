@@ -1,24 +1,27 @@
 #!/usr/bin/env bash
 
 case "$1" in
-    "")
-        exec xbacklight -get
-        ;;
-    -S)
-        shift
-        exec xbacklight -set "$1"
-        ;;
-    -A)
-        shift
-        exec xbacklight -inc "$1"
-        ;;
-    -U)
-        shift
-        exec xbacklight -dec "$1"
-        ;;
-    *)
-        echo "Unsupported option: $1"
-        echo "Supported: (none), -S, -A, -U"
-        exit 1
-        ;;
+"down")
+    echo -n 1 >/sys/class/backlight/intel_backlight/brightness
+    ;;
+"")
+    exec xbacklight -get
+    ;;
+-S)
+    shift
+    exec xbacklight -set "$1"
+    ;;
+-A)
+    shift
+    exec xbacklight -inc "$1"
+    ;;
+-U)
+    shift
+    exec xbacklight -dec "$1"
+    ;;
+*)
+    echo "Unsupported option: $1"
+    echo "Supported: (none), -S, -A, -U, down"
+    exit 1
+    ;;
 esac

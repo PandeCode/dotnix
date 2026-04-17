@@ -6,7 +6,7 @@
 # pip install youtube-transcript-api # also present in nixpkgs by the same name
 
 PLAYER="${1:-spotify}"
-FIREFOX=~/.zen/hbvavekk.School/sessionstore-backups/recovery.jsonlz4
+FIREFOX=$(sh -c 'ls $HOME/.zen/*.Default\ Profile/sessionstore-backups/recovery.jsonlz4')
 CACHE_DIR=$HOME/.cache/lyrics
 LOCK_DIR=$HOME/.cache/lyrics/locks
 mkdir -p "$CACHE_DIR"
@@ -18,7 +18,7 @@ get_id() {
 	if [[ "$url" =~ ^https://www\.youtube\.com/watch\?v= ]]; then
 		echo "$url" | perl -pe 's|https:\/\/www\.youtube\.com\/watch\?v=||'
 	else
-		echo "Error: The URL is not from YouTube." >&2
+		# echo "Error: The URL is not from YouTube." >&2
 		return 1
 	fi
 }
@@ -229,14 +229,14 @@ youtube() {
 
 				print(convert_json_to_timestamp_format(t), end='\n')
 EOF
-)
-if [ $? -eq 0 ]; then
-	echo "$res" >"$file_path"
-fi
+		)
+		if [ $? -eq 0 ]; then
+			echo "$res" >"$file_path"
+		fi
 
-# Release the lock
-release_lock "$lock_name"
-echo "$res"
+		# Release the lock
+		release_lock "$lock_name"
+		echo "$res"
 	fi
 }
 
@@ -252,34 +252,34 @@ handle_player() {
 	fi
 
 	case "$player" in
-		spotify | spotifyd | spotify_player)
-			PLAYER=$player
-			if ! lrclib | current_line "$(get_position)"; then
-				playerctl metadata --format "{{title}} - {{artist}}"
+	spotify | spotifyd | spotify_player)
+		PLAYER=$player
+		if ! lrclib | current_line "$(get_position)"; then
+			playerctl metadata --format "{{title}} - {{artist}}"
+		fi
+		;;
+	chromium)
+		PLAYER=chromium
+		album=$(playerctl -p $PLAYER metadata xesam:album | tr -d '\n')
+		if [ -z "$album" ]; then
+			playerctl -p $PLAYER metadata --format "{{title}} {{artist}}"
+		else
+			lrclib | current_line "$(get_position)"
+		fi
+		;;
+	firefox)
+		PLAYER=firefox
+		album=$(playerctl -p $PLAYER metadata xesam:album | tr -d '\n')
+		if [ -z "$album" ]; then
+			id=$(get_id)
+			if [ $? -eq 0 ]; then
+				subs=$(youtube "$id")
+				echo "$subs" | current_line "$(get_position)"
 			fi
-			;;
-		chromium)
-			PLAYER=chromium
-			album=$(playerctl -p $PLAYER metadata xesam:album | tr -d '\n')
-			if [ -z "$album" ]; then
-				playerctl -p $PLAYER metadata --format "{{title}} {{artist}}"
-			else
-				lrclib | current_line "$(get_position)"
-			fi
-			;;
-		firefox)
-			PLAYER=firefox
-			album=$(playerctl -p $PLAYER metadata xesam:album | tr -d '\n')
-			if [ -z "$album" ]; then
-				id=$(get_id)
-				if [ $? -eq 0 ]; then
-					subs=$(youtube "$id")
-					echo "$subs" | current_line "$(get_position)"
-				fi
-			else
-				lrclib | current_line "$(get_position)"
-			fi
-			;;
+		else
+			lrclib | current_line "$(get_position)"
+		fi
+		;;
 	esac
 }
 
