@@ -62,6 +62,7 @@
 
     matlab
 
+    inputs.zig-overlay.packages.${system}.master
     inputs.nix-alien.packages.${system}.nix-alien
 
     man-pages

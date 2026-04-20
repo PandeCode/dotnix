@@ -85,6 +85,11 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    zig-overlay = {
+      url = "github:mitchellh/zig-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     boomer.url = "github:nilp0inter/boomer";
   };
 

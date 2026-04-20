@@ -12,6 +12,7 @@ in
       paths = with inputs; (
         [
           niri.packages.${system}.niri-unstable
+          zig-overlay.packages.${system}.master
         ]
         ++ (builtins.attrValues ((import ../derivations/default.nix) pkgs.callPackage))
         ++ (map (
