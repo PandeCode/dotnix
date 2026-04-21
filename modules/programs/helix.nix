@@ -22,7 +22,7 @@
 
         rust-analyzer
 
-        zls
+        # zls
 
         asm-lsp
 

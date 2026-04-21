@@ -45,7 +45,7 @@
 
   environment.systemPackages = with pkgs; [
     # to make nix-shell faster but not pollute my path when i dont need them
-    (stdenvNoCC.mkDerivation {
+    (stdenvNoCC.mkDerivation rec {
       pname = "ensure-installed";
       version = "0.0.0";
       buildInputs = [clang clang-tools cargo gdb bear zig zls pkg-config rr];
@@ -55,14 +55,14 @@
       dontFixup = true;
       installPhase = ''
         mkdir -p $out/bin;
-        echo echo Ensure Install > $out/bin/.ensure-install;
+        echo echo "${(lib.join "\n" (map (i: "${i}") buildInputs))}" > $out/bin/.ensure-install;
         chmod +x $out/bin/.ensure-install;
       '';
     })
 
     matlab
 
-    inputs.zig-overlay.packages.${system}.master
+    # inputs.zig-overlay.packages.${system}.master
     inputs.nix-alien.packages.${system}.nix-alien
 
     man-pages

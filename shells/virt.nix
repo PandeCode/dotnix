@@ -4,16 +4,16 @@ pkgs.mkShell {
 
   buildInputs = with pkgs; [
     # X stuff
-    xorg.xorgserver
-    xorg.xrandr
-    xorg.xinit
-    xorg.xf86videodummy
-    xorg.xauth
-    xorg.xhost
+    xorgserver
+    xrandr
+    xinit
+    xf86videodummy
+    xauth
+    xhost
 
     # Headless display & window management
     xpra
-    xorg.xvfb
+    xvfb
     i3
     xterm
 
