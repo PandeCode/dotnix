@@ -1,0 +1,46 @@
+#!/usr/bin/env lua
+
+local futhark = {
+	a = "ᚨ",
+	b = "ᛒ",
+	c = "ᚲ",
+	d = "ᛞ",
+	e = "ᛖ",
+	f = "ᚠ",
+	g = "ᚷ",
+	h = "ᚺ",
+	i = "ᛁ",
+	j = "ᛃ",
+	k = "ᚲ",
+	l = "ᛚ",
+	m = "ᛗ",
+	n = "ᚾ",
+	o = "ᛟ",
+	p = "ᛈ",
+	q = "ᚲ",
+	r = "ᚱ",
+	s = "ᛊ",
+	t = "ᛏ",
+	u = "ᚢ",
+	v = "ᚡ",
+	w = "ᚹ",
+	x = "ᚲᛊ",
+	y = "ᛇ",
+	z = "ᛉ",
+}
+
+function toNorse(text)
+	local result = ""
+	for char in text:lower():gmatch(".") do
+		result = result .. (futhark[char] or char)
+	end
+	return result
+end
+
+local arg1 = arg[1]
+if arg1 ~= nil then
+	print(toNorse(arg))
+else
+	local stdin = io.read()
+	print(toNorse(stdin))
+end

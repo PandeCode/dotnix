@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Run GUI apps via pkexec with the entire environment preserved
+
+# Convert current environment to VAR=value pairs
+env_args=()
+while IFS='=' read -r name value; do
+	# Escape only double quotes to prevent breaking pkexec/env
+	value="${value//\"/\\\"}"
+	env_args+=("$name=\"$value\"")
+done < <(env)
+
+# Run the command via pkexec, injecting the full environment
+exec pkexec env "${env_args[@]}" "$@"

@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+theme=$(rofi-make-config.sh)
+
+options=(
+	"nixpkgs search"
+	"bg"
+	"factorio"
+	"clipimg"
+	"audio"
+	"lock"
+	"picom"
+	"color"
+	"home-manager options"
+	"bluetooth"
+	"github"
+	"wifi"
+	"youtube"
+	"kill"
+)
+
+choice=$(printf "%s\n" "${options[@]}" | rofi -dmenu -p "Choose an action" -theme "$theme")
+
+[ -z "$choice" ] && exit 1
+
+open_browser() {
+	xdg-open "$1" &>/dev/null &
+	wmctrl.sh ws 2
+}
+
+case "$choice" in
+"audio") rofi-pulse.sh ;;
+"bg") rofi-bg.sh ;;
+"bluetooth") rofi-bluetooth ;;
+"wifi") rofi-wifi-menu ;;
+"picom") neovide ~/.config/picom/picom.conf ;;
+"clipimg") ~/dotnix/bin/clipimg.sh ;;
+"lock") lock.sh ;;
+"color")
+	sleep 1
+	color=$(hyprpicker)
+	echo "$color" | cs
+	notify-send Color "$color"
+	;;
+"google search")
+	query=$(rofi -dmenu -p "Enter Google query")
+	[ -z "$query" ] || open_browser "https://www.google.com/search?q=$(printf "%s" "$query" | jq -sRr @uri)"
+	;;
+"nixpkgs search")
+	query=$(rofi -dmenu -p "Enter nixpkgs query")
+	[ -z "$query" ] || open_browser "https://search.nixos.org/packages?channel=unstable&from=0&size=50&sort=relevance&type=packages&query=$(printf "%s" "$query" | jq -sRr @uri)"
+	;;
+"pypi")
+	query=$(rofi -dmenu -p "Enter PyPI query")
+	[ -z "$query" ] || open_browser "https://pypi.org/search/?q=$(printf "%s" "$query" | jq -sRr @uri)"
+	;;
+"github")
+	query=$(rofi -dmenu -p "Enter GitHub query")
+	[ -z "$query" ] || open_browser "https://github.com/search?q=$(printf "%s" "$query" | jq -sRr @uri)&type=repositories"
+	;;
+"home-manager options")
+	query=$(rofi -dmenu -p "Enter home-manager query")
+	[ -z "$query" ] || open_browser "https://home-manager-options.extranix.com/?release=master&query=$(printf "%s" "$query" | jq -sRr @uri)"
+	;;
+"youtube")
+	query=$(rofi -dmenu -p "Enter YouTube search")
+	[ -z "$query" ] || open_browser "https://www.youtube.com/results?search_query=$(printf "%s" "$query" | jq -sRr @uri)"
+	;;
+"factorio")
+	rofi-factorio.sh
+	;;
+*)
+	notify-send "Unknown choice: $choice"
+	exit 1
+	;;
+esac

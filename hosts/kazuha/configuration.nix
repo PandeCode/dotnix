@@ -1,0 +1,105 @@
+{
+  inputs,
+  lib,
+  pkgs,
+  sharedConfig,
+  nixbuilds,
+  ...
+}: {
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+
+    ../../modules/hosts/gpu.nix
+
+    ../../modules/hosts/default.nix
+
+    ../../modules/toolsets/gaming/os.nix
+
+    ../../modules/wm/default.os.nix
+
+    ../../modules/wm/sddm.nix
+    ../../modules/wm/plymouth.nix
+
+    ../../modules/hosts/stylix.nix
+
+    inputs.nix-index-database.nixosModules.default
+
+    # ../../modules/hosts/virt_manager.nix
+    # ../../modules/hosts/osx-kvm.nix
+    # inputs.aagl.nixosModules.default
+  ];
+  # programs.honkers-railway-launcher.enable = true;
+  services.wivrn.enable = false;
+  programs.nix-index-database.comma.enable = true;
+
+  virtualisation.waydroid.enable = true;
+
+  zramSwap.enable = true;
+
+  environment = {
+    systemPackages = with pkgs; [
+      android-tools
+    ];
+    wordlist.enable = true;
+    extraInit =
+      /*
+      sh
+      */
+      ''export PATH=/home/${sharedConfig.user}/dotnix/bin:$PATH '';
+  };
+
+  # hardware = {
+  #   enable = true;
+  #   graphics.extraPackages = [
+  #     pkgs.intel-compute-runtime
+  #   ];
+  # };
+
+  boot = {
+    tmp.cleanOnBoot = true;
+    kernelPackages = pkgs.linuxPackages_xanmod;
+    loader = {
+      systemd-boot.enable = false;
+      grub = {
+        enable = true;
+        useOSProber = true;
+        device = "nodev";
+        efiSupport = true;
+        theme =
+          nixbuilds.hyperfluent-grub-theme;
+      };
+
+      efi.canTouchEfiVariables = true;
+    };
+    supportedFilesystems = lib.mkForce ["btrfs" "reiserfs" "vfat" "f2fs" "xfs" "ntfs" "cifs"];
+  };
+
+  services = {
+    supergfxd.enable = true;
+  };
+
+  time.timeZone = "America/Toronto";
+  i18n.defaultLocale = "en_US.UTF-8";
+  i18n.extraLocaleSettings = rec {
+    LC_TIME = "en_US.UTF-8";
+
+    LC_ADDRESS = LC_TIME;
+    LC_IDENTIFICATION = LC_TIME;
+    LC_MEASUREMENT = LC_TIME;
+    LC_MONETARY = LC_TIME;
+    LC_NAME = LC_TIME;
+    LC_NUMERIC = LC_TIME;
+    LC_PAPER = LC_TIME;
+    LC_TELEPHONE = LC_TIME;
+  };
+
+  users.users.${sharedConfig.user} = {
+    isNormalUser = true;
+    description = sharedConfig.user;
+    extraGroups = ["networkmanager" "wheel" "video" "libvirtd" "input" "uinput" "docker" "kvm" "adbusers"];
+  };
+
+  # systemd.coredump.enable = false;
+  system.stateVersion = "25.05";
+}

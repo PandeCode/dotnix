@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+pkg-config --list-all |
+	fzf \
+		--query "${1:-}" \
+		--prompt='pkg-config> ' \
+		--delimiter=' ' \
+		--preview '
+        pkg-config --print-errors --modversion {1}
+        echo
+        pkg-config --print-errors --cflags {1}
+        echo
+        pkg-config --print-errors --libs {1}
+        echo
+        pkg-config --print-errors --variable=pcfiledir {1}
+    ' \
+		--bind 'enter:become(pkg-config --cflags --libs {1})'

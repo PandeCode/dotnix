@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+
+mediaIdFile=/tmp/mediaId
+pictureCacheDir="$HOME/.cache/spotifyPictureCache"
+
+mkdir -p "$pictureCacheDir"
+
+isSpotify() {
+	ps -eo comm | grep -qiE "spotify"
+}
+
+getAlbumArt() {
+	artUrl=$(playerctl metadata --format "{{ mpris:artUrl }}")
+
+	if [ -z "$artUrl" ]; then
+		printf ""
+		return
+	fi
+
+	case "$artUrl" in
+	http://* | https://*)
+		fileName=$(basename "$artUrl")
+		dest="$pictureCacheDir/$fileName"
+		if [ -f "$dest" ]; then
+			printf "%s" "$dest"
+		else
+			wget --progress=bar:force -O "$dest" "$artUrl" 2>&1 | grep -v '^ ' >/dev/null
+			printf "%s" "$dest"
+		fi
+		;;
+	file://*)
+		printf "%s" "${artUrl#file://}"
+		;;
+	*)
+		if [ -f "$artUrl" ]; then
+			printf "%s" "$artUrl"
+		else
+			printf ""
+		fi
+		;;
+	esac
+}
+
+getPercent() {
+	pos=$(playerctl metadata --format "{{ position }}" 2>/dev/null || echo 0)
+	len=$(playerctl metadata mpris:length 2>/dev/null || echo 0)
+	if [ "$len" -eq 0 ]; then
+		echo 0
+	else
+		echo $((100 * pos / len))
+	fi
+}
+
+getMedia() {
+	playerctl metadata --format '{{ uc(playerName) }} {{status}}
+{{title}}
+{{artist}}
+{{album}}
+{{ duration(position) }}/{{ duration(mpris:length) }}'
+}
+
+sendNotify() {
+	replace=$(cat "$mediaIdFile" 2>/dev/null)
+	percent=$(getPercent)
+	if [ -z "$replace" ]; then
+		notify-send.py -t 2000 "$1" "$2" -i "$3" --hint int:value:$percent >"$mediaIdFile"
+	else
+		notify-send.py -t 2000 "$1" "$2" -i "$3" -r "$replace" --hint int:value:$percent >"$mediaIdFile"
+	fi
+}
+
+if isSpotify; then
+	[ -z "$1" ] || playerctl $1 -p spotify
+	title="Spotify $1"
+	art=$(getAlbumArt)
+	media=$(getMedia)
+	sendNotify "$title" "$media" "$art"
+else
+	[ -z "$1" ] || playerctl $1
+	title="Media $1"
+	art=$(getAlbumArt)
+	media=$(getMedia)
+	sendNotify "$title" "$media" "$art"
+fi

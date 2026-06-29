@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+denixify() {
+	sed -E '
+    s#/nix/store/[a-z0-9]{32}-##g;                 # Strip /nix/store hashes
+    s#[a-z0-9]{32}-##g;                            # Strip standalone hashes
+    s#([a-zA-Z0-9+]+)-[0-9][^-]*(-[0-9]*)?\.drv#\1#g;  # Remove versions in .drv
+    s#([a-zA-Z0-9+]+)-[0-9]+(\.[0-9]+)*(-[0-9]*)?#\1#g; # Remove trailing versions
+    s#\.drv##g;                                     # Remove .drv suffix
+  '
+}
+
+main() {
+	local input
+
+	if [ "$#" -eq 0 ]; then
+		input=$(cat)
+	else
+		input=""
+		for arg in "$@"; do
+			if [ -f "$arg" ]; then
+				input+=$(cat "$arg")$'\n'
+			else
+				input+="$arg"$'\n'
+			fi
+		done
+	fi
+
+	echo -n "$(echo "$input" | denixify)"
+}
+
+main "$@"

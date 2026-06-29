@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+selection=$(fzf --print0) && [ -n "$selection" ] && echo -n "$selection" | xargs -0 -o "$EDITOR"
