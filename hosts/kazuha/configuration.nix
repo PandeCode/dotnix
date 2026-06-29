@@ -58,7 +58,7 @@
 
   boot = {
     tmp.cleanOnBoot = true;
-    kernelPackages = pkgs.linuxPackages_xanmod;
+    # kernelPackages = pkgs.linuxPackages_zen;
     loader = {
       systemd-boot.enable = false;
       grub = {
