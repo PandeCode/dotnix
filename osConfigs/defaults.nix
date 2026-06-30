@@ -4,6 +4,7 @@ rec {
     email = "pandeshawnbenjamin@gmail.com";
   };
 
+  shell = "fish";
   terminal = "ghostty";
   explorer = "nautilus";
   browser = "helium";

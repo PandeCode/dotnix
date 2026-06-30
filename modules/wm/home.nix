@@ -21,7 +21,7 @@ in {
   options.wm = {
     shared = lib.mkOption {
       default = rec {
-        inherit (sharedConfig) terminal explorer;
+        inherit (sharedConfig) terminal explorer shell;
         workspace_rules = {
           float =
             # WARN: Copied from DWM, WINTYPE, not sure if they count as classes
@@ -78,7 +78,7 @@ in {
         };
 
         startup = [
-          terminal
+          (terminal + " -e fish")
           "blueman-applet"
           "nm-applet --indicator"
           # "gsettings set org.gnome.desktop.interface cursor-theme '${config.home.pointerCursor.name}'"
@@ -107,7 +107,7 @@ in {
           shift_alt_tab = ["shift" "alt" "tab"];
         };
         bindexec = [
-          (mod "Return" "${terminal}")
+          (mod "Return" "${terminal} -e ${shell}")
           (mod "e" "${explorer}")
 
           (_bind "super shift" "g" "gif.sh")
