@@ -1352,11 +1352,11 @@
         "nixpkgs": "nixpkgs_6"
       },
       "locked": {
-        "lastModified": 1782781231,
-        "narHash": "sha256-6bW1OG69Zyw2SbUE40zfnk+VtQf8HcXthtNHUc5CLuw=",
+        "lastModified": 1782781408,
+        "narHash": "sha256-6CNHpMme9crQs/X1GO5W5AF+0NyNy4jfdBiRBCGDJKI=",
         "owner": "PandeCode",
         "repo": "nixutils",
-        "rev": "7e9a53fc57e0694ff6d98c325bb35a76a0a19fcd",
+        "rev": "6892119ce7a8130101bd1f7f6d367c661221e1d1",
         "type": "github"
       },
       "original": {
