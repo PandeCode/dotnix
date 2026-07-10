@@ -2,7 +2,7 @@
   pkgs,
   config,
   lib,
-  # sharedConfig,
+  sharedConfig,
   ...
 }: {
   hardware = {
@@ -22,7 +22,7 @@
       ];
     };
   };
-  specialisation = lib.mkIf config.services.isLaptop {
+  specialisation = lib.mkIf sharedConfig.isLaptop {
     nvidia.configuration = {
       # https://github.com/niri-wm/niri/wiki/Nvidia
       # https://github.com/NVIDIA/egl-wayland/issues/126#issuecomment-2379945259

@@ -9,7 +9,7 @@
   ];
 
   environment.sessionVariables = {
-    NIX_BUILD_CORES = 6;
+    NIX_BUILD_CORES = sharedConfig.cpus;
     EDITOR = sharedConfig.editor;
     TERMINAL = sharedConfig.terminal;
     BROWSER = sharedConfig.browser;
@@ -19,10 +19,6 @@
   # environment.etc.inputrc.text = ''
   #   ${builtins.readFile ../../config/inputrc}
   # '';
-
-  services = {
-    isLaptop = true;
-  };
 
   # services.displayManager.ly = {
   #   enable = true;

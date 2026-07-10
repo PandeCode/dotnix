@@ -8,6 +8,8 @@
 
   isLaptop = true;
 
+  cpus = 6;
+
   gaming = {
     enable = true;
     epic = false;
