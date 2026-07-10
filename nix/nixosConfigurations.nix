@@ -15,6 +15,7 @@ with inputs; let
           {nix.settings = nixConfig;}
           overlays
           inputs.stylix.nixosModules.stylix
+          inputs.dwarffs.nixosModules.dwarffs
           ../hosts/${sys_name}/configuration.nix
         ]
         ++ extra_modules ++ additionalModules;
