@@ -611,11 +611,11 @@
         "vlime": "vlime"
       },
       "locked": {
-        "lastModified": 1783443476,
-        "narHash": "sha256-pqyGycQ+fMvcBMU9eYOScCpuFSQHiIIpmiHhTMpw2/I=",
+        "lastModified": 1783966696,
+        "narHash": "sha256-CI1yzNOX8zJUMjnzKTZkOMS0vBDMZ+nQRkdDftNcGFI=",
         "owner": "pandecode",
         "repo": "hermes",
-        "rev": "5a026f1cccff02bda8ef10d323065bb2e4476b24",
+        "rev": "62fa56801fbf79dad8eb6413f4ea10147175b81b",
         "type": "github"
       },
       "original": {
