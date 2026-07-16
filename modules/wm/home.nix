@@ -14,6 +14,7 @@ in {
     ../programs/rofi.nix
     ../programs/filepicker.nix
     ../programs/zen.nix
+    ../programs/chromium.nix
     ../programs/mpv.nix
     # ../programs/swhkd.nix
   ];

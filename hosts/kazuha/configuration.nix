@@ -24,6 +24,7 @@
     ../../modules/hosts/stylix.nix
 
     inputs.nix-index-database.nixosModules.default
+    inputs.nixos-hardware.nixosModules.${sharedConfig.hardware}
 
     # ../../modules/hosts/virt_manager.nix
     # ../../modules/hosts/osx-kvm.nix

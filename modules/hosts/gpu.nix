@@ -68,7 +68,7 @@
           prime = {
             sync.enable = true;
             # reverseSync.enable = true;
-            # offload.enable = true;
+            offload.enable = false;
             intelBusId = "PCI:0:2:0";
             nvidiaBusId = "PCI:1:0:0";
             # amdgpuBusId = "PCI:5@0:0:0"; # If you have an AMD iGPU

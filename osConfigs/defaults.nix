@@ -45,8 +45,8 @@ rec {
   fishShellAbbrs = {
     lsblk = "lsblk | bat -l conf -p";
     ps = "ps | bat -l conf -p";
-    lscpu = "ps | bat -l cpuinfo -p";
-    sensors = "ps | bat -l cpuinfo -p";
+    lscpu = "lscup | bat -l cpuinfo -p";
+    sensors = "sensors | bat -l cpuinfo -p";
 
     dirflake = "echo 'use flake' > .envrc; direnv allow";
     dirnix = "echo 'use nix' > .envrc; direnv allow";
@@ -79,8 +79,10 @@ rec {
     gti = "git";
 
     ":e" = "nvim";
+    ":E" = "nvim";
     e = "nvim";
     ":q" = "exit";
+    ":Q" = "exit";
     eixt = "exit";
     f = "fuck";
     nivm = "nvim";
@@ -89,6 +91,7 @@ rec {
     man = "batman";
     cls = "clear";
     tls = "clear ; tmux clear-history";
+    les = "less";
 
     mkae = "make";
   };

@@ -31,7 +31,15 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nixutils.url = "github:PandeCode/nixutils";
+    nixos-hardware = {
+      url = "github:NixOS/nixos-hardware";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nixutils = {
+      url = "github:PandeCode/nixutils";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixbuilds = {
       url = "github:PandeCode/nixbuilds";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -42,9 +50,7 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    dwarffs = {
-      url = "github:PandeCode/dwarffs";
-    };
+    dwarffs = {url = "github:PandeCode/dwarffs";};
 
     niri = {
       url = "github:sodiboo/niri-flake";
