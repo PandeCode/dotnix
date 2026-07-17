@@ -6,7 +6,7 @@
 }: {
   programs = {
     chromium = {
-      commandLineArgs = "";
+      commandLineArgs = [];
       dictionaries = [
         pkgs.hunspellDictsChromium.en_US
       ];
