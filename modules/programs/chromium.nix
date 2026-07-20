@@ -21,6 +21,7 @@
       id = "cjpalhdlnbpafiamejdnhcphjbkeiagm";
       version = "1.72.2";
       crxPath = builtins.fetchurl {
+        name = "${id}.crx";
         url = "https://github.com/gorhill/uBlock/releases/download/${version}/uBlock0_${version}.chromium.zip";
         sha256 = "sha256:0cz5fi9gnynja34cjv709a0nk0ma5vgax27zqfqpd3glw72cl16i";
       };
