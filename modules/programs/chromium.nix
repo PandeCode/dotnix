@@ -18,7 +18,7 @@
     };
     createChromiumExtension = createChromiumExtensionFor (lib.versions.major pkgs.ungoogled-chromium.version);
     ublock = rec {
-      id = "cjpalhdlnbpafiamejdnhcphjbkeiagm";
+      id = "hifpfkolgdolnmfmncmfocfiiaofjikk";
       version = "1.72.2";
       crxPath = builtins.fetchurl {
         name = "${id}.crx";
