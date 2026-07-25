@@ -10,7 +10,7 @@
 
     ./spicetify.nix
     ./newsboat.nix
-    ./helix.nix
+    # ./helix.nix
 
     ./git.nix
   ];
