@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 CONFIGDIR=$HOME/dotnix/
-BROWSER=google-chrome-stable
 EXPLORER=nautilus
 DOTFILES=$HOME/dotnix # Assuming this is where scripts are stored; adjust if necessary
 

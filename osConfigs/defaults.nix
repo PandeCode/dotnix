@@ -7,7 +7,7 @@ rec {
   shell = "fish";
   terminal = "ghostty";
   explorer = "nautilus";
-  browser = "helium";
+  browser = "chromium";
   editor = "nvim";
 
   isLaptop = false;
