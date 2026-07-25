@@ -8,6 +8,12 @@
         init.defaultBranch = "main";
         color. ui = "auto";
         alias = {
+          push = "push";
+          psuh = "push";
+          pshu = "push";
+          sphu = "push";
+          phsu = "push";
+
           ignore = ''update-index --assume-unchanged'';
           ignored = ''!git ls-files -v | grep "^[[:lower:]]"'';
           unignore = ''update-index --no-assume-unchanged'';
