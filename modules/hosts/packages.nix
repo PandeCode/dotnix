@@ -63,7 +63,7 @@
     })
 
     matlab
-    spyder
+    # spyder
 
     man-pages
     man-pages-posix
