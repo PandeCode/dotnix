@@ -1,8 +1,8 @@
 {
   bitwarden-password-manage = {
     id = "nngceckbapebfimnlniiiahkandclblb";
-    sha256 = "sha256:0kfl1sq162skv8qb8nagki0gp8m4li96fyrlyxvlafbpxpc25i4a";
-    version = "2026.6.1";
+    sha256 = "sha256:1gkzznla408fqkvhp7lng68rga5nhh4861qm0ppqixcj069cn19z";
+    version = "2026.7.0";
   };
 
   dark-reader = {
@@ -25,8 +25,8 @@
 
   mal-sync = {
     id = "kekjfbackdeiabghhcdklcdoekaanoel";
-    sha256 = "sha256:1x25ir4syykz6d8jy565ck5ih7z3cjqvlr5rb90xrslazznpvm94";
-    version = "0.12.3";
+    sha256 = "sha256:0fis4jrfchrzxvj515b3bppixvhlmkm7cvzj47lcm7dk5nd76hgf";
+    version = "0.12.4";
   };
 
   consumer-rights-wiki = {
@@ -49,7 +49,7 @@
 
   desmodder-for-desmos = {
     id = "eclmfdfimjhkmjglgdldedokjaemjfjp";
-    sha256 = "sha256:1ps83ndjncd1lnyrq8hgs769x636dlfpkzfj3w2nksy524kmik3l";
-    version = "0.15.11";
+    sha256 = "sha256:0vs9bnm7zafx9qi7k36dyjppp9fv05rfvn8qybansyfzvgazg7wk";
+    version = "0.15.12";
   };
 }
