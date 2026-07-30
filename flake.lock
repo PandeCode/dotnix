@@ -591,11 +591,11 @@
         "vlime": "vlime"
       },
       "locked": {
-        "lastModified": 1785072528,
-        "narHash": "sha256-M2/x2rzIVh/IVnfA+d7abGBPq8qhywPjsF0IawoSvL0=",
+        "lastModified": 1785387440,
+        "narHash": "sha256-A6VH4WENyycN2nRHGLfzly7BrUjCrPnnKNlo9splZHE=",
         "owner": "pandecode",
         "repo": "hermes",
-        "rev": "ed46c5038c97d4f3eeafb95899fdf8e05330228f",
+        "rev": "d4d5ba9e2d5e13247bbd8aea1a3f522e27bc2e3b",
         "type": "github"
       },
       "original": {
@@ -1342,11 +1342,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1782781522,
-        "narHash": "sha256-vRBl0jnq/mvltgkwjl0IsJsE5SfcZgeMUdF+hH9lH7s=",
+        "lastModified": 1784993047,
+        "narHash": "sha256-/0M+e7PVh9Ow7KikdVrcUZvEbhyVJ9S2sHHxsLccn6Y=",
         "owner": "PandeCode",
         "repo": "nixutils",
-        "rev": "392ee40a8952fd5cdc9e857d99f56100bf4c2200",
+        "rev": "afda028ac38d5deddc8bb9ba8efb5dbf594a8602",
         "type": "github"
       },
       "original": {
