@@ -26,5 +26,5 @@
     y = 1080;
   };
 
-  hardware = "asus-fx506hm";
+  hardware = "framework-16-amd-ai-300-series";
 }

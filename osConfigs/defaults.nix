@@ -73,7 +73,7 @@ rec {
     sizeof = "bash -c 'du -h --max-depth=0'";
     tree = "tre";
 
-    clonec = "git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch -j$(nproc) $(cso)";
+    clonec = "git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch --filter=blob:none -j$(nproc) $(cso)";
     wgetc = "cso | xargs wget -c ";
 
     gti = "git";
