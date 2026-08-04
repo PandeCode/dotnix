@@ -22,59 +22,67 @@
       ];
     };
   };
-  specialisation = lib.mkIf sharedConfig.isLaptop {
-    nvidia.configuration = {
-      # https://github.com/niri-wm/niri/wiki/Nvidia
-      # https://github.com/NVIDIA/egl-wayland/issues/126#issuecomment-2379945259
-      environment.etc = {
-        "nvidia/nvidia-application-profiles-rc.d/50-limit-free-buffer-pool-in-wayland-compositors.json".text =
-          builtins.toJSON
-          {
-            rules = [
-              {
-                pattern = {
-                  feature = "procname";
-                  matches = "niri";
-                };
-                profile = "Limit Free Buffer Pool On Wayland Compositors";
-              }
-            ];
-            profiles = [
-              {
-                name = "Limit Free Buffer Pool On Wayland Compositors";
-                settings = [
-                  {
-                    key = "GLVidHeapReuseRatio";
-                    value = 0;
-                  }
-                ];
-              }
-            ];
-          };
-      };
-      services.xserver.videoDrivers = ["nvidia"];
-      # environment.systemPackages = with pkgs.nvtopPackages; [nvidia];
-      hardware = {
-        nvidia-container-toolkit.mount-nvidia-executables = true;
-        nvidia = {
-          open = true;
-          dynamicBoost.enable = true;
-          nvidiaPersistenced = true;
-          nvidiaSettings = true;
-          powerManagement.enable = false;
-          package = config.boot.kernelPackages.nvidiaPackages.stable;
-          modesetting.enable = true;
+  specialisation = let
+    is = attrSet: attr:
+      if (attr ? attrSet && builtins.typeOf (builtins.getAttr attr attrSet) == "bool")
+      then (builtins.getAttr attr attrSet)
+      else false;
+    andSet = attrSet: list: builtins.foldl' (acc: el: (is attrSet el) && acc) true list;
+    isNvidiaLaptop = andSet sharedConfig ["isLaptop" "isNvidia"];
+  in
+    lib.mkIf isNvidiaLaptop {
+      nvidia.configuration = {
+        # https://github.com/niri-wm/niri/wiki/Nvidia
+        # https://github.com/NVIDIA/egl-wayland/issues/126#issuecomment-2379945259
+        environment.etc = {
+          "nvidia/nvidia-application-profiles-rc.d/50-limit-free-buffer-pool-in-wayland-compositors.json".text =
+            builtins.toJSON
+            {
+              rules = [
+                {
+                  pattern = {
+                    feature = "procname";
+                    matches = "niri";
+                  };
+                  profile = "Limit Free Buffer Pool On Wayland Compositors";
+                }
+              ];
+              profiles = [
+                {
+                  name = "Limit Free Buffer Pool On Wayland Compositors";
+                  settings = [
+                    {
+                      key = "GLVidHeapReuseRatio";
+                      value = 0;
+                    }
+                  ];
+                }
+              ];
+            };
+        };
+        services.xserver.videoDrivers = ["nvidia"];
+        # environment.systemPackages = with pkgs.nvtopPackages; [nvidia];
+        hardware = {
+          nvidia-container-toolkit.mount-nvidia-executables = true;
+          nvidia = {
+            open = true;
+            dynamicBoost.enable = true;
+            nvidiaPersistenced = true;
+            nvidiaSettings = true;
+            powerManagement.enable = false;
+            package = config.boot.kernelPackages.nvidiaPackages.stable;
+            modesetting.enable = true;
 
-          prime = {
-            sync.enable = true;
-            # reverseSync.enable = true;
-            offload.enable = false;
-            intelBusId = "PCI:0:2:0";
-            nvidiaBusId = "PCI:1:0:0";
-            # amdgpuBusId = "PCI:5@0:0:0"; # If you have an AMD iGPU
+            prime = {
+              sync.enable = true;
+              # reverseSync.enable = true;
+              offload.enable = false;
+              intelBusId = "PCI:0:2:0";
+              nvidiaBusId = "PCI:1:0:0";
+              # amdgpuBusId = "PCI:5@0:0:0"; # If you have an AMD iGPU
+            };
           };
         };
       };
     };
-  };
 }

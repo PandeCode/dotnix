@@ -21,9 +21,22 @@
       $CC -x c code.c -o "$n" $CFLAGS $LDFLAGS
     ''
   );
+  mkZBoxTool = name: (
+    pkgs.stdenv.mkDerivation {
+      inherit name;
+      src = builtins.readFile ../../src/${name}.zig;
+      buildInputs = with pkgs; [zig_0_16];
+      buildPhase = ''zig build-exe $src -o ${name}'';
+      installPhase = ''
+        mkdir -p $out/bin
+        mv ${name} $out/bin
+      '';
+    }
+  );
 in {
   environment.systemPackages = [
     (mkBoxTool "contpid")
     (mkBoxTool "sizes")
+    (mkZBoxTool "bg")
   ];
 }

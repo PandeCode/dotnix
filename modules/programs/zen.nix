@@ -5,46 +5,73 @@
 }: {
   imports = [inputs.zen-browser.homeModules.twilight];
 
-  # stylix.targets.zen-browser.profileNames = ["shawn"];
+  stylix.targets.zen-browser.profileNames = ["main"];
 
   programs.zen-browser = {
     enable = true;
-    # nativeMessagingHosts = [pkgs.firefoxpwa];
-    # profiles = {
-    #   "shawn".search.engines = {
-    #     nix-packages = {
-    #       name = "Nix Packages";
-    #       urls = [
-    #         {
-    #           template = "https://search.nixos.org/packages";
-    #           params = [
-    #             {
-    #               name = "type";
-    #               value = "packages";
-    #             }
-    #             {
-    #               name = "query";
-    #               value = "{searchTerms}";
-    #             }
-    #           ];
-    #         }
-    #       ];
-    #
-    #       icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
-    #       definedAliases = ["@np"];
-    #     };
-    #
-    #     nixos-wiki = {
-    #       name = "NixOS Wiki";
-    #       urls = [{template = "https://wiki.nixos.org/w/index.php?search={searchTerms}";}];
-    #       iconMapObj."16" = "https://wiki.nixos.org/favicon.ico";
-    #       definedAliases = ["@nw"];
-    #     };
-    #
-    #     bing.metaData.hidden = true;
-    #     google.metaData.alias = "@g"; # builtin engines only support specifying one additional alias
-    #   };
-    # };
+    nativeMessagingHosts = [pkgs.firefoxpwa];
+    profiles = {
+      main = {
+        containers = let
+          autoID = attrSet: attrSet;
+        in
+          autoID {
+            personal = {
+              color = "green";
+              icon = "vacation";
+              id = 1;
+            };
+            school = {
+              color = "purple";
+              icon = "fence";
+              id = 2;
+            };
+            lab = {
+              color = "orange";
+              icon = "fingerprint";
+              id = 3;
+            };
+            gov = {
+              color = "red";
+              icon = "dollar";
+              id = 4;
+            };
+          };
+        search.engines = {
+          nix-packages = {
+            name = "Nix Packages";
+            urls = [
+              {
+                template = "https://search.nixos.org/packages";
+                params = [
+                  {
+                    name = "type";
+                    value = "packages";
+                  }
+                  {
+                    name = "query";
+                    value = "{searchTerms}";
+                  }
+                ];
+              }
+            ];
+
+            icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+            definedAliases = ["@np"];
+          };
+
+          nixos-wiki = {
+            name = "NixOS Wiki";
+            urls = [{template = "https://wiki.nixos.org/w/index.php?search={searchTerms}";}];
+            iconMapObj."16" = "https://wiki.nixos.org/favicon.ico";
+            definedAliases = ["@nw"];
+          };
+
+          bing.metaData.hidden = true;
+          google.metaData.alias = "@g"; # builtin engines only support specifying one additional alias
+        };
+      };
+    };
     policies = {
       Preferences = let
         mkLockedAttrs = builtins.mapAttrs (_: value: {
