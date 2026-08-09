@@ -25,6 +25,7 @@
 
     inputs.nix-index-database.nixosModules.default
     inputs.nixos-hardware.nixosModules.${sharedConfig.hardware}
+    inputs.lix-module.nixosModules.default
 
     # ../../modules/hosts/virt_manager.nix
     # ../../modules/hosts/osx-kvm.nix
