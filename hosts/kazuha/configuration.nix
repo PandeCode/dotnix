@@ -30,13 +30,32 @@
     # ../../modules/hosts/osx-kvm.nix
     # inputs.aagl.nixosModules.default
   ];
+
+  services.fprintd = {
+    enable = true;
+    tod.enable = true;
+    tod.driver = pkgs.libfprint-2-tod1-goodix;
+  };
+  security.pam.services = {
+    sddm.fprintAuth = true;
+    # unixAuth = true;
+  };
+
   # programs.honkers-railway-launcher.enable = true;
-  services.wivrn.enable = false;
+  # services.wivrn.enable = false;
   programs.nix-index-database.comma.enable = true;
 
   virtualisation.waydroid.enable = true;
 
   zramSwap.enable = true;
+  systemd.oomd.enable = true;
+
+  swapDevices = [
+    {
+      device = "/var/lib/swapfile";
+      size = 16 * 1024; # 16 GiB
+    }
+  ];
 
   environment = {
     systemPackages = with pkgs; [

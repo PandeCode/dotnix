@@ -59,6 +59,8 @@
         '';
       };
     };
+
+    blueman.enable = true;
   };
 
   hardware = {
@@ -69,7 +71,7 @@
         General = {
           Enable = "Source,Sink,Media,Socket";
           Experimental = true; # Show battery # WARN: Arch Wiki warns for bugs
-          # FastConnectable = true; # WARN power
+          FastConnectable = true; # WARN power
         };
         Policy = {
           AutoEnable = true;
@@ -143,7 +145,6 @@
       xwayland-satellite
 
       gparted
-      blueman
       networkmanager
       networkmanagerapplet
       pavucontrol

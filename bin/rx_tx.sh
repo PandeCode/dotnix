@@ -1,3 +1,10 @@
 #!/usr/bin/env bash
 
-awk '/wlo1/ {print ( $2 / 1000000 ) " " ( $10 / 100000 ) }' /proc/net/dev
+awk '/wlp191s0/ {
+  rx=$2; tx=$10;
+  cmd="numfmt --to=iec --format=%.2f " rx;
+  cmd2="numfmt --to=iec --format=%.2f " tx;
+  cmd | getline rxmb; close(cmd);
+  cmd2 | getline txmb; close(cmd2);
+  print rxmb, txmb
+}' /proc/net/dev

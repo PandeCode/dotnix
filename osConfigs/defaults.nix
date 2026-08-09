@@ -52,7 +52,7 @@ rec {
     dirnix = "echo 'use nix' > .envrc; direnv allow";
     neo = "neovide $(fzf) 2>&1  > /dev/null & disown";
     ns = "nix-shell shell.nix --command 'fish'";
-    nsp = "nix-shell --command 'fish' -p";
+    nsp = "NIXPKGS_ALLOW_INSECURE=1 NIXPKGS_ALLOW_UNFREE=1 nix-shell --command 'fish' -p";
 
     gamescopehdr = "DXVK_HDR=1 gamescope -f --hdr-enabled -- ";
     steamhdr = "ENABLE_HDR_WSI=1 DXVK_HDR=1 DISPLAY= ";

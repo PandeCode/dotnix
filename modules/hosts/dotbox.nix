@@ -25,6 +25,9 @@
     pkgs.stdenv.mkDerivation {
       inherit name;
       src = builtins.readFile ../../src/${name}.zig;
+      dontUnpack = true;
+      dontConfigure = true;
+      dontFixup = true;
       buildInputs = with pkgs; [zig_0_16];
       buildPhase = ''zig build-exe $src -o ${name}'';
       installPhase = ''
@@ -37,6 +40,6 @@ in {
   environment.systemPackages = [
     (mkBoxTool "contpid")
     (mkBoxTool "sizes")
-    (mkZBoxTool "bg")
+    # (mkZBoxTool "bg")
   ];
 }

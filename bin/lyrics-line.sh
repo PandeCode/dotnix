@@ -125,22 +125,21 @@ from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.formatters import TextFormatter
 
 def convert_to_timestamp_format(seconds):
-"""Convert seconds to [MM:SS.MS] format"""
-minutes = seconds // 60
-seconds_remainder = seconds % 60
-# Format with exactly 2 decimal places for milliseconds
-return f"[{minutes:02d}:{seconds_remainder:05.2f}]"
+	"""Convert seconds to [MM:SS.MS] format"""
+	minutes = seconds // 60
+	seconds_remainder = seconds % 60
+	# Format with exactly 2 decimal places for milliseconds
+	return f"[{minutes:02d}:{seconds_remainder:05.2f}]"
 
 def convert_json_to_timestamp_format(json_str):
-formatted_lines = []
-for entry in json_str:
-	timestamp = convert_to_timestamp_format(int(entry['start']))
-	formatted_lines.append(f"{timestamp} {entry['text']}")
-	return '\n'.join(formatted_lines)
+	formatted_lines = []
+	for entry in json_str:
+		timestamp = convert_to_timestamp_format(int(entry['start']))
+		formatted_lines.append(f"{timestamp} {entry['text']}")
+		return '\n'.join(formatted_lines)
 
-	t = YouTubeTranscriptApi.get_transcript('$id')
-
-	print(convert_json_to_timestamp_format(t), end='\n')
+t = YouTubeTranscriptApi.get_transcript('$id')
+print(convert_json_to_timestamp_format(t), end='\n')
 EOF
 		)
 		# shellcheck disable=2181 # in binding

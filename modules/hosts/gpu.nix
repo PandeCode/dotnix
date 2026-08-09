@@ -18,6 +18,7 @@
     sessionVariables = {
       VK_ICD_FILENAMES = builtins.concatStringsSep ":" [
         "/run/opengl-driver/share/vulkan/icd.d/nvidia_icd.json"
+        "/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json"
         "/run/opengl-driver/share/vulkan/icd.d/intel_icd.x86_64.json"
       ];
     };

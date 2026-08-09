@@ -105,6 +105,9 @@
     psmisc
     # busybox
     inetutils
+    net-tools
+    acpi
+    upower
     wget
 
     bat

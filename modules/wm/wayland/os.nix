@@ -53,7 +53,7 @@
           ];
       }))
 
-      grimblast
+      # grimblast
       pamixer
       playerctl
       slurp

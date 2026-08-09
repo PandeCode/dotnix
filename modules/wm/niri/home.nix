@@ -134,8 +134,8 @@ in {
         variable-refresh-rate = "on-demand";
         mode = {
           width = 1920;
-          height = 1080;
-          refresh = 144.0;
+          height = 1200;
+          refresh = 165.0;
         };
         scale = 1;
       };
@@ -266,7 +266,7 @@ in {
           "Super+Shift+q".action = quit {skip-confirmation = true;};
 
           "Super+Tab".action = toggle-overview;
-          "Super+Slash".action = show-hotkey-overlay;
+          # "Super+Slash".action = show-hotkey-overlay;
           "Alt+f4".action = close-window;
 
           "Super+Print".action.screenshot-screen = {show-pointer = false;};

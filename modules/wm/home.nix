@@ -46,6 +46,8 @@ in {
               "org.pulseaudio.pavucontrol"
               ".blueman-manager-wrapped"
 
+              "blueman-manager"
+
               "annotate_toolbar" # zoom rubbish
             ];
           pin = [

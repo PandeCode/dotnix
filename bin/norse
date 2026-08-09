@@ -1,46 +1,141 @@
 #!/usr/bin/env lua
 
-local futhark = {
-	a = "ᚨ",
-	b = "ᛒ",
-	c = "ᚲ",
-	d = "ᛞ",
-	e = "ᛖ",
-	f = "ᚠ",
-	g = "ᚷ",
-	h = "ᚺ",
-	i = "ᛁ",
-	j = "ᛃ",
-	k = "ᚲ",
-	l = "ᛚ",
-	m = "ᛗ",
-	n = "ᚾ",
-	o = "ᛟ",
-	p = "ᛈ",
-	q = "ᚲ",
-	r = "ᚱ",
-	s = "ᛊ",
-	t = "ᛏ",
-	u = "ᚢ",
-	v = "ᚡ",
-	w = "ᚹ",
-	x = "ᚲᛊ",
-	y = "ᛇ",
-	z = "ᛉ",
-}
+-- stylua: ignore start
+local fonts = {
+	fraktur = {
+		a = "𝖆", b = "𝖇", c = "𝖈", d = "𝖉", e = "𝖊", f = "𝖋", g = "𝖌", h = "𝖍", i = "𝖎",
+		j = "𝖏", k = "𝖐", l = "𝖑", m = "𝖒", n = "𝖓", o = "𝖔", p = "𝖕", q = "𝖖", r = "𝖗",
+		s = "𝖘", t = "𝖙", u = "𝖚", v = "𝖛", w = "𝖜", x = "𝖝", y = "𝖞", z = "𝖟",
+	},
 
-function toNorse(text)
+	norse = {
+		a = "ᚨ", b = "ᛒ", c = "ᚲ", d = "ᛞ", e = "ᛖ", f = "ᚠ", g = "ᚷ", h = "ᚺ",
+		i = "ᛁ", j = "ᛃ", k = "ᚲ", l = "ᛚ", m = "ᛗ", n = "ᚾ", o = "ᛟ", p = "ᛈ",
+		q = "ᚲ", r = "ᚱ", s = "ᛊ", t = "ᛏ", u = "ᚢ", v = "ᚡ", w = "ᚹ", x = "ᚲᛊ",
+		y = "ᛇ", z = "ᛉ",
+	},
+
+	bold = {
+		a = "𝐚", b = "𝐛", c = "𝐜", d = "𝐝", e = "𝐞", f = "𝐟", g = "𝐠", h = "𝐡",
+		i = "𝐢", j = "𝐣", k = "𝐤", l = "𝐥", m = "𝐦", n = "𝐧", o = "𝐨", p = "𝐩",
+		q = "𝐪", r = "𝐫", s = "𝐬", t = "𝐭", u = "𝐮", v = "𝐯", w = "𝐰", x = "𝐱",
+		y = "𝐲", z = "𝐳",
+	},
+
+	italic = {
+		a = "𝑎", b = "𝑏", c = "𝑐", d = "𝑑", e = "𝑒", f = "𝑓", g = "𝑔", h = "ℎ",
+		i = "𝑖", j = "𝑗", k = "𝑘", l = "𝑙", m = "𝑚", n = "𝑛", o = "𝑜", p = "𝑝",
+		q = "𝑞", r = "𝑟", s = "𝑠", t = "𝑡", u = "𝑢", v = "𝑣", w = "𝑤", x = "𝑥",
+		y = "𝑦", z = "𝑧",
+	},
+
+	bolditalic = {
+		a = "𝒂", b = "𝒃", c = "𝒄", d = "𝒅", e = "𝒆", f = "𝒇", g = "𝒈", h = "𝒉",
+		i = "𝒊", j = "𝒋", k = "𝒌", l = "𝒍", m = "𝒎", n = "𝒏", o = "𝒐", p = "𝒑",
+		q = "𝒒", r = "𝒓", s = "𝒔", t = "𝒕", u = "𝒖", v = "𝒗", w = "𝒘", x = "𝒙",
+		y = "𝒚", z = "𝒛",
+	},
+
+	script = {
+		a = "𝓪", b = "𝓫", c = "𝓬", d = "𝓭", e = "𝓮", f = "𝓯", g = "𝓰", h = "𝓱",
+		i = "𝓲", j = "𝓳", k = "𝓴", l = "𝓵", m = "𝓶", n = "𝓷", o = "𝓸", p = "𝓹",
+		q = "𝓺", r = "𝓻", s = "𝓼", t = "𝓽", u = "𝓾", v = "𝓿", w = "𝔀", x = "𝔁",
+		y = "𝔂", z = "𝔃",
+	},
+
+	doublestruck = {
+		a = "𝕒", b = "𝕓", c = "𝕔", d = "𝕕", e = "𝕖", f = "𝕗", g = "𝕘", h = "𝕙",
+		i = "𝕚", j = "𝕛", k = "𝕜", l = "𝕝", m = "𝕞", n = "𝕟", o = "𝕠", p = "𝕡",
+		q = "𝕢", r = "𝕣", s = "𝕤", t = "𝕥", u = "𝕦", v = "𝕧", w = "𝕨", x = "𝕩",
+		y = "𝕪", z = "𝕫",
+	},
+
+	monospace = {
+		a = "𝚊", b = "𝚋", c = "𝚌", d = "𝚍", e = "𝚎", f = "𝚏", g = "𝚐", h = "𝚑",
+		i = "𝚒", j = "𝚓", k = "𝚔", l = "𝚕", m = "𝚖", n = "𝚗", o = "𝚘", p = "𝚙",
+		q = "𝚚", r = "𝚛", s = "𝚜", t = "𝚝", u = "𝚞", v = "𝚟", w = "𝚠", x = "𝚡",
+		y = "𝚢", z = "𝚣",
+	},
+
+	sansserif = {
+		a = "𝖆", b = "𝖇", c = "𝖈", d = "𝖉", e = "𝖊", f = "𝖋", g = "𝖌", h = "𝖍",
+		i = "𝖎", j = "𝖏", k = "𝖐", l = "𝖑", m = "𝖒", n = "𝖓", o = "𝖔", p = "𝖕",
+		q = "𝖖", r = "𝖗", s = "𝖘", t = "𝖙", u = "𝖚", v = "𝖛", w = "𝖜", x = "𝖝",
+		y = "𝖞", z = "𝖟",
+	},
+
+	sansbold = {
+		a = "𝗮", b = "𝗯", c = "𝗰", d = "𝗱", e = "𝗲", f = "𝗳", g = "𝗴", h = "𝗵",
+		i = "𝗶", j = "𝗷", k = "𝗸", l = "𝗹", m = "𝗺", n = "𝗻", o = "𝗼", p = "𝗽",
+		q = "𝗾", r = "𝗿", s = "𝘀", t = "𝘁", u = "𝘂", v = "𝘃", w = "𝘄", x = "𝘅",
+		y = "𝘆", z = "𝘇",
+	},
+
+	fullwidth = {
+		a = "ａ", b = "ｂ", c = "ｃ", d = "ｄ", e = "ｅ", f = "ｆ", g = "ｇ", h = "ｈ",
+		i = "ｉ", j = "ｊ", k = "ｋ", l = "ｌ", m = "ｍ", n = "ｎ", o = "ｏ", p = "ｐ",
+		q = "ｑ", r = "ｒ", s = "ｓ", t = "ｔ", u = "ｕ", v = "ｖ", w = "ｗ", x = "ｘ",
+		y = "ｙ", z = "ｚ",
+	},
+}
+-- stylua: ignore end
+
+function transform(text, fontname)
+	local font = fonts[fontname] or fonts.fraktur
 	local result = ""
 	for char in text:lower():gmatch(".") do
-		result = result .. (futhark[char] or char)
+		result = result .. (font[char] or char)
 	end
 	return result
 end
 
-local arg1 = arg[1]
-if arg1 ~= nil then
-	print(toNorse(arg))
-else
-	local stdin = io.read()
-	print(toNorse(stdin))
+function showHelp()
+	print("Unicode Font Transformer")
+	print("Usage: norse [OPTION] [TEXT]")
+	print()
+	print("Options:")
+	for name, _ in pairs(fonts) do
+		print("  -" .. name:sub(1, 2) .. "    " .. name)
+	end
+	print()
+	print("Examples:")
+	print("  ./norse -fr 'hello'")
+	print("  ./norse -bo 'world'")
+	print("  echo 'test' | ./norse -mo")
 end
+
+local mode = "fraktur"
+local text = nil
+
+if arg[1] == "-h" or arg[1] == "--help" then
+	showHelp()
+	return
+end
+
+if arg[1] and arg[1]:match("^-") then
+	local flag = arg[1]:sub(2)
+
+	-- Try to find matching font
+	for fontname, _ in pairs(fonts) do
+		if fontname:sub(1, #flag) == flag then
+			mode = fontname
+			text = table.concat(arg, " ", 2)
+			break
+		end
+	end
+
+	-- If not found, check exact match
+	if mode == "fraktur" then
+		mode = arg[1]:sub(2) or "fraktur"
+		text = table.concat(arg, " ", 2)
+	end
+else
+	text = table.concat(arg, " ", 1)
+end
+
+-- Read from stdin if no text provided
+if not text or text == "" then
+	text = io.read()
+end
+
+print(transform(text, mode))

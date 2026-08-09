@@ -2,7 +2,7 @@
 
 case "$1" in
 "down")
-	echo -n 1 >/sys/class/backlight/intel_backlight/brightness
+	echo -n 1 >/sys/class/backlight/amdgpu_bl1/brightness
 	;;
 "")
 	exec xbacklight -get
