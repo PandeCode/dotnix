@@ -39,7 +39,7 @@
   };
   security.pam.services = {
     sddm.fprintAuth = true;
-    unixAuth = true;
+    # unixAuth = true;
   };
 
   # programs.honkers-railway-launcher.enable = true;

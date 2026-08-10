@@ -1,14 +1,10 @@
 //usr/bin/env , zig run -freference-trace=10 -j$(nproc) "$0" -- "$@" ; exit
 
-//usr/bin/env , zig run -freference-trace=10 -j$(nproc) "$0" -- "$@" ; exit
-
 //usr/bin/env , zig run -lc -freference-trace=10 -j$(nproc) "$0" -- "$@" ; exit
 
 const std = @import("std");
-
 const http = std.http;
 const mem = std.mem;
-const log = std.log;
 const ArrayList = std.ArrayList;
 const Io = std.Io;
 const Allocator = mem.Allocator;
@@ -16,17 +12,13 @@ const print = std.debug.print;
 
 const WS = "\n\t\r ";
 
-test "hello" {
-    const E = union(enum) { a: u8, b: u9 };
-
-    const e: E = .{ .a = 512 };
-    const j: E = .{ .b = 9 };
-    _ = e;
-    _ = j;
-}
+// fn comptime_expand(comptime path: []const u8) []const u8 { }
 
 const CACHE_DIR = "~/.cache/lyrics_zig";
+var TRUE_CACHE_DIR: ?[]const u8 = null; // idgaf
 
+/// not having this in the stdlib is kinda stupid
+/// small impl, idk if i could be more efficient
 fn urlEncode(gpa: Allocator, url: []const u8) ![]const u8 {
     const chars = .{
         .{ "%", "%25" },
@@ -78,15 +70,11 @@ fn expand(gpa: Allocator, env: std.process.Environ, path: []const u8) ![]const u
     return output;
 }
 
-fn fetchWithCache(gpa: Allocator, io: Io, client: *http.Client, uri: std.Uri, cache_dir: Io.Dir) ![]const u8 {
-    const hash = blk: {
-        const id = try uri.query.?.toRawMaybeAlloc(gpa);
-        defer gpa.free(id);
-        var hash: [std.crypto.hash.Sha1.digest_length]u8 = undefined;
-        std.crypto.hash.Sha1.hash(id, &hash, .{});
-        break :blk hash;
-    };
+fn fetchWithCache(gpa: Allocator, io: Io, client: *http.Client, url: []const u8) ![]const u8 {
+    var hash: [std.crypto.hash.Sha1.digest_length]u8 = undefined;
+    std.crypto.hash.Sha1.hash(url, &hash, .{});
 
+    const cache_dir = try Io.Dir.openDirAbsolute(io, TRUE_CACHE_DIR.?, .{});
     return cache_dir.readFileAlloc(io, &hash, gpa, .unlimited) catch |e| {
         switch (e) {
             error.FileNotFound => {
@@ -94,12 +82,15 @@ fn fetchWithCache(gpa: Allocator, io: Io, client: *http.Client, uri: std.Uri, ca
                 defer body.deinit();
 
                 const fetch_res = try client.fetch(.{
-                    .location = .{ .uri = uri },
+                    .location = .{ .url = url },
+                    .method = .GET,
                     .response_writer = &body.writer,
                 });
 
-                if (fetch_res.status != .ok)
+                if (fetch_res.status != .ok) {
+                    print("url: {s}", .{url});
                     return error.ReqFail;
+                }
 
                 const res_body = try body.toOwnedSlice();
 
@@ -111,56 +102,6 @@ fn fetchWithCache(gpa: Allocator, io: Io, client: *http.Client, uri: std.Uri, ca
             },
             else => unreachable,
         }
-    };
-}
-
-const Metadata = struct {
-    title: []const u8,
-    artist: []const u8,
-    position: i64,
-};
-
-fn getPlayerMetadata(io: Io, gpa: Allocator) !Metadata {
-    const playerctl = try std.process.run(gpa, io, .{ .argv = &.{
-        "playerctl",
-        "--player=spotify,mpv,firefox,chromium",
-        "metadata",
-        "--format",
-        \\{{title}}
-        \\{{artist}}
-        \\{{position}}
-    } });
-    defer gpa.free(playerctl.stderr);
-    defer gpa.free(playerctl.stdout);
-
-    if (playerctl.term != .exited) return error.Playerctl;
-
-    var playerctl_stdout = mem.tokenizeScalar(u8, mem.trim(u8, playerctl.stdout, WS), '\n');
-
-    var title: ?[]u8 = null;
-    var artist: ?[]u8 = null;
-    var position: ?i64 = null;
-
-    var i: u8 = 0;
-    while (playerctl_stdout.next()) |md| : (i += 1) {
-        switch (i) {
-            0 => {
-                title = try gpa.alloc(u8, md.len);
-                @memcpy(title.?, md);
-            },
-            1 => {
-                artist = try gpa.alloc(u8, md.len);
-                @memcpy(artist.?, md);
-            },
-            2 => position = try std.fmt.parseInt(i64, md, 10),
-            else => unreachable,
-        }
-    }
-
-    return .{
-        .title = title.?,
-        .artist = artist.?,
-        .position = position.?,
     };
 }
 
@@ -180,7 +121,7 @@ const Lyric = struct {
 const LTStamp = struct { timestamp: i64, line: []const u8 };
 const LType = union(enum) { sync: []const LTStamp, unsync: []const []const u8 };
 
-fn lrclib(allocator: Allocator, io: Io, client: *http.Client, query: []const u8, cache_dir: Io.Dir) !?LType {
+fn lrclib(allocator: Allocator, io: Io, client: *http.Client, info: []const u8) !?LType {
     // lol i love allocators
     var arena = std.heap.ArenaAllocator.init(allocator);
     defer arena.deinit();
@@ -190,13 +131,11 @@ fn lrclib(allocator: Allocator, io: Io, client: *http.Client, query: []const u8,
         gpa,
         "https://lrclib.net/api/search?q={s}",
         .{
-            try urlEncode(gpa, query),
+            try urlEncode(gpa, info),
         },
     );
 
-    const uri = try std.Uri.parse(url);
-
-    const raw = try fetchWithCache(gpa, io, client, uri, cache_dir);
+    const raw = try fetchWithCache(gpa, io, client, url);
 
     const json = try std.json.parseFromSlice([]Lyric, gpa, raw, .{});
 
@@ -241,7 +180,7 @@ fn lrclib(allocator: Allocator, io: Io, client: *http.Client, query: []const u8,
 }
 
 pub fn main(init: std.process.Init) !void {
-    const mgpa = init.arena.allocator();
+    const gpa = init.arena.allocator();
     const io = init.io;
     const env = init.minimal.environ;
 
@@ -249,53 +188,68 @@ pub fn main(init: std.process.Init) !void {
     var stdout_writer = Io.File.stdout().writer(init.io, &stdout_buffer);
     const stdout = &stdout_writer.interface;
 
-    var client: http.Client = .{ .allocator = mgpa, .io = io };
+    var client: http.Client = .{ .allocator = gpa, .io = io };
     defer client.deinit();
 
-    const cache_dir_path = try expand(mgpa, env, CACHE_DIR);
-    defer mgpa.free(cache_dir_path);
+    const cache_dir = try expand(gpa, env, CACHE_DIR);
+    TRUE_CACHE_DIR = cache_dir;
+    Io.Dir.createDirAbsolute(io, cache_dir, .default_dir) catch {};
 
-    Io.Dir.createDirAbsolute(io, cache_dir_path, .default_dir) catch |e| {
-        switch (e) {
-            error.PathAlreadyExists => {},
-            else => unreachable,
-        }
-    };
-    const cache_dir = try Io.Dir.openDirAbsolute(io, cache_dir_path, .{});
+    const playerctl = try std.process.run(gpa, io, .{ .argv = &.{
+        "playerctl",
+        "--player=spotify,mpv,firefox,chromium",
+        "metadata",
+        "--format",
+        \\{{title}}
+        \\{{artist}}
+        \\{{position}}
+    } });
+    defer gpa.free(playerctl.stderr);
+    defer gpa.free(playerctl.stdout);
 
-    var loopArena = std.heap.ArenaAllocator.init(mgpa);
-    defer loopArena.deinit();
-    const gpa = loopArena.allocator();
+    if (playerctl.term != .exited) return error.Playerctl;
 
-    while (loopArena.reset(.retain_capacity)) {
-        try init.io.sleep(.fromSeconds(1), .real);
-        const metadata = getPlayerMetadata(io, gpa) catch continue;
-        const title = metadata.title;
-        const artist = metadata.artist;
-        const position = metadata.position;
+    var playerctl_stdout = mem.tokenizeScalar(u8, mem.trim(u8, playerctl.stdout, WS), '\n');
 
-        const lyrics = try lrclib(gpa, io, &client, try std.fmt.allocPrint(gpa, "{s} {s}", .{ title, artist }), cache_dir);
-        if (lyrics) |lyric| {
-            switch (lyric) {
-                .sync => |sync| {
-                    var idx: usize = 0;
-                    for (sync, 0..) |s, i| {
-                        if (position < s.timestamp) {
-                            idx = i;
-                            break;
-                        }
-                    }
+    var title: ?[]const u8 = null;
+    var artist: ?[]const u8 = null;
+    var position: ?[]const u8 = null;
 
-                    try stdout.print("{s}\n", .{sync[if (idx != 0) idx - 1 else 0].line});
-                },
-                .unsync => |unsync| {
-                    _ = unsync;
-                },
+    {
+        var i: u8 = 0;
+        while (playerctl_stdout.next()) |md| : (i += 1) {
+            switch (i) {
+                0 => title = md,
+                1 => artist = md,
+                2 => position = md,
+                else => {},
             }
         }
-
-        try stdout.flush();
     }
+
+    const lyrics = try lrclib(gpa, io, &client, try std.fmt.allocPrint(gpa, "{s} {s}", .{ title.?, artist.? }));
+    if (lyrics) |lyric| {
+        switch (lyric) {
+            .sync => |sync| {
+                const pos = try std.fmt.parseInt(i64, position.?, 10);
+
+                var idx: usize = 0;
+                for (sync, 0..) |s, i| {
+                    if (pos < s.timestamp) {
+                        idx = i;
+                        break;
+                    }
+                }
+
+                try stdout.print("{s}\n", .{sync[if (idx != 0) idx - 1 else 0].line});
+            },
+            .unsync => |unsync| {
+                _ = unsync;
+            },
+        }
+    }
+
+    try stdout.flush();
 }
 
 // Future ref
