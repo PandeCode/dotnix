@@ -9,6 +9,7 @@
         color. ui = "auto";
         alias = {
           push = "push";
+          puhs = "push";
           psuh = "push";
           pshu = "push";
           sphu = "push";

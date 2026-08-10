@@ -1,4 +1,4 @@
-//usr/bin/env , zig run -O ReleaseFast -freference-trace=10 -j$(nproc) "$0" -- "$@" ; exit
+//usr/bin/env , zig run -freference-trace=10 -j$(nproc) "$0" -- "$@" ; exit
 
 //usr/bin/env , zig run -lc -freference-trace=10 -j$(nproc) "$0" -- "$@" ; exit
 

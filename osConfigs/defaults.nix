@@ -43,9 +43,11 @@ rec {
   };
 
   fishShellAbbrs = {
+    ssh = "ghostty +ssh --";
+
     lsblk = "lsblk | bat -l conf -p";
     ps = "ps | bat -l conf -p";
-    lscpu = "lscup | bat -l cpuinfo -p";
+    lscpu = "lscpu | bat -l cpuinfo -p";
     sensors = "sensors | bat -l cpuinfo -p";
 
     dirflake = "echo 'use flake' > .envrc; direnv allow";
@@ -69,7 +71,7 @@ rec {
     mdkir = "mkdir";
     dmkir = "mkdir";
     cp = "cp -ir";
-    free = "free -m";
+    free = "free -h";
     sizeof = "bash -c 'du -h --max-depth=0'";
     tree = "tre";
 

@@ -25,7 +25,7 @@
 
     inputs.nix-index-database.nixosModules.default
     inputs.nixos-hardware.nixosModules.${sharedConfig.hardware}
-    inputs.lix-module.nixosModules.default
+    # inputs.lix-module.nixosModules.default
 
     # ../../modules/hosts/virt_manager.nix
     # ../../modules/hosts/osx-kvm.nix
@@ -39,7 +39,7 @@
   };
   security.pam.services = {
     sddm.fprintAuth = true;
-    # unixAuth = true;
+    unixAuth = true;
   };
 
   # programs.honkers-railway-launcher.enable = true;

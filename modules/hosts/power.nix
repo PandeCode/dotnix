@@ -17,7 +17,7 @@
     upower = {enable = true;};
 
     logind.settings.Login = {
-      HandleLidSwitch = "poweroff";
+      HandleLidSwitch = "suspend-then-hibernate";
       HandleLidSwitchExternalPower = "lock";
       HandleLidSwitchDocked = "ignore";
     };
