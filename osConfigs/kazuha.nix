@@ -27,4 +27,5 @@
   };
 
   hardware = "framework-16-amd-ai-300-series";
+  framework = true;
 }

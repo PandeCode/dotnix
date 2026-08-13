@@ -97,11 +97,6 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    ghostty = {
-      url = "github:ghostty-org/ghostty";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     nix-matlab = {
       url = "gitlab:doronbehar/nix-matlab";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -160,7 +155,6 @@ rec {
 
     checks = extras.forAllSystems ((import ./nix/checks.nix) extras);
     devShells = extras.forAllSystems ((import ./nix/devShells.nix) extras);
-
     formatter = extras.forAllSystems ((
         self: system: let
           pkgs = nixpkgs.legacyPackages.${system};

@@ -27,6 +27,18 @@ test "hello" {
 
 const CACHE_DIR = "~/.cache/lyrics_zig";
 
+fn sanitize(gpa: Allocator, str: []const u8) ![]const u8 {
+    var ret = try gpa.alloc(u8, str.len);
+    for (str, 0..) |c, i| {
+        if (std.ascii.isAlphanumeric(c)) {
+            ret[i] = c;
+        } else {
+            ret[i] = '_';
+        }
+    }
+    return ret;
+}
+
 fn urlEncode(gpa: Allocator, url: []const u8) ![]const u8 {
     const chars = .{
         .{ "%", "%25" },
@@ -78,19 +90,20 @@ fn expand(gpa: Allocator, env: std.process.Environ, path: []const u8) ![]const u
     return output;
 }
 
-fn fetchWithCache(gpa: Allocator, io: Io, client: *http.Client, uri: std.Uri, cache_dir: Io.Dir) ![]const u8 {
-    const hash = blk: {
-        const id = try uri.query.?.toRawMaybeAlloc(gpa);
-        defer gpa.free(id);
-        var hash: [std.crypto.hash.Sha1.digest_length]u8 = undefined;
-        std.crypto.hash.Sha1.hash(id, &hash, .{});
-        break :blk hash;
-    };
+fn fetchWithCache(allocator: Allocator, io: Io, client: *http.Client, uri: std.Uri, cache_dir: Io.Dir) ![]const u8 {
+    var arena = std.heap.ArenaAllocator.init(allocator);
+    const gpa = arena.allocator();
 
-    return cache_dir.readFileAlloc(io, &hash, gpa, .unlimited) catch |e| {
+    const query = try uri.query.?.toRawMaybeAlloc(gpa);
+    const nhash = std.hash.XxHash32.hash(0, query);
+    const hash = try std.fmt.allocPrint(gpa, "{}", .{nhash});
+
+    const sanitizedQuery = try sanitize(gpa, query);
+
+    return cache_dir.readFileAlloc(io, hash, gpa, .unlimited) catch |e| {
         switch (e) {
             error.FileNotFound => {
-                var body: Io.Writer.Allocating = .init(gpa);
+                var body: Io.Writer.Allocating = .init(allocator);
                 defer body.deinit();
 
                 const fetch_res = try client.fetch(.{
@@ -104,7 +117,7 @@ fn fetchWithCache(gpa: Allocator, io: Io, client: *http.Client, uri: std.Uri, ca
                 const res_body = try body.toOwnedSlice();
 
                 try cache_dir.writeFile(io, .{
-                    .sub_path = &hash,
+                    .sub_path = try std.mem.concat(gpa, u8, &.{ hash, sanitizedQuery }),
                     .data = res_body,
                 });
                 return res_body;
@@ -197,7 +210,6 @@ fn lrclib(allocator: Allocator, io: Io, client: *http.Client, query: []const u8,
     const uri = try std.Uri.parse(url);
 
     const raw = try fetchWithCache(gpa, io, client, uri, cache_dir);
-
     const json = try std.json.parseFromSlice([]Lyric, gpa, raw, .{});
 
     if (json.value.len == 0) return null;
@@ -208,7 +220,7 @@ fn lrclib(allocator: Allocator, io: Io, client: *http.Client, query: []const u8,
 
         while (iter.next()) |lyric| {
             // '[00:23.00] begin'
-            // 0123456789AB
+            // '0123456789AB'
             const min = try std.fmt.parseFloat(f32, lyric[1..3]);
             const sec = try std.fmt.parseFloat(f32, lyric[4..9]);
 
@@ -245,8 +257,7 @@ pub fn main(init: std.process.Init) !void {
     const io = init.io;
     const env = init.minimal.environ;
 
-    var stdout_buffer: [1024]u8 = undefined;
-    var stdout_writer = Io.File.stdout().writer(init.io, &stdout_buffer);
+    var stdout_writer = Io.File.stdout().writer(init.io, &.{});
     const stdout = &stdout_writer.interface;
 
     var client: http.Client = .{ .allocator = mgpa, .io = io };
@@ -286,7 +297,7 @@ pub fn main(init: std.process.Init) !void {
                         }
                     }
 
-                    try stdout.print("{s}\n", .{sync[if (idx != 0) idx - 1 else 0].line});
+                    try stdout.print("{s}\n", .{sync[if (idx != 0) idx else 0].line});
                 },
                 .unsync => |unsync| {
                     _ = unsync;

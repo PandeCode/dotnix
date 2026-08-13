@@ -148,8 +148,7 @@
 
         "custom/lyrics" = {
           format = " {}";
-          interval = 2;
-          exec = "lyrics-line.sh";
+          exec = "lyrics.zig";
         };
         "custom/cava" = {
           format = "{}";

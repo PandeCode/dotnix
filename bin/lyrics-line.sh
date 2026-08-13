@@ -6,7 +6,7 @@
 # pip install youtube-transcript-api # also present in nixpkgs by the same name
 
 PLAYER="${1:-spotify}"
-FIREFOX=$(sh -c 'ls $HOME/.zen/*.Default\ Profile/sessionstore-backups/recovery.jsonlz4')
+# FIREFOX=$(sh -c 'ls $HOME/.zen/*.Default\ Profile/sessionstore-backups/recovery.jsonlz4')
 CACHE_DIR=$HOME/.cache/lyrics
 LOCK_DIR=$HOME/.cache/lyrics/locks
 mkdir -p "$CACHE_DIR"

@@ -32,16 +32,6 @@
     # inputs.aagl.nixosModules.default
   ];
 
-  services.fprintd = {
-    enable = true;
-    tod.enable = true;
-    tod.driver = pkgs.libfprint-2-tod1-goodix;
-  };
-  security.pam.services = {
-    sddm.fprintAuth = true;
-    # unixAuth = true;
-  };
-
   # programs.honkers-railway-launcher.enable = true;
   # services.wivrn.enable = false;
   programs.nix-index-database.comma.enable = true;

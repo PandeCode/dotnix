@@ -195,6 +195,11 @@ tooltip {
   padding-right: 10px;
 }
 
+window#waybar.alacritty {
+  background-color: #111111;
+  color: #ffffff;
+}
+
 window#waybar.ghostty {
   background-color: #111111;
   color: #ffffff;
@@ -233,12 +238,14 @@ window#waybar.empty #window {
   box-shadow: none;
   background: none;
 }
+
 #backlight-slider trough {
   min-height: 10px;
   min-width: 80px;
   border-radius: 5px;
   background: black;
 }
+
 #backlight-slider highlight {
   min-width: 10px;
   border-radius: 5px;
@@ -249,6 +256,7 @@ window#waybar.empty #window {
   padding: 0;
   margin: 0;
 }
+
 #pulseaudio-slider slider {
   min-height: 0px;
   min-width: 0px;
@@ -257,12 +265,14 @@ window#waybar.empty #window {
   border: none;
   box-shadow: none;
 }
+
 #pulseaudio-slider trough {
   min-height: 10px;
   min-width: 80px;
   border-radius: 5px;
   background: black;
 }
+
 #pulseaudio-slider highlight {
   min-width: 10px;
   border-radius: 5px;

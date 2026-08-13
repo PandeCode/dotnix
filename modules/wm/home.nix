@@ -13,7 +13,8 @@ in {
     ../programs/spotify.nix
     ../programs/rofi.nix
     ../programs/filepicker.nix
-    ../programs/zen.nix
+    # ../programs/zen.nix
+    ../programs/librewolf.nix
     ../programs/chromium.nix
     ../programs/mpv.nix
     # ../programs/swhkd.nix
@@ -84,6 +85,7 @@ in {
           (terminal + " -e fish")
           "blueman-applet"
           "nm-applet --indicator"
+          "playerctld daemon"
           # "gsettings set org.gnome.desktop.interface cursor-theme '${config.home.pointerCursor.name}'"
           # "gsettings set org.gnome.desktop.interface cursor-size ${toString config.home.pointerCursor.size}"
         ];
@@ -195,33 +197,33 @@ in {
         };
       };
 
-      kitty = {
-        enable = true;
-        settings = {
-          cursor_trail = 1;
-        };
-        shellIntegration = {
-          enableBashIntegration = true;
-          enableFishIntegration = true;
-          enableZshIntegration = true;
-        };
-      };
-      ghostty = {
-        enable = true;
-        enableBashIntegration = true;
-        enableFishIntegration = true;
-        settings = {
-          background-opacity = 0.8;
-          background-blur = true;
-          window-vsync = true;
-          window-decoration = "server";
-          clipboard-trim-trailing-spaces = true;
-          clipboard-paste-protection = true;
-          confirm-close-surface = false;
-
-          custom-shader = "/home/${sharedConfig.user}/dotnix/config/ghostty/shader.glsl";
-        };
-      };
+      # kitty = {
+      #   enable = true;
+      #   settings = {
+      #     cursor_trail = 1;
+      #   };
+      #   shellIntegration = {
+      #     enableBashIntegration = true;
+      #     enableFishIntegration = true;
+      #     enableZshIntegration = true;
+      #   };
+      # };
+      # ghostty = {
+      #   enable = true;
+      #   enableBashIntegration = true;
+      #   enableFishIntegration = true;
+      #   settings = {
+      #     background-opacity = 0.8;
+      #     background-blur = true;
+      #     window-vsync = true;
+      #     window-decoration = "server";
+      #     clipboard-trim-trailing-spaces = true;
+      #     clipboard-paste-protection = true;
+      #     confirm-close-surface = false;
+      #
+      #     custom-shader = "/home/${sharedConfig.user}/dotnix/config/ghostty/shader.glsl";
+      #   };
+      # };
       alacritty.enable = true;
     };
 

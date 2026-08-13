@@ -5,7 +5,7 @@ rec {
   };
 
   shell = "fish";
-  terminal = "ghostty";
+  terminal = "alacritty";
   explorer = "nautilus";
   browser = "chromium";
   editor = "nvim";
@@ -43,8 +43,6 @@ rec {
   };
 
   fishShellAbbrs = {
-    ssh = "ghostty +ssh --";
-
     lsblk = "lsblk | bat -l conf -p";
     ps = "ps | bat -l conf -p";
     lscpu = "lscpu | bat -l cpuinfo -p";
@@ -71,7 +69,7 @@ rec {
     mdkir = "mkdir";
     dmkir = "mkdir";
     cp = "cp -ir";
-    free = "free -h";
+    free = "free -m";
     sizeof = "bash -c 'du -h --max-depth=0'";
     tree = "tre";
 

@@ -1,5 +1,38 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+} @ inputs: let
+  sharedConfig =
+    if inputs ? "sharedConfig"
+    then inputs.sharedConfig
+    else {framework = false;};
+in {
+  services.fprintd = lib.mkIf sharedConfig.framework {
+    enable = true;
+    tod.enable = true;
+    tod.driver = pkgs.libfprint-2-tod1-goodix;
+  };
+
   security = {
+    pam = {
+      loginLimits = [
+        {
+          domain = "@users";
+          item = "rtprio";
+          type = "-";
+          value = 1;
+        }
+      ];
+      services = {
+        sddm = lib.mkIf sharedConfig.framework {
+          fprintAuth = true;
+          unixAuth = true;
+          gnupg.enable = true;
+        };
+      };
+    };
+
     sudo = {
       enable = true;
       extraRules = [
@@ -29,16 +62,6 @@
           systemd
         ]}:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin"
       '';
-    };
-    pam = {
-      loginLimits = [
-        {
-          domain = "@users";
-          item = "rtprio";
-          type = "-";
-          value = 1;
-        }
-      ];
     };
 
     polkit.extraConfig =

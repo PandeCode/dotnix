@@ -6,8 +6,8 @@
 }: {
   powerManagement = {
     enable = true;
-    # cpuFreqGovernor = "performance";
     powertop.enable = true;
+    # cpuFreqGovernor = "performance";
     # scsiLinkPolicy = "max_performance";
     # "ondemand", "powersave", "performance"
   };
@@ -45,7 +45,6 @@
 
     tlp = {
       enable = true; # try auto-cpufreq
-
       settings = {
         CPU_SCALING_GOVERNOR_ON_AC = "performance";
         CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
@@ -105,21 +104,32 @@
     };
   };
 
-  # https://gist.github.com/cafkafk/deac78b5cb821049ee03e9b55f898d07
   systemd.user.services."battery-low" = {
     enable = true;
-    description = "Notify user if battery is below 10%";
+    description = "Do something about the aboout battery.";
     partOf = ["graphical-session.target"];
     wantedBy = ["graphical-session.target"];
     serviceConfig = {
       Type = "simple";
       ExecStart =
         pkgs.writeShellScript "battery-low-notification"
-        ''
-          if (( 10 >= $(${pkgs.lib.getExe pkgs.acpi} -b | head -n 1 | ${pkgs.lib.getExe pkgs.ripgrep} -o "\d+%" | ${pkgs.lib.getExe pkgs.ripgrep} -o "\d+")));
-          then ${pkgs.lib.getExe pkgs.pkgs.libnotify} --urgency=critical "Low Battery" "🪫$(${pkgs.lib.getExe pkgs.acpi} -b | head -n 1 | ${pkgs.lib.getExe pkgs.ripgrep} -o "\d+%")";
-          else echo; fi;
-        '';
+        (let
+          acpi = pkgs.lib.getExe pkgs.acpi;
+          notify-send = pkgs.lib.getExe pkgs.pkgs.libnotify;
+          inherit (pkgs) systemd;
+        in
+          # bash
+          ''
+            acpi=$(${acpi})
+            bat=$(echo $acpi | grep -Po "\d+(?=%)")
+            if ! grep -q "Charging" <<<"$acpi"; then
+              if (( $bat <= 10 )) ; then
+                  ${notify-send} --urgency=critical "Low Battery" "🪫 $acpi";
+              elif (( $bat <= 3 )); then
+                "${systemd}/bin/systemctl hibernate"
+              fi;
+            fi;
+          '');
     };
   };
 

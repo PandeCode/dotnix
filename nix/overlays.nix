@@ -4,7 +4,7 @@ with inputs; {
     nix-matlab.overlay
 
     (_final: prev: {
-      ghostty = ghostty.packages.${prev.system}.default;
+      # ghostty = ghostty.packages.${prev.system}.default;
 
       # niri-unstable = prev.niri-unstable.overrideAttrs (_old: rec {
       #   src = prev.fetchFromGitHub {
