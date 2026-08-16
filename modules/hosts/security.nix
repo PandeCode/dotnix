@@ -2,10 +2,10 @@
   pkgs,
   lib,
   ...
-} @ inputs: let
+} @ args: let
   sharedConfig =
-    if inputs ? "sharedConfig"
-    then inputs.sharedConfig
+    if args ? "sharedConfig"
+    then args.sharedConfig
     else {framework = false;};
 in {
   services.fprintd = lib.mkIf sharedConfig.framework {

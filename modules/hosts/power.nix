@@ -3,7 +3,12 @@
   lib,
   config,
   ...
-}: {
+} @ args: let
+  sharedConfig =
+    if args ? "sharedConfig"
+    then args.sharedConfig
+    else {framework = false;};
+in {
   powerManagement = {
     enable = true;
     powertop.enable = true;
@@ -45,21 +50,30 @@
 
     tlp = {
       enable = true; # try auto-cpufreq
-      settings = {
-        CPU_SCALING_GOVERNOR_ON_AC = "performance";
-        CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
+      settings =
+        {
+          CPU_SCALING_GOVERNOR_ON_AC = "performance";
+          CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
 
-        CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
-        CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
+          CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+          CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
 
-        CPU_MIN_PERF_ON_AC = 0;
-        CPU_MAX_PERF_ON_AC = 100;
-        CPU_MIN_PERF_ON_BAT = 0;
-        CPU_MAX_PERF_ON_BAT = 20;
+          CPU_MIN_PERF_ON_AC = 0;
+          CPU_MAX_PERF_ON_AC = 100;
+          CPU_MIN_PERF_ON_BAT = 0;
+          CPU_MAX_PERF_ON_BAT = 20;
 
-        START_CHARGE_THRESH_BAT0 = 40; # 40 and below it starts to charge
-        STOP_CHARGE_THRESH_BAT0 = 80; # 80 and above it stops charging
-      };
+          # https://linrunner.de/tlp/faq/battery.html#how-to-choose-good-battery-charge-thresholds
+          # framework battery is 1 ?
+        }
+        // (
+          if sharedConfig.framework
+          then {
+            START_CHARGE_THRESH_BAT1 = 75;
+            STOP_CHARGE_THRESH_BAT1 = 80;
+          }
+          else {}
+        );
     };
     ananicy = {
       enable = true;
@@ -120,13 +134,13 @@
         in
           # bash
           ''
-            acpi=$(${acpi})
+            acpi=$(${acpi} | grep -Ev "rate information unavailable")
             bat=$(echo $acpi | grep -Po "\d+(?=%)")
             if ! grep -q "Charging" <<<"$acpi"; then
               if (( $bat <= 10 )) ; then
                   ${notify-send} --urgency=critical "Low Battery" "🪫 $acpi";
-              elif (( $bat <= 3 )); then
-                "${systemd}/bin/systemctl hibernate"
+              # elif (( $bat <= 1 )); then # i think something already does this for me
+              #   "${systemd}/bin/systemctl hibernate -i"
               fi;
             fi;
           '');

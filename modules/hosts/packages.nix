@@ -62,7 +62,8 @@
       '';
     })
 
-    matlab
+    # matlab # i hate this piece of software with every fiber of my being, why does this exist, why, its so bad, iterally anything is better than it. even scratch is more consitent. i feel bad for anyone who is forced to use it
+
     # spyder
 
     man-pages

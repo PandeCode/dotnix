@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 urls=(
+	"privacy-badger/pkehgijcmpdhfbdbbnkijodmdjhbjlgp"
 	"bitwarden-password-manage/nngceckbapebfimnlniiiahkandclblb"
 	"dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh"
 	"vimium/dbepggeogbaibhgnhhndojpepiihcmeb"

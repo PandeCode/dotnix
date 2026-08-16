@@ -224,7 +224,9 @@ in {
       #     custom-shader = "/home/${sharedConfig.user}/dotnix/config/ghostty/shader.glsl";
       #   };
       # };
-      alacritty.enable = true;
+      alacritty = {
+        enable = true;
+      };
     };
 
     xdg = {

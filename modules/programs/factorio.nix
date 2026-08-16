@@ -1,7 +1,7 @@
 # if you are crazy enough to run multiple factorio runs with different mods
 # addtionally ~/.factorio/config/config.ini is a config file, its 2000 lines long :(
 # making declarative mods is harder due to authentication being needed, maybe a plus since you can update mods from the game client, :(
-_: let
+let
   # h = config.home.homeDirectory;
   configs = [
     {
