@@ -100,6 +100,8 @@
     nh
     nix-output-monitor
 
+    pv
+
     pciutils
     usbutils
     cyme

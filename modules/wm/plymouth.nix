@@ -11,14 +11,17 @@
       theme = "blahaj";
       # extraConfig = /* ini */ '' DeviceScale=1 '';
 
-      themePackages = let
+      themePackages =
+        # let
         # inherit (((import ../../derivations/default.nix) pkgs.callPackage)) plymouth-theme-custom;
-        inherit (((import ../../derivations/default.nix) pkgs.callPackage)) plymouth-theme-cat;
-      in [
-        # plymouth-theme-cat
-        pkgs.plymouth-blahaj-theme
-        # plymouth-theme-custom
-      ];
+        # inherit (((import ../../derivations/default.nix) pkgs.callPackage)) plymouth-theme-cat;
+        # in
+        [
+          # plymouth-theme-cat
+          pkgs.plymouth-blahaj-theme
+
+          # plymouth-theme-custom
+        ];
     };
 
     # Enable "Silent Boot"

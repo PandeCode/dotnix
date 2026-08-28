@@ -68,11 +68,6 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    zen-browser = {
-      url = "github:0xc000022070/zen-browser-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     spicetify-nix = {
       url = "github:Gerg-L/spicetify-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -96,11 +91,6 @@ rec {
       url = "github:danth/stylix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    # nix-matlab = {
-    #   url = "gitlab:doronbehar/nix-matlab";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
 
     zig-overlay = {
       url = "github:mitchellh/zig-overlay";

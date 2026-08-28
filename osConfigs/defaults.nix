@@ -7,7 +7,7 @@ rec {
   shell = "fish";
   terminal = "alacritty";
   explorer = "nautilus";
-  browser = "chromium";
+  browser = "browser.sh";
   editor = "nvim";
 
   isLaptop = false;
@@ -19,7 +19,7 @@ rec {
   wms = {
     sway.enable = false;
     i3.enable = true;
-    river.enable = false;
+    river.enable = true;
     niri.enable = true; # issue https://github.com/sodiboo/niri-flake/issues/1018
     # dwm.enable = true;
     # xmonad.enable = true;

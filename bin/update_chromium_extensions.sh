@@ -11,6 +11,8 @@ urls=(
 	"sponsorblock-for-youtube/mnjggcdmjocbbbhaepdhchncahnbgone"
 	"spectorjs/denbgaamihkadbghdceggmchnflmhpmk"
 	"desmodder-for-desmos/eclmfdfimjhkmjglgdldedokjaemjfjp"
+	"cc++-devtools-support-dwa/pdcpmagijalfljmkmjngeonclgbbannb"
+	"lighthouse/blipmdconlkpinefehnmjammfjpmpbjk"
 )
 
 echo '{'

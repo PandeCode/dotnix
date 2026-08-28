@@ -12,9 +12,8 @@ version=$(curl -s "$url" |
 sha256=$(nix-prefetch-url --name "$id.crx" "https://clients2.google.com/service/update2/crx?response=redirect&acceptformat=crx2,crx3&prodversion=${browserVersion}&x=id%3D${id}%26installsource%3Dondemand%26uc")
 
 echo "
-$name = {
-	id = \"$id\";
-	sha256 = \"sha256:$sha256\";
-	version = \"$version\";
-};
-"
+	\"$name\" = {
+		id = \"$id\";
+		sha256 = \"sha256:$sha256\";
+		version = \"$version\";
+	};"

@@ -112,6 +112,9 @@
 
       signal-desktop
 
+      zulip
+      # zulip-term
+
       # openshot-qt
       nautilus
       obsidian

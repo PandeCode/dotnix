@@ -40,6 +40,8 @@
       inherit (nixbuilds) notify-send-py;
     in [
       zoom-us
+      webex
+
       # kicad
       # deskreen
 

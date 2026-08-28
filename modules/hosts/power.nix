@@ -69,6 +69,10 @@ in {
         // (
           if sharedConfig.framework
           then {
+            # for some reason the battery index keeps changing from 0 to 1 and vise versa
+            START_CHARGE_THRESH_BAT0 = 75;
+            STOP_CHARGE_THRESH_BAT0 = 80;
+
             START_CHARGE_THRESH_BAT1 = 75;
             STOP_CHARGE_THRESH_BAT1 = 80;
           }
@@ -137,7 +141,7 @@ in {
             acpi=$(${acpi} | grep -Ev "rate information unavailable")
             bat=$(echo $acpi | grep -Po "\d+(?=%)")
             if ! grep -q "Charging" <<<"$acpi"; then
-              if (( $bat <= 10 )) ; then
+              if (( $bat <= 5 )) ; then
                   ${notify-send} --urgency=critical "Low Battery" "🪫 $acpi";
               # elif (( $bat <= 1 )); then # i think something already does this for me
               #   "${systemd}/bin/systemctl hibernate -i"

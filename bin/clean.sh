@@ -7,7 +7,7 @@ if [ ! -d "$TARGET_DIR" ]; then
 	exit 1
 fi
 
-DIRS=(".direnv" "target" ".zig-cache" "zig-out" "zig-pkg" ".cargo" "node_modules" "__pycache__")
+DIRS=(".direnv" "target" ".zig-cache" "zig-out" "zig-pkg" ".cargo" "node_modules" "__pycache__" "venv" ".venv" ".cache" ".ccls-cache")
 TOTAL=0
 FOUND_DIRS=()
 
