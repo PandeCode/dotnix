@@ -28,17 +28,16 @@
       glew110
       glib
       glibc
-      gnome2.GConf
       gsettings-desktop-schemas
       gtk2
       gtk3
       gtk4
       icu
-      libappindicator-gtk2
+      # libappindicator-gtk2
       libcaca
       libcanberra
       libcap
-      libdbusmenu-gtk2
+      # libdbusmenu-gtk2
       libdrm
       libelf
       libgbm
@@ -46,7 +45,7 @@
       libGL
       libglvnd
       libidn
-      libindicator-gtk2
+      # libindicator-gtk2
       libinput
       libjpeg
       libmikmod

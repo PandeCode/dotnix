@@ -63,10 +63,20 @@ rec {
 
     dwarffs = {url = "github:PandeCode/dwarffs";};
 
-    niri = {
-      # url = "github:sodiboo/niri-flake";
-      url = "github:epireyn/niri-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
+    # niri = {
+    #   # url = "github:sodiboo/niri-flake";
+    #   url = "github:epireyn/niri-flake";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+
+    # TODO move to nixbuilds
+    river = {
+      url = "git+https://codeberg.org/river/river";
+      flake = false;
+    };
+    rill = {
+      url = "git+https://codeberg.org/lzj15/rill";
+      flake = false;
     };
 
     spicetify-nix = {

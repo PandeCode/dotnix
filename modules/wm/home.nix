@@ -1,7 +1,6 @@
 {
   pkgs,
   lib,
-  config,
   sharedConfig,
   ...
 }: let
@@ -233,11 +232,22 @@ in {
       mimeApps = {
         enable = true;
         defaultApplications = {
+          "text/html" = "browser.desktop";
+          "x-scheme-handler/http" = "browser.desktop";
+          "x-scheme-handler/https" = "browser.desktop";
+          "x-scheme-handler/about" = "browser.desktop";
+          "x-scheme-handler/unknown" = "browser.desktop";
+
           "image/png" = "feh.desktop";
           "application/pdf" = "org.pwmt.zathura.desktop";
         };
       };
       desktopEntries = {
+        browser = {
+          name = "Browser";
+          exec = "${(pkgs.writeShellScriptBin "browser.sh" (builtins.readFile ../../bin/browser.sh))}/bin/browser.sh";
+        };
+
         systemctl-tui = {
           name = "Systemctl TUI";
           comment = "Launch systemctl-tui in terminal";

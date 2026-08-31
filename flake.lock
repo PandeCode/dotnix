@@ -1216,6 +1216,38 @@
         "type": "github"
       }
     },
+    "rill": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1785817081,
+        "narHash": "sha256-sXOk7ZNM8oY6l4JnYLpiyndA8UGSo2qkixKCrEiBLcE=",
+        "ref": "refs/heads/main",
+        "rev": "fd898d5d6ce05b00e00b3fe6addc2903926a99ec",
+        "revCount": 109,
+        "type": "git",
+        "url": "https://codeberg.org/lzj15/rill"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://codeberg.org/lzj15/rill"
+      }
+    },
+    "river": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1788091984,
+        "narHash": "sha256-RoqBkGRABvgBP+vufgLgIveV9XEo61Vu0Ha/VsjViZE=",
+        "ref": "refs/heads/main",
+        "rev": "2417ce69b2b35219ee0faf7ff0bf9483f12071a1",
+        "revCount": 1750,
+        "type": "git",
+        "url": "https://codeberg.org/river/river"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://codeberg.org/river/river"
+      }
+    },
     "root": {
       "inputs": {
         "boomer": "boomer",
@@ -1230,6 +1262,8 @@
         "nixpkgs": "nixpkgs_6",
         "nixpkgs-stable": "nixpkgs-stable_3",
         "nixutils": "nixutils_6",
+        "rill": "rill",
+        "river": "river",
         "spicetify-nix": "spicetify-nix",
         "stylix": "stylix",
         "zig-overlay": "zig-overlay_2"

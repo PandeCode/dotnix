@@ -20,6 +20,7 @@
       PYTHONPYCACHEPREFIX = "/home/${config.home.username}/.cache/__pycache__";
       GOPATH = "/home/${config.home.username}/go";
       DOTFILES = "/home/${config.home.username}/dotnix";
+      XDG_CONFIG_HOME = "/home/${config.home.username}/.config";
     };
 
     sessionPath = [

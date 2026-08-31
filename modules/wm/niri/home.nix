@@ -27,7 +27,7 @@ in {
 
   programs.niri = {
     enable = true;
-    package = pkgs.niri-unstable;
+    package = pkgs.niri;
     settings = with builtins; let
       splitBySpace = v: filter isString (split "[ ]+" v);
       joinByPlus = v:

@@ -56,8 +56,8 @@
 
 	"desmodder-for-desmos" = {
 		id = "eclmfdfimjhkmjglgdldedokjaemjfjp";
-		sha256 = "sha256:0m3z6hpjm1vj4sxy72qkj96lqd6ahl58s70ifklxwhkbma51g8z6";
-		version = "0.15.15";
+		sha256 = "sha256:1pnkm40rylipcdmvbnl3wv2lzzbqlpd4nrdn3777zlhr7b7gf32s";
+		version = "0.15.16";
 	};
 
 	"cc++-devtools-support-dwa" = {

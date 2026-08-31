@@ -20,7 +20,7 @@ rec {
     sway.enable = false;
     i3.enable = true;
     river.enable = true;
-    niri.enable = true; # issue https://github.com/sodiboo/niri-flake/issues/1018
+    niri.enable = false; # issue annoying with unstable
     # dwm.enable = true;
     # xmonad.enable = true;
     # bspwm.enable = true;

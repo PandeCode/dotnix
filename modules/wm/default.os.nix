@@ -8,7 +8,7 @@
   mkAll = l: builtins.concatLists (map mk l);
 in {
   imports = mkAll [
-    "niri"
+    # "niri"
     "sway"
     "river"
     "i3"
