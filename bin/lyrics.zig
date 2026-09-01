@@ -170,6 +170,8 @@ fn getPlayerMetadata(io: Io, gpa: Allocator) !Metadata {
         }
     }
 
+    if (title == null or artist == null or position == null) return error.NullInfo;
+
     return .{
         .title = title.?,
         .artist = artist.?,

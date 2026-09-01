@@ -1,8 +1,19 @@
 let
+  splitBySpace = v: builtins.filter builtins.isString (builtins.split "[ ]+" v);
+
+  rgb = r: g: b: {
+    inherit r g b;
+    a = 1.0;
+  };
+
+  rgba = r: g: b: a: {inherit r g b a;};
+
   # NOTE enums will be special in my json2zon
   left = ".left";
   right = ".right";
   never = ".never";
+  always = ".always";
+  single = ".single";
 
   ## in types.zig
   resize_window = ".resize_window";
@@ -53,410 +64,398 @@ let
   send_window_to_output_below = ".send_window_to_output_below";
   exit = ".exit";
   reload_config = ".reload_config";
-in {
-  # Gap between windows and the output's top/bottom edge
-  vertical_gap = 9;
-  # Gap between adjacent windows
-  horizontal_gap = 9;
-  # Default proportion of the output's available width that a window occupies when spawned
-  default_window_width = 0.5;
+in
+  shared: {
+    vertical_gap = 9; # Gap between windows and the output's top/bottom edge
+    horizontal_gap = 9; # Gap between adjacent windows
+    default_window_width = 0.5; # Default proportion of the output's available width that a window occupies when spawned
 
-  # Center the focused window (never; always; single)
-  # Set it to single to center a window if it's the only window in the workspace
-  center_focused_window = never;
+    # Center the focused window (never; always; single)
+    # Set it to single to center a window if it's the only window in the workspace
+    center_focused_window = always;
 
-  # Disable client side decorations
-  no_csd = true;
-  # Duration of animations; in milliseconds
-  animation_duration = 200;
-  # Enable dynamic workspaces
-  dynamic_workspaces = false;
+    no_csd = true; # Disable client side decorations
+    animation_duration = 200; # Duration of animations; in milliseconds
+    dynamic_workspaces = true; # Enable dynamic workspaces
 
-  border = {
-    width = 3;
-    focused_color = {
-      r = 141;
-      g = 214;
-      b = 0;
-      a = 1.0;
+    border = {
+      width = 3;
+      focused_color = rgb 141 214 0;
+      unfocused_color = rgb 160 160 160;
     };
-    unfocused_color = {
-      r = 160;
-      g = 160;
-      b = 160;
-      a = 1.0;
-    };
-  };
 
-  # Theme and size of cursor (set it to null to use default cursor)
-  #cursor ={theme = "Adwaita";size = 24;};
-  cursor = null;
+    # Theme and size of cursor (set it to null to use default cursor)
+    #cursor ={theme = "Adwaita";size = 24;};
+    cursor = null;
 
-  spawn_at_startup = [
-    ["bg.sh" "last"]
-    #{ "wl-clip-persist"; "--clipboard"; "both";};
-  ];
+    spawn_at_startup =
+      [["notify-send" "kazuha" "Welcome to rill"]]
+      ++ (map splitBySpace shared.startup);
 
-  keybindings = [
-    # Key: keysym names (case insensitive) from xkbcommon-keysyms.h
-    # Common ones include:
-    # "Left"; "Up"; "Right"; "Down"; "BackSpace"; "Tab"; "Space"; "Return"; "Escape"; "Delete";
-    # "XF86MonBrightnessUp"; "XF86MonBrightnessDown";
-    # "XF86AudioRaiseVolume"; "XF86AudioLowerVolume"; "XF86AudioMute"; "XF86AudioMicMute"
-    #
-    # Modifiers: shift; ctrl; mod1 (alt); mod4 (super)
+    keybindings = [
+      # Key: keysym names (case insensitive) from xkbcommon-keysyms.h
+      # Common ones include:
+      # "Left"; "Up"; "Right"; "Down"; "BackSpace"; "Tab"; "Space"; "Return"; "Escape"; "Delete";
+      # "XF86MonBrightnessUp"; "XF86MonBrightnessDown";
+      # "XF86AudioRaiseVolume"; "XF86AudioLowerVolume"; "XF86AudioMute"; "XF86AudioMicMute"
+      #
+      # Modifiers: shift; ctrl; mod1 (alt); mod4 (super)
 
-    {
-      key = "q";
-      modifiers = {mod4 = true;};
-      action = close_window;
-    }
-    {
-      key = "f";
-      modifiers = {mod4 = true;};
-      action = toggle_fullscreen;
-    }
-    {
-      key = "F11";
-      modifiers = {mod4 = true;};
-      action = toggle_passthrough;
-    }
+      {
+        key = "q";
+        modifiers = {mod4 = true;};
+        action = close_window;
+      }
+      {
+        key = "f";
+        modifiers = {mod4 = true;};
+        action = toggle_fullscreen;
+      }
+      {
+        key = "F11";
+        modifiers = {mod4 = true;};
+        action = toggle_passthrough;
+      }
 
-    # Decrease focused window's width by 0.1 of the output's available width
-    {
-      key = "minus";
-      modifiers = {mod4 = true;};
-      action = {adjust_window_width = -0.1;};
-    }
-    # Increase focused window's width by 0.1 of the output's available width
-    {
-      key = "equal";
-      modifiers = {mod4 = true;};
-      action = {adjust_window_width = 0.1;};
-    }
-    # Set focused window's width to 0.5 of the output's available width
-    {
-      key = "BackSpace";
-      modifiers = {mod4 = true;};
-      action = {set_window_width = 0.5;};
-    }
+      # Decrease focused window's width by 0.1 of the output's available width
+      {
+        key = "minus";
+        modifiers = {mod4 = true;};
+        action = {adjust_window_width = -0.1;};
+      }
+      # Increase focused window's width by 0.1 of the output's available width
+      {
+        key = "equal";
+        modifiers = {mod4 = true;};
+        action = {adjust_window_width = 0.1;};
+      }
+      # Set focused window's width to 0.5 of the output's available width
+      {
+        key = "BackSpace";
+        modifiers = {mod4 = true;};
+        action = {set_window_width = 0.5;};
+      }
 
-    {
-      key = "Left";
-      modifiers = {mod4 = true;};
-      action = focus_window_left;
-    }
-    {
-      key = "Right";
-      modifiers = {mod4 = true;};
-      action = focus_window_right;
-    }
-    {
-      key = "Left";
-      modifiers = {
-        mod4 = true;
-        shift = true;
-      };
-      action = move_window_left;
-    }
-    {
-      key = "Right";
-      modifiers = {
-        mod4 = true;
-        shift = true;
-      };
-      action = move_window_right;
-    }
+      {
+        key = "Left";
+        modifiers = {mod4 = true;};
+        action = focus_window_left;
+      }
+      {
+        key = "Right";
+        modifiers = {mod4 = true;};
+        action = focus_window_right;
+      }
+      {
+        key = "Left";
+        modifiers = {
+          mod4 = true;
+          shift = true;
+        };
+        action = move_window_left;
+      }
+      {
+        key = "Right";
+        modifiers = {
+          mod4 = true;
+          shift = true;
+        };
+        action = move_window_right;
+      }
 
-    {
-      key = "v";
-      modifiers = {mod4 = true;};
-      action = toggle_workspace_floating;
-    }
+      {
+        key = "f";
+        modifiers = {
+          shift = true;
+          mod4 = true;
+        };
+        action = toggle_workspace_floating;
+      }
 
-    {
-      key = "Up";
-      modifiers = {mod4 = true;};
-      action = focus_workspace_above;
-    }
-    {
-      key = "Down";
-      modifiers = {mod4 = true;};
-      action = focus_workspace_below;
-    }
-    {
-      key = "grave";
-      modifiers = {mod4 = true;};
-      action = focus_workspace_previous;
-    }
+      {
+        key = "Up";
+        modifiers = {mod4 = true;};
+        action = focus_workspace_above;
+      }
+      {
+        key = "Down";
+        modifiers = {mod4 = true;};
+        action = focus_workspace_below;
+      }
+      {
+        key = "grave";
+        modifiers = {mod4 = true;};
+        action = focus_workspace_previous;
+      }
 
-    {
-      key = "1";
-      modifiers = {mod4 = true;};
-      action = {focus_workspace_number = 1;};
-    }
-    {
-      key = "2";
-      modifiers = {mod4 = true;};
-      action = {focus_workspace_number = 2;};
-    }
-    {
-      key = "3";
-      modifiers = {mod4 = true;};
-      action = {focus_workspace_number = 3;};
-    }
-    {
-      key = "4";
-      modifiers = {mod4 = true;};
-      action = {focus_workspace_number = 4;};
-    }
-    {
-      key = "5";
-      modifiers = {mod4 = true;};
-      action = {focus_workspace_number = 5;};
-    }
-    {
-      key = "6";
-      modifiers = {mod4 = true;};
-      action = {focus_workspace_number = 6;};
-    }
-    {
-      key = "7";
-      modifiers = {mod4 = true;};
-      action = {focus_workspace_number = 7;};
-    }
-    {
-      key = "8";
-      modifiers = {mod4 = true;};
-      action = {focus_workspace_number = 8;};
-    }
-    {
-      key = "9";
-      modifiers = {mod4 = true;};
-      action = {focus_workspace_number = 9;};
-    }
-    {
-      key = "0";
-      modifiers = {mod4 = true;};
-      action = {focus_workspace_number = 10;};
-    }
+      {
+        key = "1";
+        modifiers = {mod4 = true;};
+        action = {focus_workspace_number = 1;};
+      }
+      {
+        key = "2";
+        modifiers = {mod4 = true;};
+        action = {focus_workspace_number = 2;};
+      }
+      {
+        key = "3";
+        modifiers = {mod4 = true;};
+        action = {focus_workspace_number = 3;};
+      }
+      {
+        key = "4";
+        modifiers = {mod4 = true;};
+        action = {focus_workspace_number = 4;};
+      }
+      {
+        key = "5";
+        modifiers = {mod4 = true;};
+        action = {focus_workspace_number = 5;};
+      }
+      {
+        key = "6";
+        modifiers = {mod4 = true;};
+        action = {focus_workspace_number = 6;};
+      }
+      {
+        key = "7";
+        modifiers = {mod4 = true;};
+        action = {focus_workspace_number = 7;};
+      }
+      {
+        key = "8";
+        modifiers = {mod4 = true;};
+        action = {focus_workspace_number = 8;};
+      }
+      {
+        key = "9";
+        modifiers = {mod4 = true;};
+        action = {focus_workspace_number = 9;};
+      }
+      {
+        key = "0";
+        modifiers = {mod4 = true;};
+        action = {focus_workspace_number = 10;};
+      }
 
-    {
-      key = "Up";
-      modifiers = {
-        mod4 = true;
-        shift = true;
-      };
-      action = move_window_to_workspace_above;
-    }
-    {
-      key = "Down";
-      modifiers = {
-        mod4 = true;
-        shift = true;
-      };
-      action = move_window_to_workspace_below;
-    }
+      {
+        key = "Up";
+        modifiers = {
+          mod4 = true;
+          shift = true;
+        };
+        action = move_window_to_workspace_above;
+      }
+      {
+        key = "Down";
+        modifiers = {
+          mod4 = true;
+          shift = true;
+        };
+        action = move_window_to_workspace_below;
+      }
 
-    {
-      key = "1";
-      modifiers = {
-        mod4 = true;
-        shift = true;
-      };
-      action = {move_window_to_workspace_number = 1;};
-    }
-    {
-      key = "2";
-      modifiers = {
-        mod4 = true;
-        shift = true;
-      };
-      action = {move_window_to_workspace_number = 2;};
-    }
-    {
-      key = "3";
-      modifiers = {
-        mod4 = true;
-        shift = true;
-      };
-      action = {move_window_to_workspace_number = 3;};
-    }
-    {
-      key = "4";
-      modifiers = {
-        mod4 = true;
-        shift = true;
-      };
-      action = {move_window_to_workspace_number = 4;};
-    }
-    {
-      key = "5";
-      modifiers = {
-        mod4 = true;
-        shift = true;
-      };
-      action = {move_window_to_workspace_number = 5;};
-    }
-    {
-      key = "6";
-      modifiers = {
-        mod4 = true;
-        shift = true;
-      };
-      action = {move_window_to_workspace_number = 6;};
-    }
-    {
-      key = "7";
-      modifiers = {
-        mod4 = true;
-        shift = true;
-      };
-      action = {move_window_to_workspace_number = 7;};
-    }
-    {
-      key = "8";
-      modifiers = {
-        mod4 = true;
-        shift = true;
-      };
-      action = {move_window_to_workspace_number = 8;};
-    }
-    {
-      key = "9";
-      modifiers = {
-        mod4 = true;
-        shift = true;
-      };
-      action = {move_window_to_workspace_number = 9;};
-    }
-    {
-      key = "0";
-      modifiers = {
-        mod4 = true;
-        shift = true;
-      };
-      action = {move_window_to_workspace_number = 10;};
-    }
+      {
+        key = "1";
+        modifiers = {
+          mod4 = true;
+          shift = true;
+        };
+        action = {move_window_to_workspace_number = 1;};
+      }
+      {
+        key = "2";
+        modifiers = {
+          mod4 = true;
+          shift = true;
+        };
+        action = {move_window_to_workspace_number = 2;};
+      }
+      {
+        key = "3";
+        modifiers = {
+          mod4 = true;
+          shift = true;
+        };
+        action = {move_window_to_workspace_number = 3;};
+      }
+      {
+        key = "4";
+        modifiers = {
+          mod4 = true;
+          shift = true;
+        };
+        action = {move_window_to_workspace_number = 4;};
+      }
+      {
+        key = "5";
+        modifiers = {
+          mod4 = true;
+          shift = true;
+        };
+        action = {move_window_to_workspace_number = 5;};
+      }
+      {
+        key = "6";
+        modifiers = {
+          mod4 = true;
+          shift = true;
+        };
+        action = {move_window_to_workspace_number = 6;};
+      }
+      {
+        key = "7";
+        modifiers = {
+          mod4 = true;
+          shift = true;
+        };
+        action = {move_window_to_workspace_number = 7;};
+      }
+      {
+        key = "8";
+        modifiers = {
+          mod4 = true;
+          shift = true;
+        };
+        action = {move_window_to_workspace_number = 8;};
+      }
+      {
+        key = "9";
+        modifiers = {
+          mod4 = true;
+          shift = true;
+        };
+        action = {move_window_to_workspace_number = 9;};
+      }
+      {
+        key = "0";
+        modifiers = {
+          mod4 = true;
+          shift = true;
+        };
+        action = {move_window_to_workspace_number = 10;};
+      }
 
-    {
-      key = "h";
-      modifiers = {mod4 = true;};
-      action = focus_output_left;
-    }
-    {
-      key = "l";
-      modifiers = {mod4 = true;};
-      action = focus_output_right;
-    }
-    {
-      key = "k";
-      modifiers = {mod4 = true;};
-      action = focus_output_above;
-    }
-    {
-      key = "j";
-      modifiers = {mod4 = true;};
-      action = focus_output_below;
-    }
+      {
+        key = "h";
+        modifiers = {mod4 = true;};
+        action = focus_output_left;
+      }
+      {
+        key = "l";
+        modifiers = {mod4 = true;};
+        action = focus_output_right;
+      }
+      {
+        key = "k";
+        modifiers = {mod4 = true;};
+        action = focus_output_above;
+      }
+      {
+        key = "j";
+        modifiers = {mod4 = true;};
+        action = focus_output_below;
+      }
 
-    {
-      key = "h";
-      modifiers = {
-        mod4 = true;
-        shift = true;
-      };
-      action = move_window_to_output_left;
-    }
-    {
-      key = "l";
-      modifiers = {
-        mod4 = true;
-        shift = true;
-      };
-      action = move_window_to_output_right;
-    }
-    {
-      key = "k";
-      modifiers = {
-        mod4 = true;
-        shift = true;
-      };
-      action = move_window_to_output_above;
-    }
-    {
-      key = "j";
-      modifiers = {
-        mod4 = true;
-        shift = true;
-      };
-      action = move_window_to_output_below;
-    }
+      {
+        key = "h";
+        modifiers = {
+          mod4 = true;
+          shift = true;
+        };
+        action = move_window_to_output_left;
+      }
+      {
+        key = "l";
+        modifiers = {
+          mod4 = true;
+          shift = true;
+        };
+        action = move_window_to_output_right;
+      }
+      {
+        key = "k";
+        modifiers = {
+          mod4 = true;
+          shift = true;
+        };
+        action = move_window_to_output_above;
+      }
+      {
+        key = "j";
+        modifiers = {
+          mod4 = true;
+          shift = true;
+        };
+        action = move_window_to_output_below;
+      }
 
-    {
-      key = "Escape";
-      modifiers = {mod4 = true;};
-      action = exit;
-    }
-    {
-      key = "r";
-      modifiers = {mod4 = true;};
-      action = reload_config;
-    }
+      {
+        key = "Escape";
+        modifiers = {mod4 = true;};
+        action = exit;
+      }
+      {
+        key = "r";
+        modifiers = {mod4 = true;};
+        action = reload_config;
+      }
 
-    {
-      key = "Enter";
-      modifiers = {mod4 = true;};
-      action = {spawn = ["alacritty"];};
-    }
+      {
+        key = "Return";
+        modifiers = {mod4 = true;};
+        action = {spawn = [shared.terminal];};
+      }
 
-    {
-      key = "Space";
-      modifiers = {mod1 = true;};
-      action = {spawn = ["rofi-run.sh"];};
-    }
-    {
-      key = "Space";
-      modifiers = {
-        mod1 = true;
-        shift = true;
-      };
-      action = {spawn = ["rofi-run-pr.sh"];};
-    }
+      {
+        key = "Space";
+        modifiers = {mod1 = true;};
+        action = {spawn = ["rofi-run.sh"];};
+      }
 
-    {
-      key = "XF86AudioRaiseVolume";
-      modifiers = {};
-      action = {spawn = ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.05+" "--limit" "1.0"];};
-    }
-    {
-      key = "XF86AudioLowerVolume";
-      modifiers = {};
-      action = {spawn = ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.05-"];};
-    }
-    {
-      key = "XF86AudioMute";
-      modifiers = {};
-      action = {spawn = ["wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"];};
-    }
-    {
-      key = "XF86AudioMicMute";
-      modifiers = {};
-      action = {spawn = ["wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"];};
-    }
-  ];
+      {
+        key = "Space";
+        modifiers = {
+          mod1 = true;
+          shift = true;
+        };
+        action = {spawn = ["rofi-run-pr.sh"];};
+      }
 
-  pointer_bindings = [
-    # Button: left; right; middle
-    {
-      button = left;
-      modifiers = {mod4 = true;};
-      action = move_window;
-    }
-    {
-      button = right;
-      modifiers = {mod4 = true;};
-      action = resize_window;
-    }
-  ];
-}
+      {
+        key = "XF86AudioRaiseVolume";
+        modifiers = {};
+        action = {spawn = ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.05+" "--limit" "1.0"];};
+      }
+      {
+        key = "XF86AudioLowerVolume";
+        modifiers = {};
+        action = {spawn = ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.05-"];};
+      }
+      {
+        key = "XF86AudioMute";
+        modifiers = {};
+        action = {spawn = ["wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"];};
+      }
+      {
+        key = "XF86AudioMicMute";
+        modifiers = {};
+        action = {spawn = ["wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"];};
+      }
+    ];
+
+    pointer_bindings = [
+      # Button: left; right; middle
+      {
+        button = left;
+        modifiers = {mod4 = true;};
+        action = move_window;
+      }
+      {
+        button = right;
+        modifiers = {mod4 = true;};
+        action = resize_window;
+      }
+    ];
+  }

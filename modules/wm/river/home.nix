@@ -1,6 +1,7 @@
 {
   pkgs,
   inputs,
+  config,
   ...
 }: let
   rill = let
@@ -65,20 +66,22 @@ in {
       executable = true;
     };
     "rill/config.zon" = let
-      config = import ./config.nix;
-      rillConfigPkg =
-        pkgs.runCommandNoCC "rillConfigPkg" {
-          CONFIG_JSON = builtins.toJSON config;
+      cfg = (import ./config.nix) config.wayland.shared;
+      rillConfig =
+        pkgs.runCommand "rillConfig" {
+          CONFIG_JSON = builtins.toJSON cfg;
+          src = ../../../bin/json2zon.zig;
           nativeBuildInputs = with pkgs; [zig_0_16];
         } ''
           mkdir -p $out
-          cat ${../../../bin/json2zon.zig} > json2zon.zig
+          cat $src > json2zon.zig
           ZIG_GLOBAL_CACHE_DIR=$PWD/zig-cache zig build-exe json2zon.zig
-          echo "$CONFIG_JSON" | ./json2zon --dot > $out/config.zon
-          zig fmt $out/config.zon
+          echo "$CONFIG_JSON" > $out/cfg.json
+          echo "$CONFIG_JSON" | ./json2zon --dot > $out/cfg.zon
+          zig fmt $out/cfg.zon
         '';
     in {
-      source = "${rillConfigPkg}/config.zon";
+      source = "${rillConfig}/cfg.zon";
       onChange = ''
         notify-send "Home-manager" "Rebuild nix"
         killall -9 rill && rill & disown
