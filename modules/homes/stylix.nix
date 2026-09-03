@@ -134,11 +134,8 @@
         f = lib.mkForce false;
       in {
         rofi.enable = f;
-        hyprpaper.enable = f;
-        hyprland.hyprpaper.enable = f;
         neovim.enable = f;
         waybar.enable = f;
-        hyprlock.enable = f;
       };
     };
 }

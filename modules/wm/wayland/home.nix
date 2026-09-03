@@ -19,6 +19,7 @@ with lib; {
         startup = [
           "wl-paste --type text --watch cliphist store" # Stores only text data
           "wl-paste --type image --watch cliphist store" # Stores only image data
+          "waybar"
           "awww-daemon"
           "bg.sh last"
           "sunsetr"
@@ -40,7 +41,7 @@ with lib; {
 
             (_bind "Super Shift" "b" "toggle_waybar.sh")
             (_bind "Super Shift" "r" "wayrec.sh")
-            (_bind "Super Shift" "p" "hyprlock")
+            (_bind "Super Shift" "p" "lock.sh")
 
             (mod "v" "rofi-clip.sh")
             (_bind "Super Shift" "v" "rofi-clip-more.sh")
@@ -52,7 +53,6 @@ with lib; {
 
   config = {
     services.hyprpolkitagent.enable = true;
-    programs.hyprlock. enable = true;
 
     xdg.configFile."sunsetr/sunsetr.toml".text = builtins.readFile ../../../config/sunsetr/sunsetr.toml;
     xdg.configFile."sunsetr/presets/day/sunsetr.toml".text = builtins.readFile ../../../config/sunsetr/presets/day/sunsetr.toml;
@@ -63,7 +63,6 @@ with lib; {
       sunsetr
 
       hyprpicker
-      hyprlock
 
       wayvnc # TODO: own file
     ];

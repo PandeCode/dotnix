@@ -25,7 +25,7 @@
   environment = {
     sessionVariables = {
       NIXOS_OZONE_WL = "1";
-      XKB_DEFAULT_OPTIONS = "caps:escape";
+      XKB_DEFAULT_OPTIONS = "ctrl:nocaps,grp:win_space_toggle";
     };
     extraInit = ''
       export XDG_DATA_DIRS="$XDG_DATA_DIRS:${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}"

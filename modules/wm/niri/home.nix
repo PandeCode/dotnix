@@ -121,7 +121,6 @@ in {
       spawn-at-startup = map (v: {argv = v;}) ([
           ["niriusd"]
           ["xwayland-satellite"]
-          ["waybar"]
           ["sh" "-c" "awww-daemon -n backdrop"]
         ]
         ++ map splitBySpace config.wayland.shared.startup);

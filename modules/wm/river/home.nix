@@ -1,6 +1,7 @@
 {
   pkgs,
   inputs,
+  lib,
   config,
   ...
 }: let
@@ -66,7 +67,7 @@ in {
       executable = true;
     };
     "rill/config.zon" = let
-      cfg = (import ./config.nix) config.wayland.shared;
+      cfg = (import ./config.nix) {inherit pkgs config lib;};
       rillConfig =
         pkgs.runCommand "rillConfig" {
           CONFIG_JSON = builtins.toJSON cfg;

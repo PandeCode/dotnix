@@ -40,11 +40,11 @@
 
         modules-left = [
           # "cffi/cffi-blk-spin"
-          "niri/submap"
+          "river/submap"
           "group/name"
         ];
         modules-center = [
-          "niri/workspaces"
+          "river/workspaces"
         ];
         modules-right = [
           "custom/lyrics"
@@ -57,7 +57,7 @@
           # "backlight/slider"
           # "pulseaudio/slider"
 
-          # "niri/language"
+          # "river/language"
           "group/expand"
           "network"
           "bluetooth"
@@ -186,7 +186,7 @@
           };
         };
 
-        "niri/workspaces" = {
+        "river/workspaces" = {
           "format" = "{icon}";
           format-icons = {
             active = "";
@@ -197,7 +197,7 @@
             "*" = [1 2 3 4];
           };
         };
-        "niri/language" = {
+        "river/language" = {
           format-en = "🦅";
           format-es = "🌮";
         };
@@ -282,7 +282,7 @@
             transition-to-right = true;
             click-to-reveal = true;
           };
-          modules = ["niri/window"];
+          modules = ["river/window"];
         };
 
         "group/expand" = {
@@ -319,10 +319,10 @@
       #gtk-layer-shell=true;
       #height=0;
       #
-      ##waybars-left=["niri/workspaces""niri/submap""wlr/taskbar"];
+      ##waybars-left=["river/workspaces""river/submap""wlr/taskbar"];
       ##waybars-right=["mpd""clock""temperature"];
       #modules-left=[
-      #    "niri/workspaces"
+      #    "river/workspaces"
       #    "custom/divider"
       #    "custom/weather"
       #    "custom/divider"
@@ -330,7 +330,7 @@
       #    "custom/divider"
       #    "memory"
       #];
-      #modules-center=["niri/window"];
+      #modules-center=["river/window"];
       #modules-right=[
       #    "tray"
       #    "network"
@@ -343,7 +343,7 @@
       #    "custom/divider"
       #    "clock"
       #];
-      #"niri/window"={format="{}";};
+      #"river/window"={format="{}";};
       #"wlr/workspaces"={
       #    on-scroll-up="hyprctldispatchworkspacee+1";
       #    on-scroll-down="hyprctldispatchworkspacee-1";
