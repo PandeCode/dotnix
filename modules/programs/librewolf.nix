@@ -10,31 +10,31 @@
     nativeMessagingHosts = [pkgs.firefoxpwa];
     profiles = {
       main = {
-        containers = let
-          autoID = attrSet: attrSet;
-        in
-          autoID {
-            personal = {
-              color = "green";
-              icon = "vacation";
-              id = 1;
-            };
-            school = {
-              color = "purple";
-              icon = "fence";
-              id = 2;
-            };
-            lab = {
-              color = "orange";
-              icon = "fingerprint";
-              id = 3;
-            };
-            gov = {
-              color = "red";
-              icon = "dollar";
-              id = 4;
-            };
-          };
+        # containers = let
+        #   autoID = attrSet: attrSet;
+        # in
+        #   autoID {
+        #     personal = {
+        #       color = "green";
+        #       icon = "vacation";
+        #       id = 1;
+        #     };
+        #     school = {
+        #       color = "purple";
+        #       icon = "fence";
+        #       id = 2;
+        #     };
+        #     lab = {
+        #       color = "orange";
+        #       icon = "fingerprint";
+        #       id = 3;
+        #     };
+        #     gov = {
+        #       color = "red";
+        #       icon = "dollar";
+        #       id = 4;
+        #     };
+        #   };
         search = {
           force = true;
           default = "ddg";

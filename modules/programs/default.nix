@@ -16,7 +16,12 @@
   ];
 
   home = rec {
+    file.".npmrc".text = ''
+      prefix=~/.npm-packages
+    '';
+
     sessionVariables = {
+      GTK_USE_PORTAL = "1";
       PYTHONPYCACHEPREFIX = "/home/${config.home.username}/.cache/__pycache__";
       GOPATH = "/home/${config.home.username}/go";
       DOTFILES = "/home/${config.home.username}/dotnix";
@@ -28,6 +33,7 @@
       "$HOME/.local/bin"
       ".git/safe/../../bin"
       "${sessionVariables.GOPATH}/bin"
+      "$HOME/.npm-packages/bin"
     ];
 
     # file = {

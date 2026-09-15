@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-if pgrep -x "librewolf" &>/dev/null; then
-	librewolf "$@"
-elif pgrep -x "chromium" &>/dev/null; then
-	chromium "$@"
+if pgrep -x librewolf >/dev/null; then
+	exec librewolf --new-window "$@"
+elif pgrep -x chromium >/dev/null; then
+	exec chromium --new-window "$@"
 else
-	librewolf "$@"
+	exec librewolf "$@"
 fi

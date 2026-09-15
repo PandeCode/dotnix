@@ -25,11 +25,20 @@ in {
         }
       ];
       services = {
-        sddm = lib.mkIf sharedConfig.framework {
-          fprintAuth = true;
-          unixAuth = true;
-          gnupg.enable = true;
-        };
+        sddm =
+          {
+            enable = true;
+            enableGnomeKeyring = true;
+            gnupg.enable = true;
+            unixAuth = true;
+          }
+          // (
+            if sharedConfig.framework
+            then {
+              fprintAuth = true;
+            }
+            else {}
+          );
       };
     };
 
@@ -66,7 +75,7 @@ in {
 
     polkit.extraConfig =
       /*
-      bash
+      javascript
       */
       ''
         polkit.addRule(function(action, subject) {

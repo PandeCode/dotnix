@@ -110,15 +110,15 @@
   #   };
   # };
 
-  home = {
-    sessionVariables = {
-      # XCURSOR_THEME = config.stylix.cursor.name;
-      # XCURSOR_SIZE = config.stylix.cursor.size;
-    };
-    activation.setTheme = lib.hm.dag.entryAfter ["writeBoundary"] ''
-      ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
-    '';
-  };
+  # home = {
+  #   sessionVariables = {
+  #     # XCURSOR_THEME = config.stylix.cursor.name;
+  #     # XCURSOR_SIZE = config.stylix.cursor.size;
+  #   };
+  #   activation.setTheme = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  #     ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
+  #   '';
+  # };
 
   stylix =
     (import ../stylix/common.nix all).stylix

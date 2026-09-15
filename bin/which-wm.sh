@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-wm_list=("awesome" "niri" "i3" "sway" "dwm" "xmonad" "Hyprland" "river" "fht-compositor")
+wm_list=("awesome" "niri" "i3" "sway" "dwm" "xmonad" "river" "fht-compositor")
 
 is_running() {
 	pgrep -x "$1" >/dev/null 2>&1

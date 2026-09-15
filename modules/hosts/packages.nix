@@ -50,7 +50,7 @@
     (stdenvNoCC.mkDerivation rec {
       pname = "ensure-installed";
       version = "0.0.0";
-      buildInputs = [clang clang-tools cargo gdb bear zig zls pkg-config rr];
+      buildInputs = [clang clang-tools cargo gdb cgdb bear zig zls pkg-config rr lean llvm_22 typst tinymist];
       src = null;
       dontUnpack = true;
       dontBuild = true;
@@ -222,6 +222,8 @@
     nodejs
 
     luajit
+    luajitPackages.fennel
+    fennel-ls
 
     (python3.withPackages (python-pkgs:
       with python-pkgs; [

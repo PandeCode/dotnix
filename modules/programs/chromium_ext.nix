@@ -14,8 +14,8 @@
 
 	"dark-reader" = {
 		id = "eimadpbcbfnmbkopoojfekhnkhdbieeh";
-		sha256 = "sha256:04xa6wg6fwgswi2n96js2fxfvwrdk1gzd3q2vhnqjhxdvkb1pjwx";
-		version = "4.9.129";
+		sha256 = "sha256:1ga601a49sz8g1v1wh7cyqx20pvsd5qjrmrfwzy8gxhr34lsiz44";
+		version = "4.9.130";
 	};
 
 	"vimium" = {
@@ -32,8 +32,8 @@
 
 	"mal-sync" = {
 		id = "kekjfbackdeiabghhcdklcdoekaanoel";
-		sha256 = "sha256:0fis4jrfchrzxvj515b3bppixvhlmkm7cvzj47lcm7dk5nd76hgf";
-		version = "0.12.4";
+		sha256 = "sha256:0dqpfbmbsyaf9p8q5ykjqnbsplabcjq35b60jv2m1qn4hp51bw1q";
+		version = "0.12.5";
 	};
 
 	"consumer-rights-wiki" = {
@@ -56,8 +56,8 @@
 
 	"desmodder-for-desmos" = {
 		id = "eclmfdfimjhkmjglgdldedokjaemjfjp";
-		sha256 = "sha256:1pnkm40rylipcdmvbnl3wv2lzzbqlpd4nrdn3777zlhr7b7gf32s";
-		version = "0.15.16";
+		sha256 = "sha256:0k825zki64km8rs55mvmy565wf3n28nqzb9avp2c6q0g73z3bxl4";
+		version = "0.15.17";
 	};
 
 	"cc++-devtools-support-dwa" = {

@@ -8,7 +8,7 @@
 with lib; {
   imports = [
     ../home.nix
-    ../../programs/waybar.nix
+    ../../programs/eww.nix
     ../../programs/swaync.nix
   ];
 
@@ -19,7 +19,6 @@ with lib; {
         startup = [
           "wl-paste --type text --watch cliphist store" # Stores only text data
           "wl-paste --type image --watch cliphist store" # Stores only image data
-          "waybar"
           "awww-daemon"
           "bg.sh last"
           "sunsetr"

@@ -26,8 +26,10 @@ in {
       monospace = {
         # package = pkgs.nerd-fonts.fantasque-sans-mono;
         # name = "FantasqueSansM Nerd Font Mono";
-        package = pkgs.nerd-fonts.comic-shanns-mono;
-        name = "ComicShannsMono Nerd Font Mono";
+        # package = pkgs.nerd-fonts.comic-shanns-mono;
+        # name = "ComicShannsMono Nerd Font Mono";
+        package = pkgs.nerd-fonts.open-dyslexic;
+        name = "OpenDyslexicM Nerd Font Mono";
       };
 
       serif = monospace;

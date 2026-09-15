@@ -41,7 +41,7 @@
       enableBashIntegration = true;
       enableFishIntegration = true;
     };
-  in rec {
+  in {
     zoxide = enable_shells;
     nix-index = enable_shells;
     direnv =
@@ -59,7 +59,6 @@
         error_symbol = "[➜](bold red)";
       };
     };
-
     bash = {
       enable = true;
       blesh.enable = false; # breaks alot
@@ -72,6 +71,7 @@
       #   fi
       # '';
     };
+
     fish = {
       enable = true;
       shellAliases = sharedConfig.fishShellAliases;

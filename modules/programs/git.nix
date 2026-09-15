@@ -8,6 +8,7 @@
         init.defaultBranch = "main";
         color. ui = "auto";
         alias = {
+          p = "push";
           push = "push";
           puhs = "push";
           psuh = "push";

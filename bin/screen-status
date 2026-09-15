@@ -1,0 +1,84 @@
+#!/bin/sh
+
+# CPU
+set -- $(awk '/^cpu / {
+    print $2, $3, $4, $5, $6, $7, $8, $9
+}' /proc/stat)
+
+user=$1
+nice=$2
+system=$3
+idle=$4
+iowait=$5
+irq=$6
+softirq=$7
+steal=$8
+
+total1=$((user + nice + system + idle + iowait + irq + softirq + steal))
+busy1=$((user + nice + system + irq + softirq + steal))
+
+sleep 1
+
+set -- $(awk '/^cpu / {
+    print $2, $3, $4, $5, $6, $7, $8, $9
+}' /proc/stat)
+
+user=$1
+nice=$2
+system=$3
+idle=$4
+iowait=$5
+irq=$6
+softirq=$7
+steal=$8
+
+total2=$((user + nice + system + idle + iowait + irq + softirq + steal))
+busy2=$((user + nice + system + irq + softirq + steal))
+
+if [ "$total2" -gt "$total1" ]; then
+    cpu=$((100 * (busy2 - busy1) / (total2 - total1)))
+else
+    cpu=0
+fi
+
+ram=$(
+    free 2>/dev/null |
+        awk '/^Mem:/ { printf "%.0f", ($3 / $2) * 100 }'
+)
+ram=${ram:-0}
+
+disk=$(
+    df -P / 2>/dev/null |
+        awk 'NR == 2 {
+            gsub("%", "", $5)
+            print $5
+        }'
+)
+disk=${disk:-0}
+
+# TODO come back and give correct logic like in ~/.tmux.cofn
+battery=$(
+    acpi 2>/dev/null |
+        grep -oE '[0-9]+%' |
+        head -n 1
+)
+battery=${battery:-N/A}
+
+ping_value=$(
+    ping -c 1 -W 2 1.1.1.1 2>/dev/null |
+        sed -n 's/.*time=\([0-9.]*\).*/\1/p' |
+        cut -d. -f1
+)
+
+if [ -z "$ping_value" ]; then
+    ping_text='OFFLINE'
+else
+    ping_text="${ping_value}ms"
+fi
+
+printf '󰂀 %s  󰍛 %s%%   %s%%  󰋊 %s%%  󰖟 %s' \
+    "$battery" \
+    "$cpu" \
+    "$ram" \
+    "$disk" \
+    "$ping_text"

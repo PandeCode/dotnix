@@ -19,7 +19,7 @@
         };
       };
     };
-    extraPortals = [pkgs.xdg-desktop-portal-gtk];
+    extraPortals = [pkgs.xdg-desktop-portal pkgs.xdg-desktop-portal-gtk];
     xdgOpenUsePortal = true;
   };
 
@@ -126,7 +126,6 @@
       neovide
 
       anime4k
-      hakuneko
       manga-tui
       comic-mandown
 

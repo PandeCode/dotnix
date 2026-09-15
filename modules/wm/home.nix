@@ -74,7 +74,7 @@ in {
           ws_1 = ["St" "st" "ghostty" "alacritty" "kitty" "st-256color"];
           ws_2 = ["Browser" "Firefox" "Google-chrome" "Opera" "Navigator" "zen-twilight"];
           ws_3 = ["ModernGL" "Emacs" "emacs" "neovide" "Code" "Code - Insiders" "Blender"];
-          ws_4 = ["hakuneko-desktop" "Unity" "unityhub" "UnityHub" "zoom"];
+          ws_4 = ["Unity" "unityhub" "UnityHub" "zoom"];
           ws_5 = ["Spotify" "vlc"];
           ws_6 = ["Mail" "Thunderbird"];
           ws_7 = ["riotclientux.exe" "leagueclient.exe" "Zenity" "zenity" "wine" "wine.exe" "explorer.exe"];
@@ -142,6 +142,11 @@ in {
   };
 
   config = {
+    home.packages = with pkgs; [
+      xdg-desktop-portal
+      xdg-desktop-portal-gtk
+    ];
+
     programs = {
       vesktop = {
         enable = true;
@@ -245,7 +250,10 @@ in {
       desktopEntries = {
         browser = {
           name = "Browser";
-          exec = "${(pkgs.writeShellScriptBin "browser.sh" (builtins.readFile ../../bin/browser.sh))}/bin/browser.sh";
+          exec = "${pkgs.writeShellScriptBin "browser.sh"
+            (builtins.readFile ../../bin/browser.sh)}/bin/browser.sh %u";
+          terminal = false;
+          type = "Application";
         };
 
         systemctl-tui = {

@@ -21,6 +21,9 @@ in {
     lf = {enable = true;};
     xplr = {enable = true;};
   };
+  home.sessionVariables = {
+    GTK_USE_PORTAL = "1";
+  };
 
   xdg = {
     mimeApps = {
