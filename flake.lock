@@ -578,11 +578,11 @@
         "nixutils": "nixutils_2"
       },
       "locked": {
-        "lastModified": 1789489734,
-        "narHash": "sha256-9D5+01XOZVED0aq3OrP8In8ONTCPZezYNmKUw68mnyw=",
+        "lastModified": 1789492158,
+        "narHash": "sha256-tFKpdaXjXRODcJzPkq2Q+vluAokXZeul/SgtSfXmGtk=",
         "owner": "pandecode",
         "repo": "libys",
-        "rev": "8307169984130f4e2e54fcf91753b7012217a551",
+        "rev": "0e9d040272e3fe51577744bcaeb2ab1709c1daf1",
         "type": "github"
       },
       "original": {
