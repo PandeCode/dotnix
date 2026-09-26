@@ -17,6 +17,37 @@ let
     inherit mods key exec;
     locked = true;
   };
+
+  # the same key does the same thing in every session, with the program
+  # that fits it. declared once here, split into the x11 and wayland layers
+  sessionBinds = [
+    (bind [ "Super" ] "b" {
+      x11 = "boomer";
+      wayland = "woomer";
+    })
+    (bind [ "Super" ] "n" {
+      x11 = "dunstctl context";
+      wayland = "swaync-client -t -sw";
+    })
+    (bind [ "Super" "Shift" ] "n" {
+      x11 = "dunstctl close-all";
+      wayland = "swaync-client -C";
+    })
+    (bind [ "Super" ] "v" {
+      x11 = greenclip.copy;
+      wayland = "rofi-clip.sh";
+    })
+    (bind [ "Super" "Shift" ] "v" {
+      x11 = greenclip.paste;
+      wayland = "rofi-clip-more.sh";
+    })
+    (bind [ "Super" "Ctrl" "Shift" ] "c" {
+      x11 = "xcolor -s clipboard";
+      wayland = "hyprpicker -a";
+    })
+  ];
+
+  forSession = session: map (b: b // { exec = b.exec.${session}; }) sessionBinds;
 in
 
 {
@@ -39,6 +70,9 @@ in
       (bind [ "Super" "Alt" "Ctrl" ] "f" "_tool_riot")
       (bind [ "Super" ] "p" "_tool_search")
       (bind [ "Super" "Shift" ] "c" "rofi-calc.sh")
+      (bind [ "Super" "Ctrl" ] "v" "clipimg.sh")
+      (bind [ "Super" ] "Print" "screenshot screen")
+      (bind [ "Super" "Shift" ] "Print" "screenshot area")
       (bind [ "Alt" ] "space" "rofi-run.sh")
       (bind [ "Alt" "Shift" ] "space" "rofi-run-pr.sh")
 
@@ -175,14 +209,9 @@ in
           scale =
             factor: ''xrandr --output "$(xrandr | awk '/ connected/ { print $1; exit }')" --scale ${factor}'';
         in
-        [
-          (bind [ ] "Print" "maim -s | xclip -selection clipboard -t image/png")
-          (bind [ "Super" ] "d" "dunstctl context")
-          (bind [ "Super" "Shift" ] "d" "dunstctl close-all")
-          (bind [ "Super" ] "b" "boomer")
-          (bind [ "Super" ] "v" greenclip.copy)
-          (bind [ "Super" "Shift" ] "v" greenclip.paste)
-          (bind [ "Super" "Ctrl" ] "v" greenclip.restart)
+        forSession "x11"
+        ++ [
+          (bind [ "Super" "Ctrl" "Shift" ] "v" greenclip.restart)
           (bind [ "Super" "Shift" ] "minus" (scale "0.8x0.8"))
           (bind [ "Super" "Shift" ] "plus" (scale "1.2x1.2"))
         ];
@@ -192,23 +221,14 @@ in
       startup = [
         "wl-paste --type text --watch cliphist store"
         "wl-paste --type image --watch cliphist store"
-        "waybar"
         "awww-daemon"
         "bg.sh last"
         "sunsetr"
       ];
 
-      binds = [
-        (bind [ "Super" "Ctrl" ] "v" "clipimg.sh")
-        (bind [ "Super" ] "n" "swaync-client -t -sw")
-        (bind [ "Super" ] "b" "woomer")
-        (bind [ "Super" "Ctrl" "Shift" ] "c" "hyprpicker -a")
-        (bind [ ] "Print" "grimblast copy area")
-        (bind [ "Super" "Shift" ] "b" "toggle_waybar.sh")
+      binds = forSession "wayland" ++ [
         (bind [ "Super" "Shift" ] "r" "wayrec.sh")
         (bind [ "Super" "Shift" ] "p" "lock.sh")
-        (bind [ "Super" ] "v" "rofi-clip.sh")
-        (bind [ "Super" "Shift" ] "v" "rofi-clip-more.sh")
       ];
     };
   };

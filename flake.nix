@@ -77,6 +77,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # colors, fonts and wallpaper for everything
+    stylix = {
+      type = "github";
+      owner = "nix-community";
+      repo = "stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # prebuilt nix-index database, for comma and command-not-found
     nix-index-database = {
       type = "github";

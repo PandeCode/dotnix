@@ -195,8 +195,6 @@ in
           "Super+Tab".toggle-overview = { };
           "Alt+f4".close-window = { };
 
-          "Super+Print".screenshot-screen._props.show-pointer = false;
-          "Super+Shift+Print".screenshot._props.show-pointer = false;
           "Super+a".spawn = [
             "nirius"
             "toggle-follow-mode"

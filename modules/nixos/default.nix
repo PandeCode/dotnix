@@ -3,6 +3,7 @@
 {
   imports = [
     ../generic
+    ../profiles
 
     # keep-sorted start
     ./nix.nix
@@ -19,6 +20,7 @@
     inputs.hermes.nixosModules.default
     inputs.home-manager.nixosModules.home-manager
     inputs.libys.nixosModules.default
+    inputs.stylix.nixosModules.stylix
     # keep-sorted end
   ];
 }

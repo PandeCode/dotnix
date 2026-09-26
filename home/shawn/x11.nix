@@ -29,7 +29,6 @@
       boomer
       dmenu
       feh
-      grim
       haskellPackages.greenclip
       libxcvt
       maim
@@ -37,8 +36,8 @@
       picom-pijulius
       scrot
       slop
-      slurp
       xclip
+      xcolor
       xdo
       xdotool
       xmenu

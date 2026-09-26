@@ -16,6 +16,7 @@
 
   dotnix = {
     user = "shawn";
+    profiles.desktop.enable = true;
     i3.enable = true;
     niri.enable = true;
     river.enable = true;
@@ -74,6 +75,9 @@
     enable = true;
     plugins = [ pkgs.networkmanager-openvpn ];
   };
+
+  # the laptop screen, for screen sharing under river
+  xdg.portal.wlr.settings.screencast.output_name = "eDP-1";
 
   time.timeZone = "America/Toronto";
 

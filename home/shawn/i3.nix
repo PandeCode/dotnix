@@ -1,12 +1,34 @@
 # my i3 settings, ported from old/modules/wm/i3/home.nix. startup, command
 # binds and window rules come from wm.nix
-{ lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   mod = "Mod4";
 
-  # i3status-rs icons; colors come with stylix
+  c = config.lib.stylix.colors.withHashtag;
+  font = config.stylix.fonts.sansSerif.name;
+
   statusHeader = ''
+    [theme.overrides]
+    idle_bg = "${c.base00}"
+    idle_fg = "${c.base05}"
+    good_bg = "${c.base00}"
+    good_fg = "${c.base0B}"
+    warning_bg = "${c.base00}"
+    warning_fg = "${c.base0A}"
+    critical_bg = "${c.base00}"
+    critical_fg = "${c.base0F}"
+    info_bg = "${c.base00}"
+    info_fg = "${c.base0D}"
+    alternating_tint_bg = "${c.base01}"
+    alternating_tint_fg = "${c.base05}"
+    separator_bg = "${c.base00}"
+
     [icons]
     icons            = "awesome6"
     [icons.overrides]
@@ -73,8 +95,42 @@ in
           workspaceNumbers = true;
           statusCommand = "${lib.meta.getExe pkgs.i3status-rust} ~/.config/i3status-rs/xconfig.toml";
           fonts = {
-            names = [ "monospace" ];
+            names = [
+              font
+              "monospace"
+            ];
             size = 12.0;
+          };
+          colors = {
+            background = c.base00;
+            statusline = c.base05;
+            separator = c.base03;
+
+            focusedWorkspace = {
+              border = c.base0A;
+              background = c.base0D;
+              text = c.base00;
+            };
+            activeWorkspace = {
+              border = c.base03;
+              background = c.base02;
+              text = c.base05;
+            };
+            inactiveWorkspace = {
+              border = c.base02;
+              background = c.base01;
+              text = c.base04;
+            };
+            urgentWorkspace = {
+              border = c.base02;
+              background = c.base0F;
+              text = c.base00;
+            };
+            bindingMode = {
+              border = c.base02;
+              background = c.base0E;
+              text = c.base00;
+            };
           };
         }
       ];
