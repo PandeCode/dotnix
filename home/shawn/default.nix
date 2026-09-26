@@ -4,6 +4,7 @@
 
     # keep-sorted start
     ./niri.nix
+    ./river.nix
     ./wm.nix
     # keep-sorted end
   ];

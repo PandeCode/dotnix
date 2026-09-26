@@ -17,6 +17,7 @@
   dotnix = {
     user = "shawn";
     niri.enable = true;
+    river.enable = true;
   };
 
   programs = {

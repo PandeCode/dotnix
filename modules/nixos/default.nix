@@ -12,6 +12,7 @@
     # always imported, each is off until a host enables it
     # keep-sorted start
     ../wm/niri/nixos.nix
+    ../wm/river/nixos.nix
     ../wm/wayland/nixos.nix
     inputs.hermes.nixosModules.default
     inputs.home-manager.nixosModules.home-manager

@@ -27,6 +27,7 @@ in
   nixosModules = {
     # keep-sorted start
     niri = ../wm/niri/nixos.nix;
+    river = ../wm/river/nixos.nix;
     wayland = ../wm/wayland/nixos.nix;
     # keep-sorted end
   };
@@ -34,6 +35,7 @@ in
   homeModules = {
     # keep-sorted start
     niri = ../wm/niri/home.nix;
+    river = import ../wm/river/home.nix { inherit (nixutils.lib) toZON; };
     wayland = ../wm/wayland/home.nix;
     wm = ../wm/shared.nix;
     # keep-sorted end
