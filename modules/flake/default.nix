@@ -25,11 +25,18 @@ in
 
   # drop-in modules, usable without the rest of this repo
   nixosModules = {
+    # keep-sorted start
     niri = ../wm/niri/nixos.nix;
+    wayland = ../wm/wayland/nixos.nix;
+    # keep-sorted end
   };
 
   homeModules = {
+    # keep-sorted start
     niri = ../wm/niri/home.nix;
+    wayland = ../wm/wayland/home.nix;
+    wm = ../wm/shared.nix;
+    # keep-sorted end
   };
 
   checks = forAllPkgs (pkgs: import ./checks.nix { inherit pkgs inputs; });

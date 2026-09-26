@@ -14,7 +14,10 @@
     inputs.nix-index-database.nixosModules.default
   ];
 
-  dotnix.user = "shawn";
+  dotnix = {
+    user = "shawn";
+    niri.enable = true;
+  };
 
   programs = {
     hermes = {

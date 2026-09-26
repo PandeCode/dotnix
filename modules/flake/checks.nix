@@ -40,25 +40,38 @@ let
       };
     }).config;
 
-  enabledFiles =
-    config: lib.attrsets.attrNames (lib.attrsets.filterAttrs (_: f: f.enable) config.xdg.configFile);
+  inherit (lib.strings) hasInfix;
 
   niri = {
-    session =
-      (nixos {
-        imports = [ self.nixosModules.niri ];
-        dotnix.niri.enable = true;
-      }).programs.niri.enable;
+    nixos = nixos {
+      imports = [ self.nixosModules.niri ];
+      dotnix.niri.enable = true;
+    };
 
-    off = enabledFiles (home self.homeModules.niri);
-
-    live = enabledFiles (home {
+    home = home {
       imports = [ self.homeModules.niri ];
-      dotnix.niri = {
-        enable = true;
-        liveConfigDir = "/home/friend/src/niri";
+      dotnix = {
+        wm = {
+          binds = [
+            {
+              mods = [ "Super" ];
+              key = "Return";
+              exec = "foot";
+            }
+          ];
+          rules.float = [ "title:Picture-in-picture" ];
+        };
+        niri = {
+          enable = true;
+          includes = [ "~/live.kdl" ];
+        };
       };
-    });
+    };
+  };
+
+  wm = home {
+    imports = [ self.homeModules.wm ];
+    dotnix.wm.terminal = "foot";
   };
 in
 
@@ -66,8 +79,20 @@ in
   formatting = self.formatter.${system}.check self;
 
   drop-in-niri =
-    assert lib.asserts.assertMsg niri.session "niri: session not enabled";
-    assert lib.asserts.assertMsg (!lib.lists.elem "niri" niri.off) "niri: config linked while off";
-    assert lib.asserts.assertMsg (lib.lists.elem "niri" niri.live) "niri: live config not linked";
+    assert lib.asserts.assertMsg niri.nixos.programs.niri.enable "niri: session not enabled";
+    assert lib.asserts.assertMsg niri.nixos.dotnix.wayland.enable "niri: wayland basics not enabled";
+    assert lib.asserts.assertMsg (hasInfix ''
+      Super+Return {
+      		spawn-sh "foot"'' niri.home.dotnix.niri.kdl) "niri: bind from dotnix.wm missing";
+    assert lib.asserts.assertMsg
+      (hasInfix ''match title="Picture-in-picture"'' niri.home.dotnix.niri.kdl)
+      "niri: floating rule from dotnix.wm missing";
+    assert lib.asserts.assertMsg (
+      niri.home.xdg.configFile ? "niri/config.kdl"
+    ) "niri: config.kdl not written";
     pkgs.runCommandLocal "drop-in-niri" { } "touch $out";
+
+  drop-in-wm =
+    assert lib.asserts.assertMsg (wm.dotnix.wm.terminal == "foot") "wm: declaration not readable";
+    pkgs.runCommandLocal "drop-in-wm" { } "touch $out";
 }
