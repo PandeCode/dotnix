@@ -21,6 +21,10 @@
       base.enable = true;
       desktop.enable = true;
       dev.enable = true;
+      gaming = {
+        enable = true;
+        minecraft = true;
+      };
       laptop.enable = true;
     };
 

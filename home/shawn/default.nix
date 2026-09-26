@@ -6,6 +6,7 @@
     ./apps.nix
     ./browsers.nix
     ./desktop.nix
+    ./gaming.nix
     ./git.nix
     ./i3.nix
     ./media.nix

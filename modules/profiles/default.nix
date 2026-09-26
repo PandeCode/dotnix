@@ -6,6 +6,7 @@
     ./base.nix
     ./desktop.nix
     ./dev.nix
+    ./gaming.nix
     ./laptop.nix
     ./security.nix
     ./theme.nix
