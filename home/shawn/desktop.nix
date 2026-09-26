@@ -1,6 +1,30 @@
-{ pkgs, ... }:
+{ pkgs, self, ... }:
 
 let
+  inherit (self.packages.${pkgs.stdenv.hostPlatform.system}) scripts;
+
+  rofi = pkgs.symlinkJoin {
+    name = "rofi";
+    paths = [
+      (pkgs.rofi.override {
+        plugins = with pkgs; [
+          rofi-calc
+          rofi-emoji
+          rofi-games
+          rofi-mpd
+          rofi-power-menu
+        ];
+      })
+    ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    # the theme follows the wallpaper, so it is made at runtime
+    postBuild = ''
+      wrapProgram $out/bin/rofi \
+        --run '[ -f /tmp/launcher.rasi ] || ${scripts}/bin/rofi-make-config.sh >/dev/null' \
+        --add-flags "-config ${../../config/rofi/config.rasi} -theme /tmp/launcher.rasi"
+    '';
+  };
+
   # installed from the fetched file, not read into nix, so evaluation does
   # not have to download it
   rofi-wifi-menu = pkgs.runCommandLocal "rofi-wifi-menu" { } ''
@@ -18,18 +42,8 @@ in
   programs.alacritty.enable = true;
 
   home.packages = with pkgs; [
-    (rofi.override {
-      plugins = [
-        rofi-calc
-        rofi-emoji
-        rofi-games
-        rofi-mpd
-        rofi-power-menu
-      ];
-    })
+    rofi
     rofi-bluetooth
     rofi-wifi-menu
   ];
-
-  xdg.configFile."rofi/nix.rasi".source = ../../config/rofi/config.rasi;
 }

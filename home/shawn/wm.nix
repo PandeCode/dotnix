@@ -71,6 +71,12 @@ in
       (bind [ "Super" "Ctrl" ] "v" "clipimg.sh")
       (bind [ "Super" ] "Print" "screenshot screen")
       (bind [ "Super" "Shift" ] "Print" "screenshot area")
+      (bind [ "Super" "Ctrl" ] "r" "record screen")
+      (bind [ "Super" "Shift" ] "r" "record area")
+      (bind [ "Super" "Shift" ] "p" "lock")
+      (bind [ "Super" "Shift" ] "equal" "display-scale in")
+      (bind [ "Super" "Shift" ] "minus" "display-scale out")
+      (bind [ "Super" "Shift" ] "0" "display-scale reset")
       (bind [ "Alt" ] "space" "rofi-run.sh")
       (bind [ "Alt" "Shift" ] "space" "rofi-run-pr.sh")
 
@@ -81,7 +87,7 @@ in
       (locked [ ] "XF86AudioMute" "_tool_ctrl vol mute")
       (locked [ ] "XF86AudioRaiseVolume" "_tool_ctrl vol up")
       (locked [ ] "XF86AudioLowerVolume" "_tool_ctrl vol down")
-      (locked [ ] "XF86AudioMicMute" "_tool_ctrl mic down")
+      (locked [ ] "XF86AudioMicMute" "_tool_ctrl mic mute")
       (locked [ ] "XF86MonBrightnessUp" "_tool_ctrl light up")
       (locked [ ] "XF86MonBrightnessDown" "_tool_ctrl light down")
     ];
@@ -201,17 +207,9 @@ in
         "picom -b"
       ];
 
-      binds =
-        let
-          scale =
-            factor: ''xrandr --output "$(xrandr | awk '/ connected/ { print $1; exit }')" --scale ${factor}'';
-        in
-        forSession "x11"
-        ++ [
-          (bind [ "Super" "Ctrl" "Shift" ] "v" greenclip.restart)
-          (bind [ "Super" "Shift" ] "minus" (scale "0.8x0.8"))
-          (bind [ "Super" "Shift" ] "plus" (scale "1.2x1.2"))
-        ];
+      binds = forSession "x11" ++ [
+        (bind [ "Super" "Ctrl" "Shift" ] "v" greenclip.restart)
+      ];
     };
 
     wayland = {
@@ -223,10 +221,7 @@ in
         "sunsetr"
       ];
 
-      binds = forSession "wayland" ++ [
-        (bind [ "Super" "Shift" ] "r" "wayrec.sh")
-        (bind [ "Super" "Shift" ] "p" "lock.sh")
-      ];
+      binds = forSession "wayland";
     };
   };
 }

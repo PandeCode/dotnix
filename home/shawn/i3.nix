@@ -173,7 +173,7 @@ in
           "${mod}+Ctrl+j" = "exec i3ctl.sh resize_d";
           "${mod}+Ctrl+k" = "exec i3ctl.sh resize_u";
 
-          "${mod}+Shift+p" =
+          "${mod}+Ctrl+p" =
             "floating enable, sticky enable, resize set width 640 px height 360 px, move position 80 px 80 px, border none";
         };
     };

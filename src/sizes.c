@@ -84,7 +84,7 @@ int main(void) {
         char minbuf[64], maxbuf[64];
         // signed 128
         s128_to_str(((int128_t)1 << 127), minbuf, sizeof(minbuf)); // -(2^127)
-        uint128_t umax = (((uint128_t)1 << 128) - 1);
+        uint128_t umax = ~(uint128_t)0;
         u128_to_str(umax, maxbuf, sizeof(maxbuf));
 
         printf(" __int128                 %4zu   %28s   %28s\n",

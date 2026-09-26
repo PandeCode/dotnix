@@ -239,8 +239,8 @@ process_wallpaper() {
 
 	echo "$BG_ID" >"$BG_ID_FILE"
 
-	if [ -x ~/dotnix/bin/rofi-make-config.sh ]; then
-		~/dotnix/bin/rofi-make-config.sh
+	if command -v rofi-make-config.sh >/dev/null; then
+		rofi-make-config.sh
 	fi
 
 	return 0

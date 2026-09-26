@@ -34,7 +34,7 @@ case "$choice" in
 "bluetooth") rofi-bluetooth ;;
 "wifi") rofi-wifi-menu ;;
 "picom") neovide ~/.config/picom/picom.conf ;;
-"clipimg") ~/dotnix/bin/clipimg.sh ;;
+"clipimg") clipimg.sh ;;
 "lock") lock.sh ;;
 "color")
 	sleep 1

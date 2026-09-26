@@ -11,9 +11,9 @@
     ./media.nix
     ./niri.nix
     ./river.nix
-    ./screenshot.nix
     ./shell.nix
     ./theme.nix
+    ./tools.nix
     ./wayland.nix
     ./wm.nix
     ./x11.nix

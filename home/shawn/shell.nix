@@ -175,8 +175,6 @@ in
     };
 
     sessionPath = [
-      # until the scripts are packages
-      "${flakePath}/bin"
       "$HOME/.local/bin"
       # bin/ of a git repo, once it's marked trusted with `mkdir .git/safe`
       ".git/safe/../../bin"

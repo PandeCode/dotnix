@@ -44,6 +44,16 @@ in
     # keep-sorted end
   };
 
+  packages = forAllPkgs (
+    pkgs:
+    nixpkgs.lib.attrsets.filterAttrs (_: nixpkgs.lib.meta.availableOn pkgs.stdenv.hostPlatform) (
+      nixpkgs.lib.filesystem.packagesFromDirectoryRecursive {
+        inherit (pkgs) callPackage;
+        directory = ../../packages;
+      }
+    )
+  );
+
   checks = forAllPkgs (pkgs: import ./checks.nix { inherit pkgs inputs; });
 
   formatter = forAllPkgs (
