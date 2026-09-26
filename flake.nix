@@ -85,6 +85,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # a patched spotify client
+    spicetify-nix = {
+      type = "github";
+      owner = "Gerg-L";
+      repo = "spicetify-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # prebuilt nix-index database, for comma and command-not-found
     nix-index-database = {
       type = "github";

@@ -118,6 +118,8 @@ in
     };
 
     programs = {
+      kdeconnect.enable = true;
+
       nautilus-open-any-terminal = {
         enable = true;
         inherit (home.dotnix.wm) terminal;
@@ -134,12 +136,17 @@ in
 
       systemPackages = with pkgs; [
         alsa-utils
+        gparted
         libnotify
+        linux-wifi-hotspot
+        mesa-demos
         nautilus
         networkmanagerapplet
         pavucontrol
         pulseaudio
         sddm-custom-theme
+        virtualglLib
+        vulkan-tools
       ];
     };
 

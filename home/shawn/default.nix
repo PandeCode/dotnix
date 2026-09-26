@@ -3,9 +3,12 @@
     ../../modules/home
 
     # keep-sorted start
+    ./apps.nix
+    ./browsers.nix
     ./desktop.nix
     ./git.nix
     ./i3.nix
+    ./media.nix
     ./niri.nix
     ./river.nix
     ./screenshot.nix

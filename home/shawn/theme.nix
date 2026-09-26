@@ -26,8 +26,12 @@ lib.modules.mkIf osConfig.dotnix.profiles.theme.enable {
       # themed by hand
       rofi.enable = false;
       neovim.enable = false;
+
+      librewolf.profileNames = [ "main" ];
     };
   };
+
+  programs.newsboat.extraConfig = lib.modules.mkBefore "color background ${c.base00}";
 
   xdg.configFile = {
     "gowall/config.yml".text = builtins.toJSON {

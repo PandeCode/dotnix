@@ -172,7 +172,6 @@ in
       GTK_USE_PORTAL = "1";
       PYTHONPYCACHEPREFIX = "${config.xdg.cacheHome}/__pycache__";
       TERMINAL = config.dotnix.wm.terminal;
-      BROWSER = "browser.sh";
     };
 
     sessionPath = [
