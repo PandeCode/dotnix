@@ -1,7 +1,3 @@
-# what a machine with a screen gets: audio, bluetooth, touchpad, fonts,
-# the login screen and boot splash, portals. ported from
-# old/modules/wm/{os,sddm,plymouth,wayland/os}.nix and the fonts in
-# old/modules/hosts/packages.nix
 {
   config,
   lib,
@@ -57,6 +53,8 @@ in
       };
     };
 
+    hardware.opentabletdriver.enable = true;
+
     hardware.bluetooth = {
       enable = true;
       powerOnBoot = true;
@@ -90,7 +88,6 @@ in
         themePackages = [ pkgs.plymouth-blahaj-theme ];
       };
 
-      # silent boot
       consoleLogLevel = 0;
       initrd.verbose = false;
       kernelParams = [
@@ -102,7 +99,6 @@ in
         "rd.udev.log_level=3"
         "udev.log_priority=3"
       ];
-      # the boot menu shows for 4 seconds, or on a key press
       loader.timeout = lib.modules.mkForce 4;
     };
 
@@ -137,10 +133,12 @@ in
       sessionVariables.XKB_DEFAULT_OPTIONS = mkIf config.dotnix.wayland.enable "ctrl:nocaps,grp:win_space_toggle";
 
       systemPackages = with pkgs; [
+        alsa-utils
         libnotify
         nautilus
         networkmanagerapplet
         pavucontrol
+        pulseaudio
         sddm-custom-theme
       ];
     };

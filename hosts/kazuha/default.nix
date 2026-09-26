@@ -16,7 +16,19 @@
 
   dotnix = {
     user = "shawn";
-    profiles.desktop.enable = true;
+
+    profiles = {
+      base.enable = true;
+      desktop.enable = true;
+      dev.enable = true;
+      laptop.enable = true;
+    };
+
+    hardware.amd = {
+      enable = true;
+      rocm.enable = true;
+    };
+
     i3.enable = true;
     niri.enable = true;
     river.enable = true;
@@ -29,6 +41,7 @@
       nixd.nixos = ''(builtins.getFlake "${config.dotnix.flakePath}").nixosConfigurations.kazuha.options'';
     };
 
+    coolercontrol.enable = true;
     libys.enable = true;
 
     nix-index-database.comma.enable = true;
@@ -60,6 +73,8 @@
       "xfs"
     ];
   };
+
+  virtualisation.waydroid.enable = true;
 
   zramSwap.enable = true;
   systemd.oomd.enable = true;

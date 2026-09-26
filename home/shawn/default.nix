@@ -4,10 +4,12 @@
 
     # keep-sorted start
     ./desktop.nix
+    ./git.nix
     ./i3.nix
     ./niri.nix
     ./river.nix
     ./screenshot.nix
+    ./shell.nix
     ./theme.nix
     ./wayland.nix
     ./wm.nix

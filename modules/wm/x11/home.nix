@@ -1,6 +1,3 @@
-# home-manager: the part of the shared declaration only x11 window
-# managers use. starts from everything in dotnix.wm; add x11-only commands
-# on top
 { config, lib, ... }:
 
 let

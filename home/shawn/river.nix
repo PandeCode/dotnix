@@ -1,5 +1,3 @@
-# my rill settings, ported from old/modules/wm/river/config.nix. startup
-# and command binds come from wm.nix
 { lib, ... }:
 
 let
@@ -30,7 +28,6 @@ in
     settings = {
       vertical_gap = 9;
       horizontal_gap = 9;
-      # share of the output's width a new window takes
       default_window_width = 0.5;
       # never, always, or single (only when it is the only window)
       center_focused_window = enum "always";
@@ -44,7 +41,6 @@ in
         unfocused_color = rgb 160 160 160;
       };
 
-      # null keeps the default cursor
       cursor = null;
 
       pointer_bindings = [
@@ -61,8 +57,7 @@ in
       ];
     };
 
-    # keys are xkbcommon keysym names; modifiers: shift, ctrl, mod1 (alt),
-    # mod4 (super)
+    # xkbcommon keysym names; mod1 is alt, mod4 is super
     keybindings =
       lib.lists.concatMap (n: [
         (key super (toString n) { focus_workspace_number = n; })

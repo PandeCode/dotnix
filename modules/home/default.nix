@@ -1,4 +1,3 @@
-# home-manager modules, always imported, each off until enabled
 { inputs, ... }:
 
 {

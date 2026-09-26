@@ -126,6 +126,15 @@ let
     };
   };
 
+  amd = nixos {
+    imports = [ self.nixosModules.amd ];
+    dotnix.hardware.amd = {
+      enable = true;
+      # rocm is x86_64 only
+      rocm.enable = pkgs.stdenv.hostPlatform.isx86_64;
+    };
+  };
+
   wm = home {
     imports = [ self.homeModules.wm ];
     dotnix.wm.terminal = "foot";
@@ -185,6 +194,15 @@ in
       "river: enum not written";
     assert lib.asserts.assertMsg (river.home.xdg.configFile ? "river/init") "river: init not written";
     pkgs.runCommandLocal "drop-in-river" { } "touch $out";
+
+  drop-in-amd =
+    assert lib.asserts.assertMsg amd.hardware.graphics.enable32Bit "amd: 32-bit graphics not enabled";
+    assert lib.asserts.assertMsg amd.services.lact.enable "amd: lact not enabled";
+    assert lib.asserts.assertMsg (
+      lib.lists.any (hasInfix "/opt/rocm") amd.systemd.tmpfiles.rules
+      == amd.dotnix.hardware.amd.rocm.enable
+    ) "amd: /opt/rocm linked when it should not be, or not linked";
+    pkgs.runCommandLocal "drop-in-amd" { } "touch $out";
 
   drop-in-wm =
     assert lib.asserts.assertMsg (wm.dotnix.wm.terminal == "foot") "wm: declaration not readable";

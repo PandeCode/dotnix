@@ -1,4 +1,3 @@
-# everything that works in every class: nixos, wsl, iso and darwin
 {
   imports = [
     # keep-sorted start

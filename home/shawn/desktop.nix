@@ -1,5 +1,3 @@
-# programs every session uses: terminal and launcher. ported from
-# old/modules/wm/home.nix and old/modules/programs/rofi.nix
 { pkgs, ... }:
 
 let

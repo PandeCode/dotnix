@@ -14,9 +14,7 @@ in
     inherit (nixpkgs) lib;
   };
 
-  # one line per machine, the defaults are arch = "x86_64", class = "nixos".
-  # classes: nixos, wsl, iso, darwin (darwin hosts go in
-  # darwinConfigurations). see README.md for adding one
+  # darwin hosts go in darwinConfigurations
   nixosConfigurations = mkHosts {
     # keep-sorted start block=yes newline_separated=yes
     kazuha = { };
@@ -26,6 +24,7 @@ in
   # drop-in modules, usable without the rest of this repo
   nixosModules = {
     # keep-sorted start
+    amd = ../hardware/amd.nix;
     i3 = ../wm/i3/nixos.nix;
     niri = ../wm/niri/nixos.nix;
     river = ../wm/river/nixos.nix;

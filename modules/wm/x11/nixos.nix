@@ -1,5 +1,3 @@
-# what every x11 session needs on the system side. x11 window managers turn
-# this on
 { config, lib, ... }:
 
 {

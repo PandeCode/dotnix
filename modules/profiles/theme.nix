@@ -1,5 +1,3 @@
-# my theme: stylix with onedark, OpenDyslexic and the bridge wallpaper.
-# ported from old/modules/stylix/common.nix and old/modules/hosts/stylix.nix
 {
   config,
   lib,

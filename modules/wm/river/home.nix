@@ -1,6 +1,3 @@
-# home-manager: rill, the window manager for river 0.4, and its
-# config.zon. startup commands and command binds start from the shared wm
-# declaration (dotnix.wm); everything else goes in `settings`.
 # needs toZON (nixutils.lib.toZON): the flake exports this module with it
 # applied
 { toZON }:

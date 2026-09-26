@@ -1,4 +1,3 @@
-# option types shared by the wm modules
 { lib }:
 
 let
@@ -7,7 +6,6 @@ let
 in
 
 {
-  # key combos bound more than once in a list of binds
   duplicateBinds =
     binds:
     let

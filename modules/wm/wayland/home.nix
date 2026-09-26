@@ -1,6 +1,3 @@
-# home-manager: the part of the shared declaration only wayland window
-# managers use. starts from everything in dotnix.wm; add wayland-only
-# commands on top
 { config, lib, ... }:
 
 let

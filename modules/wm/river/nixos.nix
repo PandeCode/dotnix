@@ -1,5 +1,4 @@
-# river 0.4, the compositor. the window manager (rill) runs from
-# ~/.config/river/init, see home.nix
+# rill, the window manager, starts from ~/.config/river/init (home.nix)
 {
   config,
   lib,

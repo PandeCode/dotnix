@@ -1,4 +1,3 @@
-# one screenshot command for every session, bound in wm.nix
 { pkgs, ... }:
 
 {

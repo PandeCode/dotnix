@@ -1,5 +1,3 @@
-# what my x11 sessions use, ported from old/modules/wm/x/home.nix and
-# old/modules/programs/greenclip.nix
 {
   config,
   osConfig,

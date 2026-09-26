@@ -1,6 +1,3 @@
-# stylix on my side: icons, the targets I theme myself, color files for
-# scripts, and colors for the wms stylix has no target for. ported from
-# old/modules/homes/stylix.nix
 {
   config,
   lib,

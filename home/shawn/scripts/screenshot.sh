@@ -1,5 +1,3 @@
-# screenshot screen|area: saves to ~/Pictures/Screenshots, copies the image
-# and shows a notification. grim and slurp on wayland, maim on x11
 mode=${1:-screen}
 
 case $mode in

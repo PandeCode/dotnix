@@ -1,6 +1,3 @@
-# home-manager: niri's config.kdl, generated from nix. startup commands,
-# command binds and floating windows start from the shared wm declaration
-# (dotnix.wm); everything else goes in `settings`
 {
   config,
   lib,

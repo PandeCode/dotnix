@@ -1,5 +1,3 @@
-# what my wayland sessions use, ported from old/modules/wm/wayland/*.nix,
-# old/modules/programs/swaync.nix and old/modules/programs/eww.nix
 { pkgs, ... }:
 
 {

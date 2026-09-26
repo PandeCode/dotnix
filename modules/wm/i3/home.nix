@@ -1,7 +1,3 @@
-# home-manager: i3, from the shared wm declaration (dotnix.wm). fills
-# home-manager's own xsession.windowManager.i3 options: command binds,
-# startup, terminal, floating/sticky/borderless windows, and optionally
-# workspace assignments. everything else is set there directly
 { config, lib, ... }:
 
 let

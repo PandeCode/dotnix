@@ -1,5 +1,3 @@
-# what every wayland session needs on the system side. wayland window
-# managers turn this on
 { config, lib, ... }:
 
 {

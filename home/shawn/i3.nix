@@ -1,5 +1,3 @@
-# my i3 settings, ported from old/modules/wm/i3/home.nix. startup, command
-# binds and window rules come from wm.nix
 {
   config,
   lib,

@@ -1,5 +1,3 @@
-# my niri settings, ported from old/modules/wm/niri/home.nix (c0d426a).
-# startup, command binds and floating windows come from wm.nix
 { lib, pkgs, ... }:
 
 let

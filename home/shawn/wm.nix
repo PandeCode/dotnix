@@ -1,4 +1,3 @@
-# my window manager declaration: every wm takes its defaults from here
 { config, pkgs, ... }:
 
 let
@@ -18,8 +17,7 @@ let
     locked = true;
   };
 
-  # the same key does the same thing in every session, with the program
-  # that fits it. declared once here, split into the x11 and wayland layers
+  # same key, same action in every session, with the program that fits it
   sessionBinds = [
     (bind [ "Super" ] "b" {
       x11 = "boomer";
@@ -205,7 +203,6 @@ in
 
       binds =
         let
-          # scale the first connected output
           scale =
             factor: ''xrandr --output "$(xrandr | awk '/ connected/ { print $1; exit }')" --scale ${factor}'';
         in

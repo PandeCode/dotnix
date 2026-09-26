@@ -10,8 +10,8 @@
     ./users.nix
     # keep-sorted end
 
-    # always imported, each is off until a host enables it
     # keep-sorted start
+    ../hardware/amd.nix
     ../wm/i3/nixos.nix
     ../wm/niri/nixos.nix
     ../wm/river/nixos.nix

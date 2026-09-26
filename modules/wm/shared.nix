@@ -1,6 +1,3 @@
-# home-manager: what every window manager shares. declare it once and the
-# wm modules (niri, i3, river, ...) take their defaults from here. a drop-in
-# module on its own: it only declares options
 { lib, ... }:
 
 let

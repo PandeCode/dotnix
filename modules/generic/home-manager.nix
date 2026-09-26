@@ -1,5 +1,4 @@
-# home-manager as a module of the system, so one switch builds both. the
-# class module imports home-manager's nixos or darwin module
+# a module of the system, so one switch builds both
 {
   config,
   inputs,

@@ -1,0 +1,24 @@
+# Digilent
+ATTRS{idVendor}=="1443", MODE:="666"
+ACTION=="add", ATTRS{idVendor}=="0403", ATTRS{manufacturer}=="Digilent", MODE:="666"
+
+# Xilinx: unbind ftdi_sio so the Xilinx tools can claim the device
+ATTRS{idVendor}=="0403", ATTRS{bInterfaceNumber}=="00",\
+PROGRAM="/bin/sh -c '\
+    echo -n $id:1.0 > /sys/bus/usb/drivers/ftdi_sio/unbind;\
+    echo -n $id:1.1 > /sys/bus/usb/drivers/ftdi_sio/unbind\
+'"
+ACTION=="add", ATTRS{idVendor}=="0403", MODE:="666"
+ATTR{idVendor}=="03fd", ATTR{idProduct}=="0008", MODE="666"
+ATTR{idVendor}=="03fd", ATTR{idProduct}=="0007", MODE="666"
+ATTR{idVendor}=="03fd", ATTR{idProduct}=="0009", MODE="666"
+ATTR{idVendor}=="03fd", ATTR{idProduct}=="000d", MODE="666"
+ATTR{idVendor}=="03fd", ATTR{idProduct}=="000f", MODE="666"
+ATTR{idVendor}=="03fd", ATTR{idProduct}=="0013", MODE="666"
+ATTR{idVendor}=="03fd", ATTR{idProduct}=="0015", MODE="666"
+
+# TI MSP430
+SUBSYSTEM=="usb", ATTR{idVendor}=="0451", MODE="0666"
+
+# Arduino
+KERNEL=="ttyACM[0-9]*", MODE="0666"
