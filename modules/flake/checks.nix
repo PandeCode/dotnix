@@ -98,6 +98,34 @@ let
     };
   };
 
+  i3 = {
+    nixos = nixos {
+      imports = [ self.nixosModules.i3 ];
+      dotnix.i3.enable = true;
+    };
+
+    home = home {
+      imports = [ self.homeModules.i3 ];
+      dotnix = {
+        wm = {
+          binds = [
+            {
+              mods = [ "Super" ];
+              key = "Return";
+              exec = "foot";
+            }
+          ];
+          rules = {
+            float = [ "title:Picture-in-picture" ];
+            pin = [ "feh" ];
+            workspaces."2" = [ "firefox" ];
+          };
+        };
+        i3.enable = true;
+      };
+    };
+  };
+
   wm = home {
     imports = [ self.homeModules.wm ];
     dotnix.wm.terminal = "foot";
@@ -106,6 +134,29 @@ in
 
 {
   formatting = self.formatter.${system}.check self;
+}
+# window managers are linux only
+// lib.attrsets.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+  drop-in-i3 =
+    let
+      inherit (i3.home.xsession.windowManager.i3) config;
+    in
+    assert lib.asserts.assertMsg i3.nixos.services.xserver.windowManager.i3.enable
+      "i3: session not enabled";
+    assert lib.asserts.assertMsg i3.nixos.services.xserver.enable "i3: x11 not enabled";
+    assert lib.asserts.assertMsg (
+      config.keybindings."Mod4+Return" == "exec --no-startup-id foot"
+    ) "i3: bind from dotnix.wm missing";
+    assert lib.asserts.assertMsg (lib.lists.elem {
+      title = "Picture-in-picture";
+    } config.floating.criteria) "i3: floating rule from dotnix.wm missing";
+    assert lib.asserts.assertMsg (lib.lists.any (
+      c: c.command == "sticky enable" && c.criteria.class or "" == "feh"
+    ) config.window.commands) "i3: sticky rule from dotnix.wm missing";
+    assert lib.asserts.assertMsg (
+      config.assigns == { }
+    ) "i3: workspaces assigned without assignWorkspaces";
+    pkgs.runCommandLocal "drop-in-i3" { } "touch $out";
 
   drop-in-niri =
     assert lib.asserts.assertMsg niri.nixos.programs.niri.enable "niri: session not enabled";

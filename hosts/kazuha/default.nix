@@ -16,6 +16,7 @@
 
   dotnix = {
     user = "shawn";
+    i3.enable = true;
     niri.enable = true;
     river.enable = true;
   };

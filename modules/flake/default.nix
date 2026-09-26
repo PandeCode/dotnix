@@ -26,18 +26,22 @@ in
   # drop-in modules, usable without the rest of this repo
   nixosModules = {
     # keep-sorted start
+    i3 = ../wm/i3/nixos.nix;
     niri = ../wm/niri/nixos.nix;
     river = ../wm/river/nixos.nix;
     wayland = ../wm/wayland/nixos.nix;
+    x11 = ../wm/x11/nixos.nix;
     # keep-sorted end
   };
 
   homeModules = {
     # keep-sorted start
+    i3 = ../wm/i3/home.nix;
     niri = ../wm/niri/home.nix;
     river = import ../wm/river/home.nix { inherit (nixutils.lib) toZON; };
     wayland = ../wm/wayland/home.nix;
     wm = ../wm/shared.nix;
+    x11 = ../wm/x11/home.nix;
     # keep-sorted end
   };
 

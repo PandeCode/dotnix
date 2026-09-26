@@ -1,8 +1,16 @@
 # my window manager declaration: every wm takes its defaults from here
-{ config, ... }:
+{ config, pkgs, ... }:
 
 let
   inherit (config.dotnix.wm) terminal shell explorer;
+
+  rofiClip = ''rofi -modi "clipboard:greenclip print" -show clipboard -run-command '{cmd}' -theme /tmp/launcher.rasi'';
+  greenclip = {
+    copy = rofiClip;
+    # i3 runs binds through sh, so && works without a wrapper
+    paste = ''${rofiClip} && sleep 0.5 && xdotool type "$(xclip -o -selection clipboard)"'';
+    restart = "pkill greenclip && greenclip clear && greenclip daemon";
+  };
 
   bind = mods: key: exec: { inherit mods key exec; };
   locked = mods: key: exec: {
@@ -28,7 +36,6 @@ in
       (bind [ "Super" ] "Return" "${terminal} -e ${shell}")
       (bind [ "Super" ] "e" explorer)
       (bind [ "Super" "Shift" ] "g" "gif.sh")
-      (bind [ "Super" "Ctrl" ] "v" "clipimg.sh")
       (bind [ "Super" "Alt" "Ctrl" ] "f" "_tool_riot")
       (bind [ "Super" ] "p" "_tool_search")
       (bind [ "Super" "Shift" ] "c" "rofi-calc.sh")
@@ -152,6 +159,35 @@ in
       };
     };
 
+    x11 = {
+      startup = [
+        "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
+        "xmodmap ~/.Xmodmap"
+        "greenclip daemon"
+        "dunst"
+        "bg.sh last"
+        "picom -b"
+      ];
+
+      binds =
+        let
+          # scale the first connected output
+          scale =
+            factor: ''xrandr --output "$(xrandr | awk '/ connected/ { print $1; exit }')" --scale ${factor}'';
+        in
+        [
+          (bind [ ] "Print" "maim -s | xclip -selection clipboard -t image/png")
+          (bind [ "Super" ] "d" "dunstctl context")
+          (bind [ "Super" "Shift" ] "d" "dunstctl close-all")
+          (bind [ "Super" ] "b" "boomer")
+          (bind [ "Super" ] "v" greenclip.copy)
+          (bind [ "Super" "Shift" ] "v" greenclip.paste)
+          (bind [ "Super" "Ctrl" ] "v" greenclip.restart)
+          (bind [ "Super" "Shift" ] "minus" (scale "0.8x0.8"))
+          (bind [ "Super" "Shift" ] "plus" (scale "1.2x1.2"))
+        ];
+    };
+
     wayland = {
       startup = [
         "wl-paste --type text --watch cliphist store"
@@ -163,6 +199,7 @@ in
       ];
 
       binds = [
+        (bind [ "Super" "Ctrl" ] "v" "clipimg.sh")
         (bind [ "Super" ] "n" "swaync-client -t -sw")
         (bind [ "Super" ] "b" "woomer")
         (bind [ "Super" "Ctrl" "Shift" ] "c" "hyprpicker -a")

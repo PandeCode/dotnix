@@ -15,7 +15,7 @@
 let
   inherit (lib.options) mkEnableOption mkOption mkPackageOption;
   inherit (lib) types;
-  inherit (import ../types.nix { inherit lib; }) bind;
+  inherit (import ../types.nix { inherit lib; }) bind duplicateBinds;
 
   cfg = config.dotnix.river;
 
@@ -111,6 +111,13 @@ in
   };
 
   config = lib.modules.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = duplicateBinds cfg.binds == [ ];
+        message = "river: bound more than once: ${lib.strings.concatStringsSep ", " (duplicateBinds cfg.binds)}";
+      }
+    ];
+
     dotnix.river = {
       zon = toZON document;
       inherit (config.dotnix.wm.wayland) startup binds;

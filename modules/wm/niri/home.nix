@@ -17,7 +17,7 @@ let
     removePrefix
     ;
   inherit (lib) types;
-  inherit (import ../types.nix { inherit lib; }) bind;
+  inherit (import ../types.nix { inherit lib; }) bind duplicateBinds;
 
   cfg = config.dotnix.niri;
 
@@ -145,6 +145,13 @@ in
   };
 
   config = lib.modules.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = duplicateBinds cfg.binds == [ ];
+        message = "niri: bound more than once: ${lib.strings.concatStringsSep ", " (duplicateBinds cfg.binds)}";
+      }
+    ];
+
     dotnix.niri = {
       kdl = lib.hm.generators.toKDL { escapeBackslashes = true; } document;
 

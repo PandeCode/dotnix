@@ -7,6 +7,16 @@ let
 in
 
 {
+  # key combos bound more than once in a list of binds
+  duplicateBinds =
+    binds:
+    let
+      combo =
+        b: lib.strings.concatStringsSep "+" (lib.lists.sort lib.trivial.lessThan b.mods ++ [ b.key ]);
+      combos = map combo binds;
+    in
+    lib.lists.unique (lib.lists.filter (c: lib.lists.count (x: x == c) combos > 1) combos);
+
   bind = types.submodule {
     options = {
       mods = mkOption {

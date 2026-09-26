@@ -1,0 +1,69 @@
+# what my x11 sessions use, ported from old/modules/wm/x/home.nix and
+# old/modules/programs/greenclip.nix
+{
+  config,
+  osConfig,
+  pkgs,
+  ...
+}:
+
+{
+  services.dunst = {
+    enable = true;
+    settings.global = {
+      dmenu = "dmenu -p dunst:";
+      browser = "xdg-open";
+    };
+  };
+
+  home = {
+    # caps lock is control, shift + caps lock is caps lock
+    file.".Xmodmap".text = ''
+      clear lock
+      clear control
+      add control = Caps_Lock Control_L Control_R
+      keycode 66 = Control_L Caps_Lock NoSymbol NoSymbol
+    '';
+
+    packages = with pkgs; [
+      boomer
+      dmenu
+      feh
+      grim
+      haskellPackages.greenclip
+      libxcvt
+      maim
+      paperview
+      picom-pijulius
+      scrot
+      slop
+      slurp
+      xclip
+      xdo
+      xdotool
+      xmenu
+      xmodmap
+      xtitle
+      xwinwrap
+    ];
+  };
+
+  xdg.configFile = {
+    # linked, not copied: edit it in the repo and restart picom
+    "picom/picom.conf".source =
+      config.lib.file.mkOutOfStoreSymlink "${osConfig.dotnix.flakePath}/config/picom/picom.conf";
+
+    "greenclip.toml".text = ''
+      [greenclip]
+      history_file = "${config.xdg.cacheHome}/greenclip.history"
+      max_history_length = 50
+      max_selection_size_bytes = 0
+      trim_space_from_selection = true
+      use_primary_selection_as_input = false
+      blacklisted_applications = []
+      enable_image_support = true
+      image_cache_directory = "/tmp/greenclip"
+      static_history = []
+    '';
+  };
+}
