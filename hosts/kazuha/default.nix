@@ -38,18 +38,26 @@
     river.enable = true;
   };
 
-  programs = {
-    hermes = {
-      enable = true;
-      defaultEditor = true;
+  programs =
+    let
       nixd.nixos = ''(builtins.getFlake "${config.dotnix.flakePath}").nixosConfigurations.kazuha.options'';
+    in
+    {
+      hermes = {
+        enable = true;
+        defaultEditor = true;
+        inherit nixd;
+      };
+
+      coolercontrol.enable = true;
+
+      libys = {
+        enable = true;
+        inherit nixd;
+      };
+
+      nix-index-database.comma.enable = true;
     };
-
-    coolercontrol.enable = true;
-    libys.enable = true;
-
-    nix-index-database.comma.enable = true;
-  };
 
   boot = {
     tmp.cleanOnBoot = true;

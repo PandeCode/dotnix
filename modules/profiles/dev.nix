@@ -3,9 +3,11 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = config.dotnix.profiles.dev;
-in {
+in
+{
   options.dotnix.profiles.dev.enable = lib.options.mkEnableOption "my development setup";
 
   config = lib.modules.mkIf cfg.enable {
@@ -19,7 +21,7 @@ in {
       };
     };
 
-    users.users.${config.dotnix.user}.extraGroups = ["docker"];
+    users.users.${config.dotnix.user}.extraGroups = [ "docker" ];
 
     # FPGA boards, TI launchpads, arduinos
     services.udev.extraRules = builtins.readFile ../../config/udev/60-boards.rules;
@@ -158,21 +160,20 @@ in {
     environment.systemPackages = with pkgs; [
       # keep-sorted start
       (python3.withPackages (
-        ps:
-          with ps; [
-            # keep-sorted start
-            ds4drv
-            matplotlib
-            numpy
-            pandas
-            pygments
-            requests
-            scipy
-            sympy
-            uncertainties
-            youtube-transcript-api
-            # keep-sorted end
-          ]
+        ps: with ps; [
+          # keep-sorted start
+          ds4drv
+          matplotlib
+          numpy
+          pandas
+          pygments
+          requests
+          scipy
+          sympy
+          uncertainties
+          youtube-transcript-api
+          # keep-sorted end
+        ]
       ))
       android-tools
       appimage-run

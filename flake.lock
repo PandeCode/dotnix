@@ -267,11 +267,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790455029,
-        "narHash": "sha256-urKsJShT31GXzuodxMpjWilbOzfL5Lo2IVaceCWZkL0=",
+        "lastModified": 1790470075,
+        "narHash": "sha256-+PY23zVSK8O1n9xrrHjEPCmxqqhlHy09tnzcHI5rAEE=",
         "owner": "PandeCode",
         "repo": "libys",
-        "rev": "6b701a38757667b8941bcaf5c6f4300fb9650ae7",
+        "rev": "c38b5b3f8056779786b23373ba77f5b88cf36b88",
         "type": "github"
       },
       "original": {
