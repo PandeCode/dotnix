@@ -16,6 +16,10 @@ boot *args:
 build *args:
     nh os build {{ flake }} {{ args }}
 
+# build the live system, into result/iso/
+iso *args:
+    nix build {{ flake }}#nixosConfigurations.iso.config.system.build.isoImage {{ args }}
+
 # evaluate every host and run the checks
 check *args:
     nix flake check {{ args }}

@@ -15,15 +15,58 @@ in
   options.dotnix.profiles.base.enable = lib.options.mkEnableOption "what every machine of mine gets";
 
   config = mkIf cfg.enable {
-    programs = {
-      # login shells stay bash; the terminal starts fish
-      fish.enable = true;
-      gnupg.agent = {
-        enable = true;
-        enableSSHSupport = true;
-      };
-      mtr.enable = true;
+    time.timeZone = mkDefault "America/Toronto";
+
+    i18n = {
+      defaultLocale = "en_US.UTF-8";
+      extraLocaleSettings = lib.attrsets.genAttrs [
+        "LC_ADDRESS"
+        "LC_IDENTIFICATION"
+        "LC_MEASUREMENT"
+        "LC_MONETARY"
+        "LC_NAME"
+        "LC_NUMERIC"
+        "LC_PAPER"
+        "LC_TELEPHONE"
+        "LC_TIME"
+      ] (_: "en_US.UTF-8");
     };
+
+    networking.networkmanager = {
+      enable = true;
+      plugins = [ pkgs.networkmanager-openvpn ];
+    };
+
+    boot.tmp.cleanOnBoot = true;
+    zramSwap.enable = true;
+    systemd.oomd.enable = true;
+
+    programs =
+      let
+        nixd.nixos = ''(builtins.getFlake "${config.dotnix.flakePath}").nixosConfigurations.${config.networking.hostName}.options'';
+      in
+      {
+        hermes = {
+          enable = true;
+          defaultEditor = true;
+          inherit nixd;
+        };
+
+        libys = {
+          enable = true;
+          inherit nixd;
+        };
+
+        nix-index-database.comma.enable = true;
+
+        # login shells stay bash; the terminal starts fish
+        fish.enable = true;
+        gnupg.agent = {
+          enable = true;
+          enableSSHSupport = true;
+        };
+        mtr.enable = true;
+      };
 
     services.ananicy = {
       enable = true;

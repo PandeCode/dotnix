@@ -20,6 +20,7 @@
     inputs.hermes.nixosModules.default
     inputs.home-manager.nixosModules.home-manager
     inputs.libys.nixosModules.default
+    inputs.nix-index-database.nixosModules.default
     inputs.stylix.nixosModules.stylix
     # keep-sorted end
   ];

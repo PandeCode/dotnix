@@ -3,6 +3,7 @@
 {
   imports = [
     # keep-sorted start
+    ./apps.nix
     ./base.nix
     ./desktop.nix
     ./dev.nix

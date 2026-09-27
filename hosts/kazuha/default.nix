@@ -1,6 +1,5 @@
 # Framework 16, AMD Ryzen AI 300
 {
-  config,
   inputs,
   lib,
   pkgs,
@@ -11,13 +10,13 @@
   imports = [
     ./hardware.nix
     inputs.nixos-hardware.nixosModules.framework-16-amd-ai-300-series
-    inputs.nix-index-database.nixosModules.default
   ];
 
   dotnix = {
     user = "shawn";
 
     profiles = {
+      apps.enable = true;
       base.enable = true;
       desktop.enable = true;
       dev.enable = true;
@@ -32,36 +31,11 @@
       enable = true;
       rocm.enable = true;
     };
-
-    i3.enable = true;
-    niri.enable = true;
-    river.enable = true;
   };
 
-  programs =
-    let
-      nixd.nixos = ''(builtins.getFlake "${config.dotnix.flakePath}").nixosConfigurations.kazuha.options'';
-    in
-    {
-      hermes = {
-        enable = true;
-        defaultEditor = true;
-        inherit nixd;
-      };
-
-      coolercontrol.enable = true;
-
-      libys = {
-        enable = true;
-        inherit nixd;
-      };
-
-      nix-index-database.comma.enable = true;
-    };
+  programs.coolercontrol.enable = true;
 
   boot = {
-    tmp.cleanOnBoot = true;
-
     loader = {
       systemd-boot.enable = false;
       efi.canTouchEfiVariables = true;
@@ -88,9 +62,6 @@
 
   virtualisation.waydroid.enable = true;
 
-  zramSwap.enable = true;
-  systemd.oomd.enable = true;
-
   swapDevices = [
     {
       device = "/var/lib/swapfile";
@@ -98,30 +69,8 @@
     }
   ];
 
-  networking.networkmanager = {
-    enable = true;
-    plugins = [ pkgs.networkmanager-openvpn ];
-  };
-
   # the laptop screen, for screen sharing under river
   xdg.portal.wlr.settings.screencast.output_name = "eDP-1";
-
-  time.timeZone = "America/Toronto";
-
-  i18n = {
-    defaultLocale = "en_US.UTF-8";
-    extraLocaleSettings = lib.attrsets.genAttrs [
-      "LC_ADDRESS"
-      "LC_IDENTIFICATION"
-      "LC_MEASUREMENT"
-      "LC_MONETARY"
-      "LC_NAME"
-      "LC_NUMERIC"
-      "LC_PAPER"
-      "LC_TELEPHONE"
-      "LC_TIME"
-    ] (_: "en_US.UTF-8");
-  };
 
   # the release this machine was installed with, not the current one
   system.stateVersion = "25.05";

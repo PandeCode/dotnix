@@ -118,8 +118,6 @@ in
     };
 
     programs = {
-      kdeconnect.enable = true;
-
       nautilus-open-any-terminal = {
         enable = true;
         inherit (home.dotnix.wm) terminal;
@@ -169,6 +167,11 @@ in
         jetbrains-mono
       ]);
 
-    dotnix.profiles.theme.enable = mkDefault true;
+    dotnix = {
+      profiles.theme.enable = mkDefault true;
+      i3.enable = mkDefault true;
+      niri.enable = mkDefault true;
+      river.enable = mkDefault true;
+    };
   };
 }

@@ -17,6 +17,8 @@ in
   # darwin hosts go in darwinConfigurations
   nixosConfigurations = mkHosts {
     # keep-sorted start block=yes newline_separated=yes
+    iso.class = "iso";
+
     kazuha = { };
     # keep-sorted end
   };

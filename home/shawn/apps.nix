@@ -1,5 +1,7 @@
 {
   config,
+  lib,
+  osConfig,
   pkgs,
   ...
 }:
@@ -35,7 +37,7 @@ let
   };
 in
 
-{
+lib.modules.mkIf osConfig.dotnix.profiles.apps.enable {
   programs = {
     vesktop = {
       enable = true;
