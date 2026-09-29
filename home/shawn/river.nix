@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ lib, osConfig, ... }:
 
 let
   enum = name: { _enum = name; };
@@ -19,7 +19,7 @@ let
   key = modifiers: key: action: { inherit key modifiers action; };
 in
 
-{
+lib.modules.mkIf osConfig.dotnix.river.enable {
   dotnix.river = {
     enable = true;
 

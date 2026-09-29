@@ -1,4 +1,6 @@
 {
+  lib,
+  osConfig,
   pkgs,
   self,
   ...
@@ -15,7 +17,7 @@ let
     };
 in
 
-{
+lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
   home.packages = with pkgs; [
     c-tools
     scripts

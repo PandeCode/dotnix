@@ -11,6 +11,8 @@
     ./gaming.nix
     ./laptop.nix
     ./security.nix
+    ./server.nix
+    ./ssh.nix
     ./theme.nix
     # keep-sorted end
   ];

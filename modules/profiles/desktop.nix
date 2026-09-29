@@ -6,172 +6,180 @@
 }:
 
 let
-  inherit (lib.modules) mkDefault mkIf;
+  inherit (lib.modules) mkDefault mkIf mkMerge;
 
   cfg = config.dotnix.profiles.desktop;
   home = config.home-manager.users.${config.dotnix.user};
 in
 
 {
-  options.dotnix.profiles.desktop.enable = lib.options.mkEnableOption "my desktop";
+  options.dotnix.profiles.desktop = {
+    enable = lib.options.mkEnableOption "my desktop";
+    minimal = lib.options.mkEnableOption "only i3, a terminal and librewolf";
+  };
 
-  config = mkIf cfg.enable {
-    security.rtkit.enable = true;
+  config = mkIf cfg.enable (mkMerge [
+    {
+      security.rtkit.enable = true;
 
-    services = {
-      pipewire = {
-        enable = true;
-        alsa = {
+      services = {
+        pipewire = {
           enable = true;
-          support32Bit = true;
+          alsa = {
+            enable = true;
+            support32Bit = true;
+          };
+          pulse.enable = true;
+          jack.enable = true;
         };
-        pulse.enable = true;
-        jack.enable = true;
-      };
 
-      libinput = {
-        enable = true;
-        touchpad = {
-          middleEmulation = true;
-          disableWhileTyping = false;
-          tapping = true;
-          additionalOptions = ''
-            Option "PalmDetection" "on"
-            Option "TappingButtonMap" "lmr"
-          '';
+        libinput = {
+          enable = true;
+          touchpad = {
+            middleEmulation = true;
+            disableWhileTyping = false;
+            tapping = true;
+            additionalOptions = ''
+              Option "PalmDetection" "on"
+              Option "TappingButtonMap" "lmr"
+            '';
+          };
+        };
+
+        displayManager.sddm = {
+          enable = true;
+          package = pkgs.kdePackages.sddm;
+          wayland.enable = true;
+          theme = "sddm-custom-theme";
+          extraPackages = [ pkgs.sddm-custom-theme ];
         };
       };
 
-      blueman.enable = true;
-
-      displayManager.sddm = {
+      xdg.portal = {
         enable = true;
-        package = pkgs.kdePackages.sddm;
-        wayland.enable = true;
-        theme = "sddm-custom-theme";
-        extraPackages = [ pkgs.sddm-custom-theme ];
+        xdgOpenUsePortal = true;
+        extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
       };
-    };
 
-    hardware.opentabletdriver.enable = true;
+      programs.ydotool = mkIf config.dotnix.wayland.enable {
+        enable = true;
+        group = "users";
+      };
 
-    hardware.bluetooth = {
-      enable = true;
-      powerOnBoot = true;
-      settings = {
-        General = {
-          Enable = "Source,Sink,Media,Socket";
-          # battery levels of headsets; the arch wiki warns it can be buggy
-          Experimental = true;
-          # faster reconnects, costs some power
-          FastConnectable = true;
+      environment = {
+        sessionVariables.XKB_DEFAULT_OPTIONS = mkIf config.dotnix.wayland.enable "ctrl:nocaps,grp:win_space_toggle";
+
+        systemPackages = with pkgs; [
+          alsa-utils
+          libnotify
+          networkmanagerapplet
+          pavucontrol
+          pulseaudio
+          sddm-custom-theme
+        ];
+      };
+
+      fonts.packages =
+        (with pkgs; [
+          fira-code
+          fira-code-symbols
+          libertinus
+          liberation_ttf
+          noto-fonts
+          noto-fonts-cjk-sans
+          noto-fonts-color-emoji
+        ])
+        ++ (with pkgs.nerd-fonts; [
+          comic-shanns-mono
+          dejavu-sans-mono
+          fantasque-sans-mono
+          fira-code
+          fira-mono
+          jetbrains-mono
+        ]);
+
+      dotnix = {
+        profiles.theme.enable = mkDefault true;
+        i3.enable = mkDefault true;
+        niri.enable = mkDefault (!cfg.minimal);
+        river.enable = mkDefault (!cfg.minimal);
+      };
+    }
+
+    (mkIf (!cfg.minimal) {
+      services.blueman.enable = true;
+
+      hardware.opentabletdriver.enable = true;
+
+      hardware.bluetooth = {
+        enable = true;
+        powerOnBoot = true;
+        settings = {
+          General = {
+            Enable = "Source,Sink,Media,Socket";
+            # battery levels of headsets; the arch wiki warns it can be buggy
+            Experimental = true;
+            # faster reconnects, costs some power
+            FastConnectable = true;
+          };
+          Policy.AutoEnable = true;
         };
-        Policy.AutoEnable = true;
-      };
-    };
-
-    # media keys on bluetooth headsets
-    systemd.user.services.mpris-proxy = {
-      description = "Mpris proxy";
-      after = [
-        "network.target"
-        "sound.target"
-      ];
-      wantedBy = [ "default.target" ];
-      serviceConfig.ExecStart = "${pkgs.bluez}/bin/mpris-proxy";
-    };
-
-    boot = {
-      plymouth = {
-        enable = true;
-        theme = "blahaj";
-        themePackages = [ pkgs.plymouth-blahaj-theme ];
       };
 
-      consoleLogLevel = 0;
-      initrd.verbose = false;
-      kernelParams = [
-        "quiet"
-        "splash"
-        "boot.shell_on_fail"
-        "loglevel=3"
-        "rd.systemd.show_status=false"
-        "rd.udev.log_level=3"
-        "udev.log_priority=3"
-      ];
-      loader.timeout = lib.modules.mkForce 4;
-    };
+      # media keys on bluetooth headsets
+      systemd.user.services.mpris-proxy = {
+        description = "Mpris proxy";
+        after = [
+          "network.target"
+          "sound.target"
+        ];
+        wantedBy = [ "default.target" ];
+        serviceConfig.ExecStart = "${pkgs.bluez}/bin/mpris-proxy";
+      };
 
-    xdg.portal = {
-      enable = true;
-      xdgOpenUsePortal = true;
-      extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+      boot = {
+        plymouth = {
+          enable = true;
+          theme = "blahaj";
+          themePackages = [ pkgs.plymouth-blahaj-theme ];
+        };
+
+        consoleLogLevel = 0;
+        initrd.verbose = false;
+        kernelParams = [
+          "quiet"
+          "splash"
+          "boot.shell_on_fail"
+          "loglevel=3"
+          "rd.systemd.show_status=false"
+          "rd.udev.log_level=3"
+          "udev.log_priority=3"
+        ];
+        loader.timeout = lib.modules.mkForce 4;
+      };
 
       # screen sharing under river; the output is set per host
-      wlr.settings.screencast = {
+      xdg.portal.wlr.settings.screencast = {
         max_fps = 30;
         exec_before = "disable_notifications.sh";
         exec_after = "enable_notifications.sh";
         chooser_type = "simple";
         chooser_cmd = "${lib.meta.getExe pkgs.slurp} -f 'Monitor: %o' -or";
       };
-    };
 
-    programs = {
-      nautilus-open-any-terminal = {
+      programs.nautilus-open-any-terminal = {
         enable = true;
         inherit (home.dotnix.wm) terminal;
       };
 
-      ydotool = mkIf config.dotnix.wayland.enable {
-        enable = true;
-        group = "users";
-      };
-    };
-
-    environment = {
-      sessionVariables.XKB_DEFAULT_OPTIONS = mkIf config.dotnix.wayland.enable "ctrl:nocaps,grp:win_space_toggle";
-
-      systemPackages = with pkgs; [
-        alsa-utils
+      environment.systemPackages = with pkgs; [
         gparted
-        libnotify
         linux-wifi-hotspot
         mesa-demos
         nautilus
-        networkmanagerapplet
-        pavucontrol
-        pulseaudio
-        sddm-custom-theme
         virtualglLib
         vulkan-tools
       ];
-    };
-
-    fonts.packages =
-      (with pkgs; [
-        fira-code
-        fira-code-symbols
-        libertinus
-        liberation_ttf
-        noto-fonts
-        noto-fonts-cjk-sans
-        noto-fonts-color-emoji
-      ])
-      ++ (with pkgs.nerd-fonts; [
-        comic-shanns-mono
-        dejavu-sans-mono
-        fantasque-sans-mono
-        fira-code
-        fira-mono
-        jetbrains-mono
-      ]);
-
-    dotnix = {
-      profiles.theme.enable = mkDefault true;
-      i3.enable = mkDefault true;
-      niri.enable = mkDefault true;
-      river.enable = mkDefault true;
-    };
-  };
+    })
+  ]);
 }

@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  osConfig,
   pkgs,
   ...
 }:
@@ -46,7 +47,7 @@ let
   '';
 in
 
-{
+lib.modules.mkIf osConfig.dotnix.i3.enable {
   dotnix.i3.enable = true;
 
   xdg.configFile."i3status-rs/xconfig.toml".text = lib.strings.concatStringsSep "\n" [

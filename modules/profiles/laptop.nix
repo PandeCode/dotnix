@@ -6,7 +6,7 @@
 }:
 
 let
-  inherit (lib.modules) mkForce mkIf;
+  inherit (lib.modules) mkDefault mkForce mkIf;
 
   cfg = config.dotnix.profiles.laptop;
 
@@ -51,7 +51,7 @@ in
         };
       };
 
-      logind.settings.Login = {
+      logind.settings.Login = builtins.mapAttrs (_: mkDefault) {
         HandleLidSwitch = "suspend-then-hibernate";
         HandleLidSwitchExternalPower = "lock";
         HandleLidSwitchDocked = "ignore";
@@ -59,7 +59,7 @@ in
     };
 
     systemd = {
-      sleep.settings.Sleep = {
+      sleep.settings.Sleep = builtins.mapAttrs (_: mkDefault) {
         HibernateDelaySec = "2h";
         AllowSuspend = "yes";
         AllowHibernation = "yes";

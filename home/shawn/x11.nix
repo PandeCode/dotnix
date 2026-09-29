@@ -1,11 +1,12 @@
 {
   config,
+  lib,
   osConfig,
   pkgs,
   ...
 }:
 
-{
+lib.modules.mkIf osConfig.dotnix.x11.enable {
   services.dunst = {
     enable = true;
     settings.global = {

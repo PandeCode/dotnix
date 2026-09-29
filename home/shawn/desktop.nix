@@ -1,4 +1,10 @@
-{ pkgs, self, ... }:
+{
+  lib,
+  osConfig,
+  pkgs,
+  self,
+  ...
+}:
 
 let
   inherit (self.packages.${pkgs.stdenv.hostPlatform.system}) scripts;
@@ -38,12 +44,12 @@ let
   '';
 in
 
-{
+lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
   programs.alacritty.enable = true;
 
-  home.packages = with pkgs; [
+  home.packages = [
     rofi
-    rofi-bluetooth
     rofi-wifi-menu
-  ];
+  ]
+  ++ lib.lists.optional osConfig.services.blueman.enable pkgs.rofi-bluetooth;
 }

@@ -1,4 +1,4 @@
-# ASUS TUF, Intel with an RTX 2050
+# ASUS TUF, Intel with an RTX 2050; a server now, lid shut
 { inputs, ... }:
 
 {
@@ -13,18 +13,18 @@
     user = "shawn";
 
     profiles = {
-      apps.enable = true;
       base.enable = true;
       boot.enable = true;
-      desktop.enable = true;
-      dev.enable = true;
-      gaming = {
+      desktop = {
         enable = true;
-        minecraft = true;
+        minimal = true;
       };
+      # for the charge limit; the server profile keeps it awake
       laptop.enable = true;
+      server.enable = true;
     };
 
+    # the GPU sleeps until something computes on it
     hardware.nvidia = {
       enable = true;
       prime = {
@@ -32,14 +32,10 @@
         intelBusId = "PCI:0:2:0";
         nvidiaBusId = "PCI:1:0:0";
       };
-      syncSpecialisation = true;
     };
   };
 
-  services = {
-    asusd.enable = true;
-    supergfxd.enable = true;
-  };
+  programs.libys.enable = false;
 
   # the release this machine was installed with, not the current one
   system.stateVersion = "25.05";

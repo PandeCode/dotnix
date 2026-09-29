@@ -1,4 +1,9 @@
-{ lib, pkgs, ... }:
+{
+  lib,
+  osConfig,
+  pkgs,
+  ...
+}:
 
 let
   flat = {
@@ -19,7 +24,7 @@ let
   };
 in
 
-{
+lib.modules.mkIf osConfig.dotnix.niri.enable {
   home.packages = [ pkgs.nirius ];
 
   dotnix.niri = {

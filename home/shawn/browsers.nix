@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  osConfig,
   pkgs,
   ...
 }:
@@ -37,7 +38,7 @@ let
   };
 in
 
-{
+lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
   home = {
     packages = [ browser ];
     sessionVariables.BROWSER = lib.meta.getExe browser;
@@ -45,7 +46,7 @@ in
 
   programs = {
     chromium = {
-      enable = true;
+      enable = !osConfig.dotnix.profiles.desktop.minimal;
       package = pkgs.ungoogled-chromium;
       dictionaries = [ pkgs.hunspellDictsChromium.en_US ];
       extensions =

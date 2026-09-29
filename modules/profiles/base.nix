@@ -53,7 +53,7 @@ in
         };
 
         libys = {
-          enable = true;
+          enable = mkDefault true;
           inherit nixd;
         };
 

@@ -1,4 +1,10 @@
-{ config, pkgs, ... }:
+{
+  config,
+  lib,
+  osConfig,
+  pkgs,
+  ...
+}:
 
 let
   inherit (config.dotnix.wm) terminal shell explorer;
@@ -56,7 +62,9 @@ in
 
     startup = [
       "${terminal} -e ${shell}"
-      "blueman-applet"
+    ]
+    ++ lib.lists.optional osConfig.services.blueman.enable "blueman-applet"
+    ++ [
       "nm-applet --indicator"
       "playerctld daemon"
     ];

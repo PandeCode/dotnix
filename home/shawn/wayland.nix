@@ -1,6 +1,11 @@
-{ pkgs, ... }:
-
 {
+  lib,
+  osConfig,
+  pkgs,
+  ...
+}:
+
+lib.modules.mkIf osConfig.dotnix.wayland.enable {
   services = {
     hyprpolkitagent.enable = true;
 
