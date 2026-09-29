@@ -41,13 +41,6 @@
     supergfxd.enable = true;
   };
 
-  swapDevices = [
-    {
-      device = "/var/lib/swapfile";
-      size = 16 * 1024;
-    }
-  ];
-
   # the release this machine was installed with, not the current one
   system.stateVersion = "25.05";
 }
