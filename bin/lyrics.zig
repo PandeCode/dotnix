@@ -3,6 +3,9 @@
 // prints the lyric line playing now: synced lyrics from lrclib for songs,
 // youtube captions (through python's youtube-transcript-api) for videos.
 // -f, --follow keeps running and prints a line whenever it changes.
+// --wrap BEFORE AFTER puts the words already sung between BEFORE and AFTER;
+// \e, \033, \x1b, \n, \t and \\ in them are escapes.
+// --pango escapes & < > in the text, for pango markup in BEFORE and AFTER.
 // PRINT_PLAYER=1 prints the player's name first.
 
 const std = @import("std");
@@ -12,6 +15,10 @@ const mem = std.mem;
 const Allocator = mem.Allocator;
 
 const follow_interval: Io.Duration = .fromMilliseconds(500);
+// words move faster than lines
+const wrap_interval: Io.Duration = .fromMilliseconds(200);
+// the last line has no next one to end it
+const last_line_us = 4 * std.time.us_per_s;
 // std.http has no timeouts of its own, and a dropped connection would hang a bar
 const fetch_timeout: Io.Duration = .fromSeconds(10);
 const python_timeout: Io.Duration = .fromSeconds(30);
@@ -183,14 +190,102 @@ fn parseLrc(gpa: Allocator, text: []const u8) ![]Line {
     return list.items;
 }
 
-/// the line sung at position, null before the first one
-fn at(lines: []const Line, position: i64) ?[]const u8 {
-    var found: ?[]const u8 = null;
-    for (lines) |l| {
+/// the index of the line sung at position, null before the first one
+fn at(lines: []const Line, position: i64) ?usize {
+    var found: ?usize = null;
+    for (lines, 0..) |l, i| {
         if (l.us > position) break;
-        found = l.text;
+        found = i;
     }
     return found;
+}
+
+/// how far into line i position is, 0 to 1
+fn progress(lines: []const Line, i: usize, position: i64) f64 {
+    const start = lines[i].us;
+    const end = if (i + 1 < lines.len) lines[i + 1].us else start + last_line_us;
+    if (end <= start) return 1;
+    const f = @as(f64, @floatFromInt(position - start)) / @as(f64, @floatFromInt(end - start));
+    return std.math.clamp(f, 0, 1);
+}
+
+/// the byte where the words sung by fraction f of the line end; words count by their length
+fn sungUntil(text: []const u8, f: f64) usize {
+    var total: usize = 0;
+    for (text) |c| {
+        if (c != ' ') total += 1;
+    }
+    const reached = f * @as(f64, @floatFromInt(total));
+    var done: usize = 0;
+    var cut: usize = 0;
+    var words = mem.tokenizeScalar(u8, text, ' ');
+    while (words.next()) |w| {
+        done += w.len;
+        if (@as(f64, @floatFromInt(done)) > reached) break;
+        cut = words.index;
+    }
+    return cut;
+}
+
+/// the backslash escapes of --wrap arguments
+fn unescape(gpa: Allocator, s: []const u8) ![]u8 {
+    var out: std.ArrayList(u8) = .empty;
+    var i: usize = 0;
+    while (i < s.len) : (i += 1) {
+        if (s[i] != '\\' or i + 1 == s.len) {
+            try out.append(gpa, s[i]);
+            continue;
+        }
+        const rest = s[i + 1 ..];
+        if (rest[0] == 'e') {
+            try out.append(gpa, 0x1b);
+            i += 1;
+        } else if (mem.startsWith(u8, rest, "033")) {
+            try out.append(gpa, 0x1b);
+            i += 3;
+        } else if (mem.startsWith(u8, rest, "x1b") or mem.startsWith(u8, rest, "x1B")) {
+            try out.append(gpa, 0x1b);
+            i += 3;
+        } else if (rest[0] == 'n') {
+            try out.append(gpa, '\n');
+            i += 1;
+        } else if (rest[0] == 't') {
+            try out.append(gpa, '\t');
+            i += 1;
+        } else if (rest[0] == '\\') {
+            try out.append(gpa, '\\');
+            i += 1;
+        } else {
+            try out.append(gpa, '\\');
+        }
+    }
+    return out.toOwnedSlice(gpa);
+}
+
+fn escapePango(out: *std.ArrayList(u8), gpa: Allocator, s: []const u8) !void {
+    for (s) |c| switch (c) {
+        '&' => try out.appendSlice(gpa, "&amp;"),
+        '<' => try out.appendSlice(gpa, "&lt;"),
+        '>' => try out.appendSlice(gpa, "&gt;"),
+        else => try out.append(gpa, c),
+    };
+}
+
+const Options = struct {
+    follow: bool = false,
+    wrap: ?[2][]const u8 = null,
+    pango: bool = false,
+};
+
+fn render(gpa: Allocator, opts: Options, text: []const u8, cut: usize) ![]u8 {
+    var out: std.ArrayList(u8) = .empty;
+    const w = opts.wrap orelse [2][]const u8{ "", "" };
+    const parts = [_][]const u8{ text[0..cut], text[cut..] };
+    if (cut > 0 and opts.wrap != null) try out.appendSlice(gpa, w[0]);
+    if (opts.pango) try escapePango(&out, gpa, parts[0]) else try out.appendSlice(gpa, parts[0]);
+    if (cut > 0 and opts.wrap != null) try out.appendSlice(gpa, w[1]);
+    if (opts.pango) try escapePango(&out, gpa, parts[1]) else try out.appendSlice(gpa, parts[1]);
+    return out.toOwnedSlice(gpa);
 }
 
 const Found = struct {
@@ -365,7 +460,7 @@ const Song = struct {
     lines: []Line = &.{},
 };
 
-fn current(ctx: Ctx, gpa: Allocator, song: *Song) !?[]const u8 {
+fn current(ctx: Ctx, gpa: Allocator, opts: Options, song: *Song) !?[]const u8 {
     const p = pick(try players(ctx, gpa)) orelse return null;
     const key = try p.key(gpa);
     if (!mem.eql(u8, key, song.key)) {
@@ -377,7 +472,11 @@ fn current(ctx: Ctx, gpa: Allocator, song: *Song) !?[]const u8 {
             break :blk &.{};
         };
     }
-    const text = at(song.lines, p.position) orelse try p.fallback(gpa);
+    const text = if (at(song.lines, p.position)) |i| blk: {
+        const line = song.lines[i].text;
+        const cut = if (opts.wrap != null) sungUntil(line, progress(song.lines, i, p.position)) else 0;
+        break :blk try render(gpa, opts, line, cut);
+    } else try render(gpa, opts, try p.fallback(gpa), 0);
     if (ctx.env.get("PRINT_PLAYER") != null) return try std.fmt.allocPrint(gpa, "{s}\n{s}", .{ p.name, text });
     return text;
 }
@@ -394,12 +493,20 @@ pub fn main(init: std.process.Init) !void {
     const io = init.io;
     const arena = init.arena.allocator();
 
-    var follow = false;
-    for ((try init.minimal.args.toSlice(arena))[1..]) |arg| {
+    var opts: Options = .{};
+    const args = (try init.minimal.args.toSlice(arena))[1..];
+    var i: usize = 0;
+    while (i < args.len) : (i += 1) {
+        const arg = args[i];
         if (mem.eql(u8, arg, "-f") or mem.eql(u8, arg, "--follow")) {
-            follow = true;
+            opts.follow = true;
+        } else if (mem.eql(u8, arg, "--pango")) {
+            opts.pango = true;
+        } else if (mem.eql(u8, arg, "--wrap") and i + 2 < args.len) {
+            opts.wrap = .{ try unescape(arena, args[i + 1]), try unescape(arena, args[i + 2]) };
+            i += 2;
         } else {
-            std.log.err("usage: lyrics.zig [-f|--follow]", .{});
+            std.log.err("usage: lyrics.zig [-f|--follow] [--wrap BEFORE AFTER] [--pango]", .{});
             std.process.exit(2);
         }
     }
@@ -428,8 +535,8 @@ pub fn main(init: std.process.Init) !void {
 
     while (true) {
         _ = tick.reset(.retain_capacity);
-        const text = try current(ctx, tick.allocator(), &song) orelse "";
-        if (!follow) {
+        const text = try current(ctx, tick.allocator(), opts, &song) orelse "";
+        if (!opts.follow) {
             if (text.len > 0) try stdout.print("{s}\n", .{text});
             try stdout.flush();
             return;
@@ -440,7 +547,7 @@ pub fn main(init: std.process.Init) !void {
             shown.clearRetainingCapacity();
             try shown.appendSlice(init.gpa, text);
         }
-        try io.sleep(follow_interval, .awake);
+        try io.sleep(if (opts.wrap != null) wrap_interval else follow_interval, .awake);
     }
 }
 
@@ -459,9 +566,12 @@ test "lrc lines" {
     try std.testing.expectEqual(@as(i64, 1_500_000), lines[0].us);
     try std.testing.expectEqual(@as(i64, 62_345_000), lines[3].us);
     try std.testing.expect(at(lines, 1_000_000) == null);
-    try std.testing.expectEqualStrings("first", at(lines, 4_999_999).?);
-    try std.testing.expectEqualStrings("", at(lines, 5_000_000).?);
-    try std.testing.expectEqualStrings("chorus", at(lines, 999_000_000).?);
+    try std.testing.expectEqualStrings("first", lines[at(lines, 4_999_999).?].text);
+    try std.testing.expectEqualStrings("", lines[at(lines, 5_000_000).?].text);
+    try std.testing.expectEqualStrings("chorus", lines[at(lines, 999_000_000).?].text);
+    try std.testing.expectEqual(@as(f64, 0.5), progress(lines, 1, 7_500_000));
+    // the last line lasts last_line_us
+    try std.testing.expectEqual(@as(f64, 1), progress(lines, 3, 999_000_000));
 }
 
 test "youtube ids" {
@@ -485,4 +595,31 @@ test "lz4 block with an overlapping match" {
     var out: [9]u8 = undefined;
     const n = try lz4Block(&out, &block);
     try std.testing.expectEqualStrings("abababab!", out[0..n]);
+}
+
+test "words sung" {
+    const t = "one two three";
+    try std.testing.expectEqual(@as(usize, 0), sungUntil(t, 0));
+    try std.testing.expectEqual(@as(usize, 0), sungUntil(t, 0.2));
+    // 3 of 11 letters
+    try std.testing.expectEqual(@as(usize, 3), sungUntil(t, 3.0 / 11.0));
+    try std.testing.expectEqual(@as(usize, 7), sungUntil(t, 0.7));
+    try std.testing.expectEqual(t.len, sungUntil(t, 1));
+    try std.testing.expectEqual(@as(usize, 0), sungUntil("", 1));
+}
+
+test "wrapping and escapes" {
+    const gpa = std.testing.allocator;
+    const esc = try unescape(gpa, "\\e[1m\\x1b\\033\\\\\\q");
+    defer gpa.free(esc);
+    try std.testing.expectEqualStrings("\x1b[1m\x1b\x1b\\\\q", esc);
+
+    const opts: Options = .{ .wrap = .{ "<b>", "</b>" }, .pango = true };
+    const out = try render(gpa, opts, "rock & roll <3", 4);
+    defer gpa.free(out);
+    try std.testing.expectEqualStrings("<b>rock</b> &amp; roll &lt;3", out);
+
+    const none = try render(gpa, opts, "not yet", 0);
+    defer gpa.free(none);
+    try std.testing.expectEqualStrings("not yet", none);
 }
