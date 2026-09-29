@@ -1,343 +1,625 @@
 //usr/bin/env , zig run -freference-trace=10 -j$(nproc) "$0" -- "$@" ; exit
 
-//usr/bin/env , zig run -freference-trace=10 -j$(nproc) "$0" -- "$@" ; exit
-
-//usr/bin/env , zig run -lc -freference-trace=10 -j$(nproc) "$0" -- "$@" ; exit
+// prints the lyric line playing now: synced lyrics from lrclib for songs,
+// youtube captions (through python's youtube-transcript-api) for videos.
+// -f, --follow keeps running and prints a line whenever it changes.
+// --wrap BEFORE AFTER puts the words already sung between BEFORE and AFTER;
+// \e, \033, \x1b, \n, \t and \\ in them are escapes.
+// --pango escapes & < > in the text, for pango markup in BEFORE and AFTER.
+// PRINT_PLAYER=1 prints the player's name first.
 
 const std = @import("std");
 
-const http = std.http;
-const mem = std.mem;
-const log = std.log;
-const ArrayList = std.ArrayList;
 const Io = std.Io;
+const mem = std.mem;
 const Allocator = mem.Allocator;
-const print = std.debug.print;
 
-const WS = "\n\t\r ";
+const follow_interval: Io.Duration = .fromMilliseconds(500);
+// words move faster than lines
+const wrap_interval: Io.Duration = .fromMilliseconds(200);
+// the last line has no next one to end it
+const last_line_us = 4 * std.time.us_per_s;
+// std.http has no timeouts of its own, and a dropped connection would hang a bar
+const fetch_timeout: Io.Duration = .fromSeconds(10);
+const python_timeout: Io.Duration = .fromSeconds(30);
 
-test "hello" {
-    const E = union(enum) { a: u8, b: u9 };
+/// one timed line; us is microseconds, as playerctl reports positions
+const Line = struct {
+    us: i64,
+    text: []const u8,
+};
 
-    const e: E = .{ .a = 512 };
-    const j: E = .{ .b = 9 };
-    _ = e;
-    _ = j;
-}
-
-const CACHE_DIR = "~/.cache/lyrics_zig";
-
-fn sanitize(gpa: Allocator, str: []const u8) ![]const u8 {
-    var ret = try gpa.alloc(u8, str.len);
-    for (str, 0..) |c, i| {
-        if (std.ascii.isAlphanumeric(c)) {
-            ret[i] = c;
-        } else {
-            ret[i] = '_';
-        }
-    }
-    return ret;
-}
-
-fn urlEncode(gpa: Allocator, url: []const u8) ![]const u8 {
-    const chars = .{
-        .{ "%", "%25" },
-        .{ " ", "%20" },
-        .{ ":", "%3A" },
-        .{ "/", "%2F" },
-        .{ "?", "%3F" },
-        .{ "#", "%23" },
-        .{ "[", "%5B" },
-        .{ "]", "%5D" },
-        .{ "@", "%40" },
-        .{ "!", "%21" },
-        .{ "$", "%24" },
-        .{ "&", "%26" },
-        .{ "'", "%27" },
-        .{ "(", "%28" },
-        .{ ")", "%29" },
-        .{ "*", "%2A" },
-        .{ "+", "%2B" },
-        .{ ",", "%2C" },
-        .{ ";", "%3B" },
-        .{ "=", "%3D" },
-    };
-
-    var expansions: usize = 0;
-    inline for (chars) |t| {
-        expansions += mem.count(u8, url, t[0]);
-    }
-    var start_output = try gpa.alloc(u8, url.len + (expansions * 2));
-    var end = url.len;
-    @memcpy(start_output[0..end], url);
-
-    inline for (chars) |t| {
-        const output = try mem.replaceOwned(u8, gpa, start_output[0..end], t[0], t[1]);
-        end = output.len;
-        @memcpy(start_output[0..end], output);
-        gpa.free(output);
-    }
-
-    return start_output;
-}
-
-/// just ~ for now
-fn expand(gpa: Allocator, env: std.process.Environ, path: []const u8) ![]const u8 {
-    const HOME: []const u8 = try env.getAlloc(gpa, "HOME");
-    defer gpa.free(HOME);
-    const output = try gpa.alloc(u8, path.len - 1 + HOME.len);
-    _ = mem.replace(u8, path, "~", HOME, output);
-    return output;
-}
-
-fn fetchWithCache(allocator: Allocator, io: Io, client: *http.Client, uri: std.Uri, cache_dir: Io.Dir) ![]const u8 {
-    var arena = std.heap.ArenaAllocator.init(allocator);
-    const gpa = arena.allocator();
-
-    const query = try uri.query.?.toRawMaybeAlloc(gpa);
-    const nhash = std.hash.XxHash32.hash(0, query);
-    const hash = try std.fmt.allocPrint(gpa, "{}", .{nhash});
-
-    const sanitizedQuery = try sanitize(gpa, query);
-
-    return cache_dir.readFileAlloc(io, hash, gpa, .unlimited) catch |e| {
-        switch (e) {
-            error.FileNotFound => {
-                var body: Io.Writer.Allocating = .init(allocator);
-                defer body.deinit();
-
-                const fetch_res = try client.fetch(.{
-                    .location = .{ .uri = uri },
-                    .response_writer = &body.writer,
-                });
-
-                if (fetch_res.status != .ok)
-                    return error.ReqFail;
-
-                const res_body = try body.toOwnedSlice();
-
-                try cache_dir.writeFile(io, .{
-                    .sub_path = try std.mem.concat(gpa, u8, &.{ hash, sanitizedQuery }),
-                    .data = res_body,
-                });
-                return res_body;
-            },
-            else => unreachable,
-        }
-    };
-}
-
-const Metadata = struct {
+const Player = struct {
+    /// the playerctl instance, e.g. spotify or firefox.instance_1_42
+    name: []const u8,
+    playing: bool,
     title: []const u8,
     artist: []const u8,
+    album: []const u8,
+    url: []const u8,
     position: i64,
-};
 
-fn getPlayerMetadata(io: Io, gpa: Allocator) !Metadata {
-    const playerctl = try std.process.run(gpa, io, .{ .argv = &.{
-        "playerctl",
-        "--player=spotify,mpv,firefox,chromium",
-        "metadata",
-        "--format",
-        \\{{title}}
-        \\{{artist}}
-        \\{{position}}
-    } });
-    defer gpa.free(playerctl.stderr);
-    defer gpa.free(playerctl.stdout);
-
-    if (playerctl.term != .exited) return error.Playerctl;
-
-    var playerctl_stdout = mem.tokenizeScalar(u8, mem.trim(u8, playerctl.stdout, WS), '\n');
-
-    var title: ?[]u8 = null;
-    var artist: ?[]u8 = null;
-    var position: ?i64 = null;
-
-    var i: u8 = 0;
-    while (playerctl_stdout.next()) |md| : (i += 1) {
-        switch (i) {
-            0 => {
-                title = try gpa.alloc(u8, md.len);
-                @memcpy(title.?, md);
-            },
-            1 => {
-                artist = try gpa.alloc(u8, md.len);
-                @memcpy(artist.?, md);
-            },
-            2 => position = try std.fmt.parseInt(i64, md, 10),
-            else => unreachable,
-        }
+    fn kind(p: Player) []const u8 {
+        return p.name[0 .. mem.indexOfScalar(u8, p.name, '.') orelse p.name.len];
     }
 
-    if (title == null or artist == null or position == null) return error.NullInfo;
+    fn isSpotify(p: Player) bool {
+        return mem.startsWith(u8, p.kind(), "spotify");
+    }
 
-    return .{
-        .title = title.?,
-        .artist = artist.?,
-        .position = position.?,
+    fn isFirefox(p: Player) bool {
+        const k = p.kind();
+        return mem.eql(u8, k, "firefox") or mem.eql(u8, k, "zen") or mem.eql(u8, k, "librewolf");
+    }
+
+    /// what the current song is, to know when to look lyrics up again
+    fn key(p: Player, gpa: Allocator) ![]u8 {
+        return std.fmt.allocPrint(gpa, "{s}\n{s}\n{s}\n{s}\n{s}", .{ p.kind(), p.title, p.artist, p.album, p.url });
+    }
+
+    fn fallback(p: Player, gpa: Allocator) ![]const u8 {
+        if (p.artist.len == 0) return p.title;
+        return std.fmt.allocPrint(gpa, "{s} - {s}", .{ p.title, p.artist });
+    }
+};
+
+const Ctx = struct {
+    io: Io,
+    env: *const std.process.Environ.Map,
+    client: *std.http.Client,
+    cache: Io.Dir,
+};
+
+/// every player playerctl knows, one tab separated line each
+fn players(ctx: Ctx, gpa: Allocator) ![]Player {
+    const res = try std.process.run(gpa, ctx.io, .{ .argv = &.{
+        "playerctl",
+        "--all-players",
+        "metadata",
+        "--format",
+        "{{playerInstance}}\t{{status}}\t{{title}}\t{{artist}}\t{{album}}\t{{position}}\t{{xesam:url}}",
+    } });
+    // exits 1 with "No players found"
+    if (res.term != .exited or res.term.exited != 0) return &.{};
+
+    var list: std.ArrayList(Player) = .empty;
+    var lines = mem.tokenizeScalar(u8, res.stdout, '\n');
+    while (lines.next()) |line| {
+        var f = mem.splitScalar(u8, line, '\t');
+        const name = f.next() orelse continue;
+        const status = f.next() orelse continue;
+        try list.append(gpa, .{
+            .name = name,
+            .playing = mem.eql(u8, status, "Playing"),
+            .title = mem.trim(u8, f.next() orelse "", " "),
+            .artist = mem.trim(u8, f.next() orelse "", " "),
+            .album = mem.trim(u8, f.next() orelse "", " "),
+            .position = std.fmt.parseInt(i64, f.next() orelse "", 10) catch 0,
+            .url = f.next() orelse "",
+        });
+    }
+    return list.items;
+}
+
+/// the first one playing, else the first one there is
+fn pick(list: []Player) ?Player {
+    for (list) |p| if (p.playing) return p;
+    return if (list.len > 0) list[0] else null;
+}
+
+fn urlEncode(gpa: Allocator, s: []const u8) ![]u8 {
+    var out: std.ArrayList(u8) = .empty;
+    for (s) |c| {
+        if (std.ascii.isAlphanumeric(c) or mem.indexOfScalar(u8, "-._~", c) != null) {
+            try out.append(gpa, c);
+        } else {
+            try out.print(gpa, "%{X:0>2}", .{c});
+        }
+    }
+    return out.toOwnedSlice(gpa);
+}
+
+/// the body of a GET, from the cache when it was fetched before
+fn fetch(ctx: Ctx, gpa: Allocator, url: []const u8) ![]u8 {
+    const name = try std.fmt.allocPrint(gpa, "{x:0>16}", .{std.hash.Wyhash.hash(0, url)});
+    if (ctx.cache.readFileAlloc(ctx.io, name, gpa, .limited(16 << 20))) |body| {
+        return body;
+    } else |err| if (err != error.FileNotFound) return err;
+
+    const Race = union(enum) {
+        body: anyerror![]u8,
+        timeout: Io.Cancelable!void,
+    };
+    var buf: [2]Race = undefined;
+    var race: Io.Select(Race) = .init(ctx.io, &buf);
+    defer while (race.cancel()) |_| {};
+    try race.concurrent(.body, get, .{ ctx, gpa, url });
+    try race.concurrent(.timeout, Io.sleep, .{ ctx.io, fetch_timeout, .awake });
+    const body = switch (try race.await()) {
+        .body => |b| try b,
+        .timeout => return error.Timeout,
+    };
+    try ctx.cache.writeFile(ctx.io, .{ .sub_path = name, .data = body });
+    return body;
+}
+
+fn get(ctx: Ctx, gpa: Allocator, url: []const u8) anyerror![]u8 {
+    var body: Io.Writer.Allocating = .init(gpa);
+    const res = try ctx.client.fetch(.{
+        .location = .{ .url = url },
+        .response_writer = &body.writer,
+        .headers = .{ .user_agent = .{ .override = "lyrics.zig (github.com/PandeCode/dotnix)" } },
+    });
+    if (res.status != .ok) return error.HttpStatus;
+    return body.written();
+}
+
+/// "mm:ss.xx", "mm:ss.xxx" or "mm:ss" in microseconds
+fn parseStamp(s: []const u8) ?i64 {
+    const colon = mem.indexOfScalar(u8, s, ':') orelse return null;
+    const min = std.fmt.parseInt(i64, s[0..colon], 10) catch return null;
+    const sec = std.fmt.parseFloat(f64, s[colon + 1 ..]) catch return null;
+    if (min < 0 or sec < 0) return null;
+    return min * std.time.us_per_min + @as(i64, @intFromFloat(@round(sec * std.time.us_per_s)));
+}
+
+/// an lrc file: "[00:12.34] text", with several stamps on one line allowed and [ar:...] style tags skipped
+fn parseLrc(gpa: Allocator, text: []const u8) ![]Line {
+    var list: std.ArrayList(Line) = .empty;
+    var lines = mem.splitScalar(u8, text, '\n');
+    while (lines.next()) |raw| {
+        var rest = mem.trim(u8, raw, " \t\r");
+        var stamps: [8]i64 = undefined;
+        var n: usize = 0;
+        while (rest.len > 0 and rest[0] == '[') {
+            const close = mem.indexOfScalar(u8, rest, ']') orelse break;
+            const us = parseStamp(rest[1..close]) orelse break;
+            if (n < stamps.len) {
+                stamps[n] = us;
+                n += 1;
+            }
+            rest = rest[close + 1 ..];
+        }
+        for (stamps[0..n]) |us| try list.append(gpa, .{ .us = us, .text = mem.trim(u8, rest, " \t") });
+    }
+    mem.sort(Line, list.items, {}, struct {
+        fn lt(_: void, a: Line, b: Line) bool {
+            return a.us < b.us;
+        }
+    }.lt);
+    return list.items;
+}
+
+/// the index of the line sung at position, null before the first one
+fn at(lines: []const Line, position: i64) ?usize {
+    var found: ?usize = null;
+    for (lines, 0..) |l, i| {
+        if (l.us > position) break;
+        found = i;
+    }
+    return found;
+}
+
+/// how far into line i position is, 0 to 1
+fn progress(lines: []const Line, i: usize, position: i64) f64 {
+    const start = lines[i].us;
+    const end = if (i + 1 < lines.len) lines[i + 1].us else start + last_line_us;
+    if (end <= start) return 1;
+    const f = @as(f64, @floatFromInt(position - start)) / @as(f64, @floatFromInt(end - start));
+    return std.math.clamp(f, 0, 1);
+}
+
+/// the byte where the words sung by fraction f of the line end; words count by their length
+fn sungUntil(text: []const u8, f: f64) usize {
+    var total: usize = 0;
+    for (text) |c| {
+        if (c != ' ') total += 1;
+    }
+    const reached = f * @as(f64, @floatFromInt(total));
+    var done: usize = 0;
+    var cut: usize = 0;
+    var words = mem.tokenizeScalar(u8, text, ' ');
+    while (words.next()) |w| {
+        done += w.len;
+        if (@as(f64, @floatFromInt(done)) > reached) break;
+        cut = words.index;
+    }
+    return cut;
+}
+
+/// the backslash escapes of --wrap arguments
+fn unescape(gpa: Allocator, s: []const u8) ![]u8 {
+    var out: std.ArrayList(u8) = .empty;
+    var i: usize = 0;
+    while (i < s.len) : (i += 1) {
+        if (s[i] != '\\' or i + 1 == s.len) {
+            try out.append(gpa, s[i]);
+            continue;
+        }
+        const rest = s[i + 1 ..];
+        if (rest[0] == 'e') {
+            try out.append(gpa, 0x1b);
+            i += 1;
+        } else if (mem.startsWith(u8, rest, "033")) {
+            try out.append(gpa, 0x1b);
+            i += 3;
+        } else if (mem.startsWith(u8, rest, "x1b") or mem.startsWith(u8, rest, "x1B")) {
+            try out.append(gpa, 0x1b);
+            i += 3;
+        } else if (rest[0] == 'n') {
+            try out.append(gpa, '\n');
+            i += 1;
+        } else if (rest[0] == 't') {
+            try out.append(gpa, '\t');
+            i += 1;
+        } else if (rest[0] == '\\') {
+            try out.append(gpa, '\\');
+            i += 1;
+        } else {
+            try out.append(gpa, '\\');
+        }
+    }
+    return out.toOwnedSlice(gpa);
+}
+
+fn escapePango(out: *std.ArrayList(u8), gpa: Allocator, s: []const u8) !void {
+    for (s) |c| switch (c) {
+        '&' => try out.appendSlice(gpa, "&amp;"),
+        '<' => try out.appendSlice(gpa, "&lt;"),
+        '>' => try out.appendSlice(gpa, "&gt;"),
+        else => try out.append(gpa, c),
     };
 }
 
-const Lyric = struct {
-    id: i64,
-    name: []const u8,
-    trackName: []const u8,
-    artistName: []const u8,
-    albumName: []const u8,
-    duration: f32,
-    instrumental: bool,
-    plainLyrics: ?[]const u8,
-    syncedLyrics: ?[]const u8,
-    lyricsfile: []const u8,
+const Options = struct {
+    follow: bool = false,
+    wrap: ?[2][]const u8 = null,
+    pango: bool = false,
 };
 
-const LTStamp = struct { timestamp: i64, line: []const u8 };
-const LType = union(enum) { sync: []const LTStamp, unsync: []const []const u8 };
+fn render(gpa: Allocator, opts: Options, text: []const u8, cut: usize) ![]u8 {
+    var out: std.ArrayList(u8) = .empty;
+    const w = opts.wrap orelse [2][]const u8{ "", "" };
+    const parts = [_][]const u8{ text[0..cut], text[cut..] };
+    if (cut > 0 and opts.wrap != null) try out.appendSlice(gpa, w[0]);
+    if (opts.pango) try escapePango(&out, gpa, parts[0]) else try out.appendSlice(gpa, parts[0]);
+    if (cut > 0 and opts.wrap != null) try out.appendSlice(gpa, w[1]);
+    if (opts.pango) try escapePango(&out, gpa, parts[1]) else try out.appendSlice(gpa, parts[1]);
+    return out.toOwnedSlice(gpa);
+}
 
-fn lrclib(allocator: Allocator, io: Io, client: *http.Client, query: []const u8, cache_dir: Io.Dir) !?LType {
-    // lol i love allocators
-    var arena = std.heap.ArenaAllocator.init(allocator);
-    defer arena.deinit();
-    const gpa = arena.allocator();
+const Found = struct {
+    syncedLyrics: ?[]const u8 = null,
+};
 
-    const url = try std.fmt.allocPrint(
-        gpa,
-        "https://lrclib.net/api/search?q={s}",
-        .{
-            try urlEncode(gpa, query),
-        },
-    );
+fn lrclib(ctx: Ctx, gpa: Allocator, p: Player) ![]Line {
+    const q = try std.fmt.allocPrint(gpa, "{s} {s}", .{ p.title, p.artist });
+    const url = try std.fmt.allocPrint(gpa, "https://lrclib.net/api/search?q={s}", .{try urlEncode(gpa, q)});
+    const body = try fetch(ctx, gpa, url);
+    const found = try std.json.parseFromSliceLeaky([]Found, gpa, body, .{ .ignore_unknown_fields = true });
+    // the first hit is not always synced
+    for (found) |f| if (f.syncedLyrics) |lrc| return parseLrc(gpa, lrc);
+    return &.{};
+}
 
-    const uri = try std.Uri.parse(url);
+/// the v= of a youtube watch url, or a youtu.be id
+fn youtubeId(url: []const u8) ?[]const u8 {
+    const rest = if (mem.indexOf(u8, url, "youtu.be/")) |i|
+        url[i + "youtu.be/".len ..]
+    else if (mem.indexOf(u8, url, "youtube.com/watch?")) |i| blk: {
+        const q = url[i + "youtube.com/watch?".len ..];
+        var params = mem.splitScalar(u8, q[0 .. mem.indexOfScalar(u8, q, '#') orelse q.len], '&');
+        while (params.next()) |kv| if (mem.startsWith(u8, kv, "v=")) break :blk kv[2..];
+        return null;
+    } else return null;
+    const id = rest[0 .. mem.indexOfAny(u8, rest, "?&#/") orelse rest.len];
+    return if (id.len > 0) id else null;
+}
 
-    const raw = try fetchWithCache(gpa, io, client, uri, cache_dir);
-    const json = try std.json.parseFromSlice([]Lyric, gpa, raw, .{});
+/// mozilla's lz4 files: "mozLz40\0", the decompressed size, then one lz4 block
+fn mozLz4(gpa: Allocator, data: []const u8) ![]u8 {
+    if (data.len < 12 or !mem.eql(u8, data[0..8], "mozLz40\x00")) return error.NotMozLz4;
+    const out = try gpa.alloc(u8, mem.readInt(u32, data[8..12], .little));
+    return out[0..try lz4Block(out, data[12..])];
+}
 
-    if (json.value.len == 0) return null;
-
-    if (json.value[0].syncedLyrics) |lyrics| {
-        var lyrics_list: ArrayList(LTStamp) = try .initCapacity(gpa, mem.count(u8, lyrics, "\n"));
-        var iter = mem.splitScalar(u8, lyrics, '\n');
-
-        while (iter.next()) |lyric| {
-            // '[00:23.00] begin'
-            // '0123456789AB'
-            const min = try std.fmt.parseFloat(f32, lyric[1..3]);
-            const sec = try std.fmt.parseFloat(f32, lyric[4..9]);
-
-            // we need microsecs since playerctl returns that
-            const ms: i64 = @intFromFloat(sec * std.time.us_per_s + min * std.time.us_per_min);
-            const _line = mem.trim(u8, lyric[11..], WS);
-
-            const line = try allocator.alloc(u8, _line.len);
-            @memcpy(line, _line);
-
-            try lyrics_list.append(allocator, .{ .line = line, .timestamp = ms });
-        }
-
-        return .{ .sync = try lyrics_list.toOwnedSlice(allocator) };
+fn lz4Block(out: []u8, src: []const u8) !usize {
+    var i: usize = 0;
+    var o: usize = 0;
+    while (i < src.len) {
+        const token = src[i];
+        i += 1;
+        var lit: usize = token >> 4;
+        if (lit == 15) while (i < src.len) {
+            lit += src[i];
+            i += 1;
+            if (src[i - 1] != 255) break;
+        };
+        if (i + lit > src.len or o + lit > out.len) return error.Corrupt;
+        @memcpy(out[o..][0..lit], src[i..][0..lit]);
+        i += lit;
+        o += lit;
+        // the last sequence has literals only
+        if (i == src.len) break;
+        if (i + 2 > src.len) return error.Corrupt;
+        const offset: usize = mem.readInt(u16, src[i..][0..2], .little);
+        i += 2;
+        var len: usize = token & 15;
+        if (len == 15) while (i < src.len) {
+            len += src[i];
+            i += 1;
+            if (src[i - 1] != 255) break;
+        };
+        len += 4;
+        if (offset == 0 or offset > o or o + len > out.len) return error.Corrupt;
+        // matches may overlap what they copy, so byte by byte
+        for (0..len) |k| out[o + k] = out[o - offset + k];
+        o += len;
     }
-    if (json.value[0].plainLyrics) |lyrics| {
-        var lyrics_list: ArrayList([]const u8) = try .initCapacity(gpa, mem.count(u8, lyrics, "\n"));
-        var iter = mem.splitScalar(u8, lyrics, '\n');
+    return o;
+}
 
-        while (iter.next()) |lyric| {
-            const _line = mem.trim(u8, lyric, WS);
-            const line = try allocator.alloc(u8, _line.len);
-            @memcpy(line, _line);
-            try lyrics_list.append(allocator, line);
+/// the newest recovery.jsonlz4 of any firefox, zen or librewolf profile
+fn sessionFile(ctx: Ctx, gpa: Allocator) !?[]const u8 {
+    const home = ctx.env.get("HOME") orelse return null;
+    var best: ?[]const u8 = null;
+    var best_mtime: i96 = 0;
+    for ([_][]const u8{ ".zen", ".mozilla/firefox", ".librewolf" }) |base| {
+        const root = try std.fs.path.join(gpa, &.{ home, base });
+        var dir = Io.Dir.cwd().openDir(ctx.io, root, .{ .iterate = true }) catch continue;
+        defer dir.close(ctx.io);
+        var it = dir.iterate();
+        while (it.next(ctx.io) catch null) |entry| {
+            if (entry.kind != .directory) continue;
+            const path = try std.fs.path.join(gpa, &.{ root, entry.name, "sessionstore-backups", "recovery.jsonlz4" });
+            const st = Io.Dir.cwd().statFile(ctx.io, path, .{}) catch continue;
+            if (best == null or st.mtime.nanoseconds > best_mtime) {
+                best = path;
+                best_mtime = st.mtime.nanoseconds;
+            }
         }
-
-        return .{ .unsync = try lyrics_list.toOwnedSlice(allocator) };
     }
-    return null;
+    return best;
+}
+
+/// the url of the tab looked at last, in the selected window
+fn firefoxUrl(ctx: Ctx, gpa: Allocator) !?[]const u8 {
+    const path = try sessionFile(ctx, gpa) orelse return null;
+    const raw = try Io.Dir.cwd().readFileAlloc(ctx.io, path, gpa, .limited(256 << 20));
+    const json = try std.json.parseFromSliceLeaky(std.json.Value, gpa, try mozLz4(gpa, raw), .{});
+
+    const windows = (json.object.get("windows") orelse return null).array.items;
+    if (windows.len == 0) return null;
+    const selected: usize = if (json.object.get("selectedWindow")) |s| @intCast(@max(s.integer, 1)) else 1;
+    const window = windows[@min(selected, windows.len) - 1];
+
+    var last: ?std.json.ObjectMap = null;
+    var last_at: i64 = -1;
+    for ((window.object.get("tabs") orelse return null).array.items) |tab| {
+        const t = if (tab.object.get("lastAccessed")) |v| v.integer else 0;
+        if (t > last_at) {
+            last = tab.object;
+            last_at = t;
+        }
+    }
+    const tab = last orelse return null;
+    const entries = (tab.get("entries") orelse return null).array.items;
+    if (entries.len == 0) return null;
+    const index: usize = if (tab.get("index")) |v| @intCast(@max(v.integer, 1)) else entries.len;
+    const url = entries[@min(index, entries.len) - 1].object.get("url") orelse return null;
+    return url.string;
+}
+
+const transcript_py =
+    \\import sys
+    \\from youtube_transcript_api import YouTubeTranscriptApi as Api
+    \\try:
+    \\    rows = [(s.start, s.text) for s in Api().fetch(sys.argv[1])]
+    \\except AttributeError:
+    \\    rows = [(s["start"], s["text"]) for s in Api.get_transcript(sys.argv[1])]
+    \\for start, text in rows:
+    \\    print(f"{start}\t{' '.join(text.split())}")
+;
+
+/// captions as "seconds\ttext" lines, cached per video, also when there are none
+fn youtube(ctx: Ctx, gpa: Allocator, id: []const u8) ![]Line {
+    const name = try std.fmt.allocPrint(gpa, "yt-{s}", .{id});
+    const text = ctx.cache.readFileAlloc(ctx.io, name, gpa, .limited(16 << 20)) catch |err| blk: {
+        if (err != error.FileNotFound) return err;
+        const res = try std.process.run(gpa, ctx.io, .{
+            .argv = &.{ "python3", "-c", transcript_py, id },
+            .timeout = .{ .duration = .{ .raw = python_timeout, .clock = .awake } },
+        });
+        const out = if (res.term == .exited and res.term.exited == 0) res.stdout else "";
+        try ctx.cache.writeFile(ctx.io, .{ .sub_path = name, .data = out });
+        break :blk out;
+    };
+
+    var list: std.ArrayList(Line) = .empty;
+    var lines = mem.tokenizeScalar(u8, text, '\n');
+    while (lines.next()) |line| {
+        const tab = mem.indexOfScalar(u8, line, '\t') orelse continue;
+        const sec = std.fmt.parseFloat(f64, line[0..tab]) catch continue;
+        try list.append(gpa, .{ .us = @intFromFloat(sec * std.time.us_per_s), .text = line[tab + 1 ..] });
+    }
+    return list.items;
+}
+
+/// timed lines for what the player is on, empty when there are none
+fn lookup(ctx: Ctx, gpa: Allocator, p: Player) ![]Line {
+    if (p.album.len > 0 or p.isSpotify()) return lrclib(ctx, gpa, p);
+    const url = if (p.url.len > 0) p.url else if (p.isFirefox()) try firefoxUrl(ctx, gpa) orelse "" else "";
+    if (youtubeId(url)) |id| return youtube(ctx, gpa, id);
+    return &.{};
+}
+
+/// lyrics of the song last looked up, kept while it plays
+const Song = struct {
+    arena: std.heap.ArenaAllocator,
+    key: []const u8 = "",
+    lines: []Line = &.{},
+};
+
+fn current(ctx: Ctx, gpa: Allocator, opts: Options, song: *Song) !?[]const u8 {
+    const p = pick(try players(ctx, gpa)) orelse return null;
+    const key = try p.key(gpa);
+    if (!mem.eql(u8, key, song.key)) {
+        _ = song.arena.reset(.retain_capacity);
+        const a = song.arena.allocator();
+        song.key = try a.dupe(u8, key);
+        song.lines = lookup(ctx, a, p) catch |err| blk: {
+            std.log.warn("{s}: {t}", .{ p.name, err });
+            break :blk &.{};
+        };
+    }
+    const text = if (at(song.lines, p.position)) |i| blk: {
+        const line = song.lines[i].text;
+        const cut = if (opts.wrap != null) sungUntil(line, progress(song.lines, i, p.position)) else 0;
+        break :blk try render(gpa, opts, line, cut);
+    } else try render(gpa, opts, try p.fallback(gpa), 0);
+    if (ctx.env.get("PRINT_PLAYER") != null) return try std.fmt.allocPrint(gpa, "{s}\n{s}", .{ p.name, text });
+    return text;
+}
+
+fn cacheDir(io: Io, env: *const std.process.Environ.Map, gpa: Allocator) !Io.Dir {
+    const path = if (env.get("XDG_CACHE_HOME")) |x|
+        try std.fs.path.join(gpa, &.{ x, "lyrics" })
+    else
+        try std.fs.path.join(gpa, &.{ env.get("HOME") orelse return error.NoHome, ".cache", "lyrics" });
+    return Io.Dir.cwd().createDirPathOpen(io, path, .{});
 }
 
 pub fn main(init: std.process.Init) !void {
-    const mgpa = init.arena.allocator();
     const io = init.io;
-    const env = init.minimal.environ;
+    const arena = init.arena.allocator();
 
-    var stdout_writer = Io.File.stdout().writer(init.io, &.{});
+    var opts: Options = .{};
+    const args = (try init.minimal.args.toSlice(arena))[1..];
+    var i: usize = 0;
+    while (i < args.len) : (i += 1) {
+        const arg = args[i];
+        if (mem.eql(u8, arg, "-f") or mem.eql(u8, arg, "--follow")) {
+            opts.follow = true;
+        } else if (mem.eql(u8, arg, "--pango")) {
+            opts.pango = true;
+        } else if (mem.eql(u8, arg, "--wrap") and i + 2 < args.len) {
+            opts.wrap = .{ try unescape(arena, args[i + 1]), try unescape(arena, args[i + 2]) };
+            i += 2;
+        } else {
+            std.log.err("usage: lyrics.zig [-f|--follow] [--wrap BEFORE AFTER] [--pango]", .{});
+            std.process.exit(2);
+        }
+    }
+
+    var client: std.http.Client = .{ .allocator = init.gpa, .io = io };
+    defer client.deinit();
+    try client.initDefaultProxies(arena, init.environ_map);
+
+    const ctx: Ctx = .{
+        .io = io,
+        .env = init.environ_map,
+        .client = &client,
+        .cache = try cacheDir(io, init.environ_map, arena),
+    };
+
+    var buf: [4096]u8 = undefined;
+    var stdout_writer = Io.File.stdout().writer(io, &buf);
     const stdout = &stdout_writer.interface;
 
-    var client: http.Client = .{ .allocator = mgpa, .io = io };
-    defer client.deinit();
+    var song: Song = .{ .arena = .init(init.gpa) };
+    defer song.arena.deinit();
+    var tick: std.heap.ArenaAllocator = .init(init.gpa);
+    defer tick.deinit();
+    var shown: std.ArrayList(u8) = .empty;
+    defer shown.deinit(init.gpa);
 
-    const cache_dir_path = try expand(mgpa, env, CACHE_DIR);
-    defer mgpa.free(cache_dir_path);
-
-    Io.Dir.createDirAbsolute(io, cache_dir_path, .default_dir) catch |e| {
-        switch (e) {
-            error.PathAlreadyExists => {},
-            else => unreachable,
+    while (true) {
+        _ = tick.reset(.retain_capacity);
+        const text = try current(ctx, tick.allocator(), opts, &song) orelse "";
+        if (!opts.follow) {
+            if (text.len > 0) try stdout.print("{s}\n", .{text});
+            try stdout.flush();
+            return;
         }
-    };
-    const cache_dir = try Io.Dir.openDirAbsolute(io, cache_dir_path, .{});
-
-    var loopArena = std.heap.ArenaAllocator.init(mgpa);
-    defer loopArena.deinit();
-    const gpa = loopArena.allocator();
-
-    while (loopArena.reset(.retain_capacity)) {
-        try init.io.sleep(.fromSeconds(1), .real);
-        const metadata = getPlayerMetadata(io, gpa) catch continue;
-        const title = metadata.title;
-        const artist = metadata.artist;
-        const position = metadata.position;
-
-        const lyrics = try lrclib(gpa, io, &client, try std.fmt.allocPrint(gpa, "{s} {s}", .{ title, artist }), cache_dir);
-        if (lyrics) |lyric| {
-            switch (lyric) {
-                .sync => |sync| {
-                    var idx: usize = 0;
-                    for (sync, 0..) |s, i| {
-                        if (position < s.timestamp) {
-                            idx = i;
-                            break;
-                        }
-                    }
-
-                    try stdout.print("{s}\n", .{sync[if (idx != 0) idx else 0].line});
-                },
-                .unsync => |unsync| {
-                    _ = unsync;
-                },
-            }
+        if (!mem.eql(u8, text, shown.items)) {
+            try stdout.print("{s}\n", .{text});
+            try stdout.flush();
+            shown.clearRetainingCapacity();
+            try shown.appendSlice(init.gpa, text);
         }
-
-        try stdout.flush();
+        try io.sleep(if (opts.wrap != null) wrap_interval else follow_interval, .awake);
     }
 }
 
-// Future ref
+test "lrc lines" {
+    const gpa = std.testing.allocator;
+    var arena: std.heap.ArenaAllocator = .init(gpa);
+    defer arena.deinit();
+    const lines = try parseLrc(arena.allocator(),
+        \\[ar:Somebody]
+        \\[00:01.50] first
+        \\[00:10.00][01:02.345] chorus
+        \\[00:05.0]
+        \\no stamp
+    );
+    try std.testing.expectEqual(@as(usize, 4), lines.len);
+    try std.testing.expectEqual(@as(i64, 1_500_000), lines[0].us);
+    try std.testing.expectEqual(@as(i64, 62_345_000), lines[3].us);
+    try std.testing.expect(at(lines, 1_000_000) == null);
+    try std.testing.expectEqualStrings("first", lines[at(lines, 4_999_999).?].text);
+    try std.testing.expectEqualStrings("", lines[at(lines, 5_000_000).?].text);
+    try std.testing.expectEqualStrings("chorus", lines[at(lines, 999_000_000).?].text);
+    try std.testing.expectEqual(@as(f64, 0.5), progress(lines, 1, 7_500_000));
+    // the last line lasts last_line_us
+    try std.testing.expectEqual(@as(f64, 1), progress(lines, 3, 999_000_000));
+}
 
-// i only know how to get the url of the current browser for firefox
-const yt_lyrics_start =
-    \\from youtube_transcript_api import YouTubeTranscriptApi
-    \\from youtube_transcript_api.formatters import TextFormatter
-    \\
-    \\def convert_to_timestamp_format(seconds):
-    \\"""Convert seconds to [MM:SS.MS] format"""
-    \\minutes = seconds // 60
-    \\seconds_remainder = seconds % 60
-    \\# Format with exactly 2 decimal places for milliseconds
-    \\return f"[{minutes:02d}:{seconds_remainder:05.2f}]"
-    \\
-    \\def convert_json_to_timestamp_format(json_str):
-    \\formatted_lines = []
-    \\for entry in json_str:
-    \\   timestamp = convert_to_timestamp_format(int(entry['start']))
-    \\   formatted_lines.append(f"{timestamp} {entry['text']}")
-    \\   return '\n'.join(formatted_lines)
-    \\   t = YouTubeTranscriptApi.get_transcript(
-;
+test "youtube ids" {
+    try std.testing.expectEqualStrings("dQw4w9WgXcQ", youtubeId("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42s").?);
+    try std.testing.expectEqualStrings("dQw4w9WgXcQ", youtubeId("https://music.youtube.com/watch?list=x&v=dQw4w9WgXcQ").?);
+    try std.testing.expectEqualStrings("dQw4w9WgXcQ", youtubeId("https://youtu.be/dQw4w9WgXcQ?si=abc").?);
+    try std.testing.expect(youtubeId("https://www.youtube.com/watch?list=x") == null);
+    try std.testing.expect(youtubeId("https://example.com/") == null);
+}
 
-// have a quoted id here
-// \\    '$id'
+test "url encoding" {
+    const gpa = std.testing.allocator;
+    const s = try urlEncode(gpa, "AC/DC & me~");
+    defer gpa.free(s);
+    try std.testing.expectEqualStrings("AC%2FDC%20%26%20me~", s);
+}
 
-const yt_lyrics_end =
-    \\      )
-    \\   print(convert_json_to_timestamp_format(t), end='\n')
-;
+test "lz4 block with an overlapping match" {
+    // "ab" then a 6 byte match at offset 2, then "!" as the last literals
+    const block = [_]u8{ 0x22, 'a', 'b', 2, 0, 0x10, '!' };
+    var out: [9]u8 = undefined;
+    const n = try lz4Block(&out, &block);
+    try std.testing.expectEqualStrings("abababab!", out[0..n]);
+}
+
+test "words sung" {
+    const t = "one two three";
+    try std.testing.expectEqual(@as(usize, 0), sungUntil(t, 0));
+    try std.testing.expectEqual(@as(usize, 0), sungUntil(t, 0.2));
+    // 3 of 11 letters
+    try std.testing.expectEqual(@as(usize, 3), sungUntil(t, 3.0 / 11.0));
+    try std.testing.expectEqual(@as(usize, 7), sungUntil(t, 0.7));
+    try std.testing.expectEqual(t.len, sungUntil(t, 1));
+    try std.testing.expectEqual(@as(usize, 0), sungUntil("", 1));
+}
+
+test "wrapping and escapes" {
+    const gpa = std.testing.allocator;
+    const esc = try unescape(gpa, "\\e[1m\\x1b\\033\\\\\\q");
+    defer gpa.free(esc);
+    try std.testing.expectEqualStrings("\x1b[1m\x1b\x1b\\\\q", esc);
+
+    const opts: Options = .{ .wrap = .{ "<b>", "</b>" }, .pango = true };
+    const out = try render(gpa, opts, "rock & roll <3", 4);
+    defer gpa.free(out);
+    try std.testing.expectEqualStrings("<b>rock</b> &amp; roll &lt;3", out);
+
+    const none = try render(gpa, opts, "not yet", 0);
+    defer gpa.free(none);
+    try std.testing.expectEqualStrings("not yet", none);
+}

@@ -1,180 +1,104 @@
-rec {
-  description = "nix config";
+{
+  description = "my nix config";
 
+  # lets a fresh machine download instead of build before the caches in
+  # modules/generic/nix.nix are set up
   nixConfig = {
-    trusted-users = ["root" "shawn"];
-    experimental-features = ["nix-command" "flakes"];
-    accept-flake-config = true;
-    show-trace = true;
-    auto-optimise-store = true;
-
-    # substituters = ["https://aseipp-nix-cache.freetls.fastly.net"];
-
     extra-substituters = [
-      "https://nix-community.cachix.org"
       "https://charon.cachix.org"
+      "https://nix-community.cachix.org"
     ];
     extra-trusted-public-keys = [
-      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "charon.cachix.org-1:epdetEs1ll8oi8DT8OG2jEA4whj3FDbqgPFvapEPbY8="
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
     ];
   };
 
+  outputs = inputs: import ./modules/flake inputs;
+
   inputs = {
-    # self.submodules = true;
+    ### mine
+    # the shared nixpkgs pin
+    nixpkgs.follows = "nixbuilds/nixpkgs";
 
-    nixpkgs.url = "https://channels.nixos.org/nixos-unstable/nixexprs.tar.zst";
-    nixpkgs-stable.url = "https://channels.nixos.org/nixos-26.05/nixexprs.tar.zst";
-
-    # lix = {
-    #   url = "https://git.lix.systems/lix-project/lix/archive/main.tar.gz";
-    #   flake = false;
-    # };
-    #
-    # lix-module = {
-    #   url = "https://git.lix.systems/lix-project/nixos-module/archive/main.tar.gz";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    #   inputs.lix.follows = "lix";
-    # };
-
-    home-manager = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    nixos-hardware = {
-      url = "github:NixOS/nixos-hardware";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    nixutils = {
-      url = "github:PandeCode/nixutils";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # my packages, as an overlay
     nixbuilds = {
-      url = "github:PandeCode/nixbuilds";
+      type = "github";
+      owner = "PandeCode";
+      repo = "nixbuilds";
+    };
+
+    # my lib and the shared formatter config
+    nixutils = {
+      type = "github";
+      owner = "PandeCode";
+      repo = "nixutils";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nix-index-database = {
-      url = "github:nix-community/nix-index-database";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    dwarffs = {url = "github:PandeCode/dwarffs";};
-
-    # niri = {
-    #   # url = "github:sodiboo/niri-flake";
-    #   url = "github:epireyn/niri-flake";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-
-    # TODO move to nixbuilds
-    river = {
-      url = "git+https://codeberg.org/river/river";
-      flake = false;
-    };
-    rill = {
-      url = "git+https://codeberg.org/lzj15/rill";
-      flake = false;
-    };
-
-    spicetify-nix = {
-      url = "github:Gerg-L/spicetify-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
+    # neovim
     hermes = {
-      url = "github:pandecode/hermes";
-      # inputs.nixpkgs.follows = "nixpkgs";
-    };
-    libys = {
-      url = "github:pandecode/libys";
-      # inputs.nixpkgs.follows = "nixpkgs";
-    };
+      type = "github";
+      owner = "PandeCode";
+      repo = "hermes";
 
-    git-hooks = {
-      url = "github:cachix/git-hooks.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    stylix = {
-      url = "github:danth/stylix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    zig-overlay = {
-      url = "github:mitchellh/zig-overlay";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    boomer.url = "github:nilp0inter/boomer";
-  };
-
-  outputs = {
-    self,
-    nixpkgs,
-    ...
-  } @ inputs: let
-    extras =
-      self
-      // rec {
-        inherit nixConfig;
-
-        systems = {
-          x86_64-linux = "x86_64-linux";
-          # aarch64-linux = "aarch64-linux";
-          # x86_64-darwin = "x86_64-darwin";
-          # aarch64-darwin = "aarch64-darwin";
-        };
-        supportedSystems = builtins.attrNames systems;
-        forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
-
-        stateVersion = "24.11";
-        dotutils = import ./utils/default.nix nixpkgs;
-
-        sharedConfig_kazuha = import ./osConfigs/kazuha.nix;
-
-        overlays = (import ./nix/overlays.nix) inputs;
-
-        inherit (inputs) nixutils;
-        inherit (inputs) nixbuilds;
+      inputs = {
+        nixbuilds.follows = "nixbuilds";
+        nixutils.follows = "nixutils";
       };
-
-    nixosConfigurations = (import ./nix/nixosConfigurations.nix) extras;
-    homeConfigurations = (import ./nix/homeConfigurations.nix) extras;
-  in {
-    nixosConfigurations = nixosConfigurations [];
-    homeConfigurations = homeConfigurations [];
-
-    lib = {
-      appendNixos = nixosConfigurations;
-      appendHome = homeConfigurations;
     };
 
-    nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
+    # emacs
+    libys = {
+      type = "github";
+      owner = "PandeCode";
+      repo = "libys";
 
-    checks = extras.forAllSystems ((import ./nix/checks.nix) extras);
-    devShells = extras.forAllSystems ((import ./nix/devShells.nix) extras);
-    formatter = extras.forAllSystems ((
-        self: system: let
-          pkgs = nixpkgs.legacyPackages.${system};
-          config = self.checks.${system}.pre-commit-check.config;
-          inherit (config) package configFile;
-          script = ''
-            ${pkgs.lib.getExe package} run --all-files --config ${configFile}
-          '';
-        in
-          pkgs.writeShellScriptBin "pre-commit-run" script
-      )
-      extras);
+      inputs = {
+        nixbuilds.follows = "nixbuilds";
+        nixutils.follows = "nixutils";
+      };
+    };
 
-    # darwinConfigurations = {
-    #   herta = darwin.lib.darwinSystem {/
-    #     system = "aarch64-darwin";
+    ### system
+    # manage userspace with nix
+    home-manager = {
+      type = "github";
+      owner = "nix-community";
+      repo = "home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    #     modules = [stylix.darwinModules.stylix ./configuration.nix];
-    #   };
-    # };
+    # per-model hardware settings
+    nixos-hardware = {
+      type = "github";
+      owner = "NixOS";
+      repo = "nixos-hardware";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # colors, fonts and wallpaper for everything
+    stylix = {
+      type = "github";
+      owner = "nix-community";
+      repo = "stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # a patched spotify client
+    spicetify-nix = {
+      type = "github";
+      owner = "Gerg-L";
+      repo = "spicetify-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # prebuilt nix-index database, for comma and command-not-found
+    nix-index-database = {
+      type = "github";
+      owner = "nix-community";
+      repo = "nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 }

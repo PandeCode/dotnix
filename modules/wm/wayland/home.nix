@@ -1,69 +1,27 @@
+{ config, lib, ... }:
+
+let
+  inherit (lib.options) mkOption;
+  inherit (lib) types;
+  inherit (import ../types.nix { inherit lib; }) bind;
+in
+
 {
-  pkgs,
-  lib,
-  config,
-  inputs,
-  ...
-}:
-with lib; {
-  imports = [
-    ../home.nix
-    ../../programs/eww.nix
-    ../../programs/swaync.nix
-  ];
+  imports = [ ../shared.nix ];
 
-  options.wayland = {
-    shared = mkOption {
-      default = rec {
-        inherit (config.wm.shared) terminal workspace_rules explorer;
-        startup = [
-          "wl-paste --type text --watch cliphist store" # Stores only text data
-          "wl-paste --type image --watch cliphist store" # Stores only image data
-          "awww-daemon"
-          "bg.sh last"
-          "sunsetr"
-          config.wm.shared.terminal
-        ];
-        _bind = mod: key: exec: {inherit mod key exec;};
-        mod = _bind "Super";
-        nomod = _bind "";
+  options.dotnix.wm.wayland = {
+    startup = mkOption {
+      type = types.listOf types.str;
+      description = "dotnix.wm.startup plus wayland-only commands.";
+    };
 
-        bindexec =
-          config.wm.shared.bindexec
-          ++ [
-            (mod "n" "swaync-client -t -sw")
-            (mod "b" "woomer")
-
-            (_bind "Super Ctrl Shift" "c" "hyprpicker -a")
-
-            (nomod "Print" "grimblast copy area")
-
-            (_bind "Super Shift" "b" "toggle_waybar.sh")
-            (_bind "Super Shift" "r" "wayrec.sh")
-            (_bind "Super Shift" "p" "lock.sh")
-
-            (mod "v" "rofi-clip.sh")
-            (_bind "Super Shift" "v" "rofi-clip-more.sh")
-          ];
-        inherit (config.wm.shared) bindexec_el;
-      };
+    binds = mkOption {
+      type = types.listOf bind;
+      description = "dotnix.wm.binds plus wayland-only binds.";
     };
   };
 
-  config = {
-    services.hyprpolkitagent.enable = true;
-
-    xdg.configFile."sunsetr/sunsetr.toml".text = builtins.readFile ../../../config/sunsetr/sunsetr.toml;
-    xdg.configFile."sunsetr/presets/day/sunsetr.toml".text = builtins.readFile ../../../config/sunsetr/presets/day/sunsetr.toml;
-
-    home.packages = with pkgs; [
-      wdisplays
-      wlprop
-      sunsetr
-
-      hyprpicker
-
-      wayvnc # TODO: own file
-    ];
+  config.dotnix.wm.wayland = {
+    inherit (config.dotnix.wm) startup binds;
   };
 }

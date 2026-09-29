@@ -1,618 +1,166 @@
 {
-  pkgs,
-  lib,
   config,
-  inputs,
+  lib,
+  pkgs,
   ...
-}: let
-  HOME = "/home/${config.home.username}";
-in {
-  imports = [
-    ../wayland/home.nix
-    inputs.niri.homeModules.niri
-    inputs.niri.homeModules.stylix
-  ];
+}:
 
-  nixpkgs.overlays = [inputs.niri.overlays.niri];
+let
+  inherit (lib.options) mkEnableOption mkOption mkPackageOption;
+  inherit (lib.strings)
+    concatMapStrings
+    concatStringsSep
+    hasPrefix
+    removePrefix
+    ;
+  inherit (lib) types;
+  inherit (import ../types.nix { inherit lib; }) bind duplicateBinds;
 
-  dotnix.symlinkPairs = [
-    ["${HOME}/dotnix/config/niri/shaders/open.glsl" "${HOME}/.config/niri/shaders/open.glsl"]
-    ["${HOME}/dotnix/config/niri/shaders/close.glsl" "${HOME}/.config/niri/shaders/close.glsl"]
-    ["${HOME}/dotnix/config/niri/shaders/resize.glsl" "${HOME}/.config/niri/shaders/resize.glsl"]
-  ];
+  cfg = config.dotnix.niri;
 
-  home.packages = with pkgs; [
-    nirius
-  ];
+  toBind = b: {
+    name = concatStringsSep "+" (b.mods ++ [ b.key ]);
+    value = {
+      spawn-sh = b.exec;
+    }
+    // lib.attrsets.optionalAttrs b.locked { _props.allow-when-locked = true; };
+  };
 
-  programs.niri = {
-    enable = true;
-    package = pkgs.niri;
-    settings = with builtins; let
-      splitBySpace = v: filter isString (split "[ ]+" v);
-      joinByPlus = v:
-        foldl' (a: b:
-          a
-          + (
-            if a == ""
-            then ""
-            else "+"
-          )
-          + b) "" (splitBySpace v);
-    in {
-      window-rules = [
-        {
-          matches = [
-            {
-              app-id = "steam";
-              title = ''r#"^notificationtoasts_\d+_desktop$"#'';
-            }
-          ];
-          default-floating-position = {
-            x = 10;
-            y = 10;
-            relative-to = "bottom-right";
-          };
-        }
-        {
-          matches = [
-            {title = "Picture-in-Picture";}
-            {app-id = "feh";}
-            {app-id = "pqiv";}
-            {app-id = "Pqiv";}
-            {app-id = "nsxiv";}
-          ];
-          default-floating-position = {
-            x = 10;
-            y = 10;
-            relative-to = "top-right";
-          };
+  # "title:<text>" matches the title, anything else the app id
+  toMatch =
+    entry:
+    if hasPrefix "title:" entry then { title = removePrefix "title:" entry; } else { app-id = entry; };
 
-          # baba-is-float = true;
-        }
-
-        {
-          matches =
-            (map (k: {app-id = k;})
-              config.wayland.shared.workspace_rules.float)
-            ++ (map (k: {title = k;})
-              config.wayland.shared.workspace_rules.float);
+  # nodes that repeat (spawn-sh-at-startup, window-rule, ...) must be
+  # ordered children for toKDL
+  document = cfg.settings // {
+    _children =
+      map (cmd: { spawn-sh-at-startup = cmd; }) cfg.startup
+      ++ lib.lists.optional (cfg.floating != [ ]) {
+        window-rule = {
+          _children = map (entry: { match._props = toMatch entry; }) cfg.floating;
           open-floating = true;
-        }
-        {
-          matches = [
-            {
-              app-id = "com.mitchellh.ghostty";
-              at-startup = true;
-            }
-            {
-              app-id = "^zen-twilight$";
-              at-startup = true;
-            }
-          ];
-          open-maximized = true;
-        }
-        {
-          matches = [{app-id = "^zen-twilight$";}];
-          variable-refresh-rate = true;
-          border = {width = 0;};
-        }
-      ];
-      layer-rules = [
-        {
-          matches = [{namespace = "backdrop";}];
-          place-within-backdrop = true;
-        }
-        {
-          matches = [{namespace = "rofi";}];
-          # baba-is-float = true;
-          opacity = 0.9;
+        };
+      }
+      ++ map (rule: { window-rule = rule; }) cfg.windowRules
+      ++ map (rule: { layer-rule = rule; }) cfg.layerRules;
+  };
 
-          # xray = true;
-          # blur = true;
-        }
-      ];
+  generated = pkgs.writeText "niri-generated.kdl" cfg.kdl;
 
-      hotkey-overlay.skip-at-startup = true;
-      prefer-no-csd = true;
+  # validated before the includes are added: those are live files that do
+  # not exist at build time
+  configFile = pkgs.runCommand "niri-config.kdl" { nativeBuildInputs = [ cfg.package ]; } ''
+    niri validate -c ${generated}
+    cat ${generated} > $out
+    ${concatMapStrings (file: "echo 'include \"${file}\"' >> $out\n") cfg.includes}
+  '';
 
-      layout.border.width = lib.mkForce 1;
+  shaders = lib.attrsets.mapAttrs' (name: file: {
+    name = "window-${name}";
+    value.custom-shader = builtins.readFile file;
+  }) (lib.attrsets.filterAttrs (_: file: file != null) cfg.shaders);
+in
 
-      spawn-at-startup = map (v: {argv = v;}) ([
-          ["niriusd"]
-          ["xwayland-satellite"]
-          ["sh" "-c" "awww-daemon -n backdrop"]
-        ]
-        ++ map splitBySpace config.wayland.shared.startup);
-      switch-events = {
-        tablet-mode-on.action.spawn = ["gsettings" "set" "org.gnome.desktop.a11y.applications" "screen-keyboard-enabled" "true"];
-        tablet-mode-off.action.spawn = ["gsettings" "set" "org.gnome.desktop.a11y.applications" "screen-keyboard-enabled" "false"];
+{
+  imports = [ ../wayland/home.nix ];
+
+  options.dotnix.niri = {
+    enable = mkEnableOption "niri's config";
+
+    package = mkPackageOption pkgs "niri" { } // {
+      description = "Used to validate the config at build time.";
+    };
+
+    settings = mkOption {
+      type = types.attrsOf types.anything;
+      default = { };
+      example = {
+        prefer-no-csd = { };
+        input.touchpad.tap = { };
+        binds."Super+h".focus-column-left = { };
       };
-      outputs."eDP-1" = {
-        enable = true;
-        variable-refresh-rate = "on-demand";
-        mode = {
-          width = 1920;
-          height = 1200;
-          refresh = 165.0;
-        };
-        scale = 1;
-      };
-      input = {
-        mouse = {
-          accel-speed = 0.2;
-          accel-profile = "flat";
-        };
-        keyboard = {
-          xkb = {
-            # layout = "us,es";
-            options = "grp:win_space_toggle,ctrl:nocaps";
-          };
-        };
-        touchpad = {
-          tap = true;
-          natural-scroll = true;
-          accel-speed = 0.2;
-          accel-profile = "flat";
-          scroll-method = "two-finger";
-          disabled-on-external-mouse = true;
-        };
-      };
-      animations = {
-        window-open = {
-          custom-shader = "${HOME}/.config/niri/shaders/open.glsl";
-          kind.easing = {
-            curve = "linear";
-            duration-ms = 250;
-          };
-        };
-        window-close = {
-          custom-shader = "${HOME}/.config/niri/shaders/close.glsl";
-          kind.easing = {
-            curve = "linear";
-            duration-ms = 250;
-          };
-        };
-        window-resize = {
-          custom-shader = "${HOME}/.config/niri/shaders/resize.glsl";
-          kind.easing = {
-            curve = "linear";
-            duration-ms = 250;
-          };
-        };
-      };
-      binds = with config.lib.niri.actions;
-        (foldl' (a: b: a // b) {}
-          ((
-              map
-              (n: {
-                "Mod+${toString n}".action.focus-workspace = n;
-              })
-              (genList (x: x + 1) 9)
-            )
-            ++ (
-              map
-              (
-                v: {
-                  "${(
-                    if v.mod == ""
-                    then ""
-                    else "${joinByPlus v.mod}+"
-                  )}${v.key}".action.spawn =
-                    splitBySpace v.exec;
-                }
-              )
-              config.wayland.shared.bindexec
-              ++ (
-                map
-                (
-                  v: {
-                    "${(
-                      if v.mod == ""
-                      then ""
-                      else "${joinByPlus v.mod}+"
-                    )}${v.key}" = {
-                      allow-when-locked = true;
-                      action.spawn =
-                        splitBySpace v.exec;
-                    };
-                  }
-                )
-                config.wayland.shared.bindexec_el
-              )
-            )))
-        // {
-          "Super+Alt+H".action = focus-monitor-left;
-          "Super+Alt+J".action = focus-monitor-down;
-          "Super+Alt+K".action = focus-monitor-up;
-          "Super+Alt+L".action = focus-monitor-right;
+      description = ''
+        config.kdl as nix, in home-manager's toKDL shape: a node is an
+        attribute, `{ }` is a node without arguments, `_args` and `_props`
+        hold arguments and properties.
+      '';
+    };
 
-          "Super+Shift+Alt+H".action = move-column-to-monitor-left;
-          "Super+Shift+Alt+J".action = move-column-to-monitor-down;
-          "Super+Shift+Alt+K".action = move-column-to-monitor-up;
-          "Super+Shift+Alt+L".action = move-column-to-monitor-right;
+    startup = mkOption {
+      type = types.listOf types.str;
+      description = "Shell commands at startup. Starts as dotnix.wm.wayland.startup.";
+    };
 
-          "Super+h".action = focus-column-left;
-          "Super+l".action = focus-column-right;
-          "Super+j".action = focus-window-or-workspace-down;
-          "Super+k".action = focus-window-or-workspace-up;
+    binds = mkOption {
+      type = types.listOf bind;
+      description = "Binds that run a command. Starts as dotnix.wm.wayland.binds.";
+    };
 
-          "Super+Shift+h".action = consume-or-expel-window-left;
-          "Super+Shift+l".action = consume-or-expel-window-right;
+    floating = mkOption {
+      type = types.listOf types.str;
+      description = "Windows that open floating. Starts as dotnix.wm.rules.float.";
+    };
 
-          "Super+Shift+j".action = move-window-to-workspace-down {focus = true;};
-          "Super+Shift+k".action = move-window-to-workspace-up {focus = true;};
+    windowRules = mkOption {
+      type = types.listOf (types.attrsOf types.anything);
+      default = [ ];
+      description = "window-rule nodes, in order.";
+    };
 
-          "Super+Ctrl+l".action = set-column-width "+10%";
-          "Super+Ctrl+h".action = set-column-width "-10%";
+    layerRules = mkOption {
+      type = types.listOf (types.attrsOf types.anything);
+      default = [ ];
+      description = "layer-rule nodes, in order.";
+    };
 
-          "Super+Space".action = expand-column-to-available-width;
-          "Super+Shift+Space".action = maximize-column;
+    shaders = lib.attrsets.genAttrs [ "open" "close" "resize" ] (
+      name:
+      mkOption {
+        type = types.nullOr types.path;
+        default = null;
+        description = "GLSL file for the window-${name} animation.";
+      }
+    );
 
-          "Super+f" = {
-            action = fullscreen-window;
-            repeat = false;
-          };
-          "Super+Alt+f" = {
-            action = toggle-windowed-fullscreen;
-            repeat = false;
-          };
-          "Super+Shift+f" = {
-            action = toggle-window-floating;
-            repeat = false;
-          };
+    kdl = mkOption {
+      type = types.str;
+      readOnly = true;
+      description = "The generated config, without includes. For reading, not setting.";
+    };
 
-          "Super+Shift+q".action = quit {skip-confirmation = true;};
-
-          "Super+Tab".action = toggle-overview;
-          # "Super+Slash".action = show-hotkey-overlay;
-          "Alt+f4".action = close-window;
-
-          "Super+Print".action.screenshot-screen = {show-pointer = false;};
-          "Super+Shift+Print".action.screenshot = {show-pointer = false;};
-          "Super+a".action.spawn = ["nirius" "toggle-follow-mode"];
-          # "Super+a".action.spawn = ["sh" "-c" "kill -s USR1 $(cat /tmp/niritools)"];
-          # "Super+shift+a".action.spawn = ["sh" "-c" "kill -s USR2 $(cat /tmp/niritools)"];
-        };
+    includes = mkOption {
+      type = types.listOf types.str;
+      default = [ ];
+      example = [ "~/dotnix/config/niri/live.kdl" ];
+      description = ''
+        Files included at the end of config.kdl. They override the
+        generated config and niri reloads them on change, so they are good
+        for trying things without a switch.
+      '';
     };
   };
 
-  #     workspaces = {
-  #       ws_1 = {};
-  #       ws_2 = {};
-  #       ws_3 = {};
-  #       ws_4 = {};
-  #       ws_5 = {};
-  #     };
-  #     window-rules =
-  #       [
-  #         {
-  #           open-maximized = true;
-  #           draw-border-with-background = false;
-  #           clip-to-geometry = true;
-  #           geometry-corner-radius = rec {
-  #             bottom-left = 8.0;
-  #             bottom-right = bottom-left;
-  #             top-left = bottom-left;
-  #             top-right = bottom-left;
-  #           };
-  #           border = {width = 2;};
-  #         }
-  #         {
-  #           matches = [{app-id = "^baba$";}];
-  #           baba-is-float = true;
-  #         }
-  #         {
-  #           matches = [{is-window-cast-target = true;}];
-  #
-  #           focus-ring = {
-  #             active = {color = "#f38ba8";};
-  #             inactive = {color = "#7d0d2d";};
-  #           };
-  #
-  #           border = {
-  #             inactive = {color = "#7d0d2d";};
-  #           };
-  #
-  #           shadow = {
-  #             color = "#7d0d2d70";
-  #           };
-  #
-  #           tab-indicator = {
-  #             active = {color = "#f38ba8";};
-  #             inactive = {color = "#7d0d2d";};
-  #           };
-  #         }
-  #
-  #         {
-  #           matches = [{is-active = false;}];
-  #           opacity = 0.95;
-  #         }
-  #         {
-  #           matches = [{app-id = "zen";}];
-  #         }
-  #
-  #         {
-  #           matches =
-  #             lib.flatten
-  #             (map (
-  #                 v:
-  #                   if builtins.isString v && builtins.substring 0 6 v == "title:"
-  #                   then [{title = builtins.substring 6 (builtins.stringLength v) v;}]
-  #                   else [{app-id = v;} {title = v;}]
-  #               )
-  #               config.wayland.shared.workspace_rules.float);
-  #           open-floating = true;
-  #         }
-  #         # { # TODO Wait for niri devs
-  #         #   matches =
-  #         #     lib.flatten
-  #         #     (map (
-  #         #         v:
-  #         #           if builtins.isString v && builtins.substring 0 6 v == "title:"
-  #         #           then [{title = builtins.substring 6 (builtins.stringLength v) v;}]
-  #         #           else [{app-id = v;} {title = v;}]
-  #         #       )
-  #         #       config.wayland.shared.workspace_rules.pin);
-  #         #   pin = true;
-  #         # }
-  #       ]
-  #       ++ lib.flatten (
-  #         map (ws: {
-  #           matches =
-  #             lib.flatten
-  #             (map (
-  #                 v:
-  #                   if builtins.isString v && builtins.substring 0 6 v == "title:"
-  #                   then [{title = builtins.substring 6 (builtins.stringLength v) v;}]
-  #                   else [{app-id = v;} {title = v;}]
-  #               )
-  #               config.wayland.shared.workspace_rules.${ws});
-  #           open-on-workspace = ws;
-  #         }) ["ws_1" "ws_2" "ws_3" "ws_4" "ws_5"]
-  #       )
-  #       # ++ m "ws_1"
-  #       # ++ m "ws_2"
-  #       # ++ m "ws_3"
-  #       # ++ m "ws_4"
-  #       # ++ m "ws_5"
-  #       # pin
-  #       ;
-  #     environment = {
-  #       DISPLAY = ":0";
-  #     };
-  #     layout = {
-  #       gaps = 8;
-  #     };
-  #     outputs."eDP-1" = {
-  #       enable = true;
-  #       variable-refresh-rate = "on-demand";
-  #       mode = {
-  #         width = 1920;
-  #         height = 1080;
-  #         refresh = 144.0;
-  #       };
-  #       scale = 1;
-  #       # transform = "normal";
-  #       # position x=1280 y=0
-  #     };
-  #     input = {
-  #       keyboard = {
-  #         xkb = {
-  #           layout = "us,es";
-  #           options = "grp:win_space_toggle,ctrl:nocaps";
-  #         };
-  #       };
-  #
-  #       touchpad = {
-  #         tap = true;
-  #         natural-scroll = true;
-  #         accel-speed = 0.2;
-  #         accel-profile = "flat";
-  #         scroll-method = "two-finger";
-  #         disabled-on-external-mouse = true;
-  #       };
-  #
-  #       mouse = {
-  #         natural-scroll = true;
-  #         accel-speed = 0.2;
-  #       };
-  #
-  #       trackpoint = {
-  #         natural-scroll = true;
-  #         middle-emulation = true;
-  #       };
-  #     };
-  #
-  #     binds = with config.lib.niri.actions; let
-  #       # binds = with (map (v : {action = v;}) config.lib.niri.actions); let
-  #       sh = spawn "sh" "-c";
-  #       ls = f: {
-  #         allow-when-locked = true;
-  #         action.spawn = f;
-  #       };
-  #       cd150 = f: {
-  #         cooldown-ms = 150;
-  #         action = f;
-  #       };
-  #     in rec {
-  #       XF86AudioPlay = ls ["_tool_ctrl" "media" "toggle"];
-  #       XF86AudioNext = ls ["_tool_ctrl" "media" "next"];
-  #       XF86AudioPrev = ls ["_tool_ctrl" "media" "prev"];
-  #       XF86AudioRaiseVolume = ls ["_tool_ctrl" "vol" "up"];
-  #       XF86AudioLowerVolume = ls ["_tool_ctrl" "vol" "down"];
-  #       XF86AudioMute = ls ["_tool_ctrl" "vol" "mute"];
-  #       XF86AudioMicMute = ls ["_tool_ctrl" "mic" "mute"];
-  #       XF86MonBrightnessUp = ls ["_tool_ctrl" "light" "up"];
-  #       XF86MonBrightnessDown = ls ["_tool_ctrl" "light" "down"];
-  #
-  #       "Mod+TouchpadScrollDown" = XF86MonBrightnessDown;
-  #       "Mod+TouchpadScrollUp" = XF86MonBrightnessUp;
-  #
-  #       "Mod+Shift+Slash".action = show-hotkey-overlay;
-  #
-  #       "Mod+e".action = spawn config.wayland.shared.explorer;
-  #       "Mod+Return".action = spawn config.wayland.shared.terminal;
-  #       "Ctrl+Alt+Delete".action = spawn "hyprlock";
-  #       "Ctrl+Shift+Alt+Delete".action = quit;
-  #
-  #       "Mod+Shift+c".action = spawn "rofi-calc.sh";
-  #       "Mod+Ctrl+c".action = spawn "calc-clip.sh";
-  #
-  #       "Mod+Alt+c".action = spawn "hyprpicker";
-  #
-  #       "Alt+space".action = spawn "rofi-run.sh";
-  #       "Alt+Shift+space".action = spawn "rofi-run-pr.sh";
-  #
-  #       "Super+v".action = spawn "rofi-clip.sh";
-  #       "Super+Shift+v".action = spawn "rofi-paste.sh";
-  #
-  #
-  #       "Mod+s".action = spawn "_tool_search";
-  #
-  #       "Alt+F4".action = close-window;
-  #
-  #       "Mod+H".action = focus-column-left;
-  #       "Mod+L".action = focus-column-right;
-  #
-  #       "Mod+Ctrl+H".action = move-column-left;
-  #       "Mod+Ctrl+L".action = move-column-right;
-  #
-  #       "Mod+J".action = focus-window-or-workspace-down;
-  #       "Mod+K".action = focus-window-or-workspace-up;
-  #       "Mod+Shift+J".action = move-window-down-or-to-workspace-down;
-  #       "Mod+Shift+K".action = move-window-up-or-to-workspace-up;
-  #
-  #       "Mod+Home".action = focus-column-first;
-  #       "Mod+End".action = focus-column-last;
-  #       "Mod+Ctrl+Home".action = move-column-to-first;
-  #       "Mod+Ctrl+End".action = move-column-to-last;
+  config = lib.modules.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = duplicateBinds cfg.binds == [ ];
+        message = "niri: bound more than once: ${lib.strings.concatStringsSep ", " (duplicateBinds cfg.binds)}";
+      }
+    ];
 
-  #       # "Mod+Shift+Page_Down".action = move-workspace-down;
-  #       # "Mod+Shift+Page_Up ".action = move-workspace-up;
-  #       "Mod+Shift+U".action = move-workspace-down;
-  #       "Mod+Shift+I".action = move-workspace-up;
-  #
-  #       # You can bind mouse wheel scroll ticks using the following syntax.
-  #       # These binds will change direction based on the natural-scroll setting.
-  #       #
-  #       # To avoid scrolling through workspaces really fast, you can use
-  #       # the cooldown-ms property. The bind will be rate-limited to this value.
-  #       # You can set a cooldown on any bind, but it's most useful for the wheel.
-  #
-  #       # "Mod+WheelScrollDown" = cd150 focus-workspace-down;
-  #       # "Mod+WheelScrollUp" = cd150 focus-workspace-up;
-  #       # "Mod+Ctrl+WheelScrollDown" = cd150 move-column-to-workspace-down;
-  #       # "Mod+Ctrl+WheelScrollUp" = cd150 move-column-to-workspace-up;
-  #
-  #       # "Mod+WheelScrollRight".action = focus-column-right;
-  #       # "Mod+WheelScrollLeft".action = focus-column-left;
-  #       # "Mod+Ctrl+WheelScrollRight".action = move-column-right;
-  #       # "Mod+Ctrl+WheelScrollLeft".action = move-column-left;
-  #
-  #       # Usually scrolling up and down with Shift in applications results in
-  #       # horizontal scrolling; these binds replicate that.
-  #       # "Mod+Shift+WheelScrollDown".action = focus-column-right;
-  #       # "Mod+Shift+WheelScrollUp".action = focus-column-left;
-  #       # "Mod+Ctrl+Shift+WheelScrollDown".action = move-column-right;
-  #       # "Mod+Ctrl+Shift+WheelScrollUp ".action = move-column-left;
-  #
-  #       # You can refer to workspaces by index. However, keep in mind that
-  #       # niri is a dynamic workspace system, so these commands are kind of
-  #       #"best effort". Trying to refer to a workspace index bigger than
-  #       # the current workspace count will instead refer to the bottommost
-  #       # (empty) workspace.
-  #       #
-  #       # For example, with 2 workspaces + 1 empty, indices 3, 4, 5 and so on
-  #       # will all refer to the 3rd workspace.
-  #       "Mod+1".action = focus-workspace 1;
-  #       "Mod+2".action = focus-workspace 2;
-  #       "Mod+3".action = focus-workspace 3;
-  #       "Mod+4".action = focus-workspace 4;
-  #       "Mod+5".action = focus-workspace 5;
-  #       "Mod+6".action = focus-workspace 6;
-  #       "Mod+7".action = focus-workspace 7;
-  #       "Mod+8".action = focus-workspace 8;
-  #       "Mod+9".action = focus-workspace 9;
-  #
-  #       # "Mod+Ctrl+1".action = move-column-to-workspace 1;
-  #       # "Mod+Ctrl+2".action = move-column-to-workspace 2;
-  #       # "Mod+Ctrl+3".action = move-column-to-workspace 3;
-  #       # "Mod+Ctrl+4".action = move-column-to-workspace 4;
-  #       # "Mod+Ctrl+5".action = move-column-to-workspace 5;
-  #       # "Mod+Ctrl+6".action = move-column-to-workspace 6;
-  #       # "Mod+Ctrl+7".action = move-column-to-workspace 7;
-  #       # "Mod+Ctrl+8".action = move-column-to-workspace 8;
-  #       # "Mod+Ctrl+9".action = move-column-to-workspace 9;
-  #       #
-  #       # "Mod+Shift+1".action = move-window-to-workspace 1;
-  #       # "Mod+Shift+2".action = move-window-to-workspace 2;
-  #       # "Mod+Shift+3".action = move-window-to-workspace 3;
-  #       # "Mod+Shift+4".action = move-window-to-workspace 4;
-  #       # "Mod+Shift+5".action = move-window-to-workspace 5;
-  #       # "Mod+Shift+6".action = move-window-to-workspace 6;
-  #       # "Mod+Shift+7".action = move-window-to-workspace 7;
-  #       # "Mod+Shift+8".action = move-window-to-workspace 8;
-  #       # "Mod+Shift+9".action = move-window-to-workspace 9;
-  #
-  #       # Switches focus between the current and the previous workspace.
-  #       "Mod+grave".action = focus-workspace-previous;
-  #
-  #       # The following binds move the focused window in and out of a column.
-  #       # If the window is alone, they will consume it into the nearby column to the side.
-  #       # If the window is already in a column, they will expel it out.
-  #       "Mod+BracketLeft".action = consume-or-expel-window-left;
-  #       "Mod+BracketRight".action = consume-or-expel-window-right;
-  #
-  #       "Mod+Tab".action = toggle-overview;
-  #
-  #       # Consume one window from the right to the bottom of the focused column.
-  #       "Mod+Comma".action = consume-window-into-column;
-  #       # Expel the bottom window from the focused column to the right.
-  #       "Mod+Period".action = expel-window-from-column;
-  #
-  #       "Mod+R".action = switch-preset-column-width;
-  #       "Mod+Shift+R".action = switch-preset-window-height;
-  #       "Mod+Ctrl+R".action = reset-window-height;
-  #
-  #       "Mod+Shift+F".action = maximize-column;
-  #       "Mod+F".action = fullscreen-window;
-  #
-  #       "Mod+C".action = center-column;
-  #
-  #       # Finer width adjustments.
-  #       # This command can also:
-  #       # * set width in pixels:"1000"
-  #       # * adjust width in pixels:"-5" or"+5"
-  #       # * set width as a percentage of screen width:"25%"
-  #       # * adjust width as a percentage of screen width:"-10%" or"+10%"
-  #       # Pixel sizes use logical, or scaled, pixels. I.e. on an output with scale 2.0,
-  #       # set-column-width"100" will make the column occupy 200 physical screen pixels.
-  #       "Mod+Minus".action = set-column-width "-10%";
-  #       "Mod+Equal".action = set-column-width "+10%";
-  #
-  #       "Mod+Alt+Minus".action = set-window-height "-10%";
-  #       "Mod+Alt+Equal".action = set-window-height "+10%";
-  #
-  #       # Move the focused window between the floating and the tiling layout.
-  #       "Mod+alt+f".action = toggle-window-floating;
-  #       "Mod+shift+space".action = switch-focus-between-floating-and-tiling;
-  #
-  #       # Actions to switch layouts.
-  #       # Note: if you uncomment these, make sure you do NOT have
-  #       # a matching layout switch hotkey configured in xkb options above.
-  #       # Having both at once on the same hotkey will break the switching,
-  #       # since it will switch twice upon pressing the hotkey (once by xkb, once by niri).
-  #       # "Mod+Comma".action = switch-layout "next";
-  #       # "Mod+Period".action = switch-layout "prev";
-  #
-  #       "Print".action = screenshot;
-  #       # "Ctrl+Print".action = screenshot-screen;
-  #       "Alt+Print".action = screenshot-window;
-  #
-  #       "Mod+Shift+P".action = power-off-monitors;
-  #     };
-  #   };
-  #   # config = builtins.readFile ../../../config/niri/config.kdl;
-  # };
+    dotnix.niri = {
+      kdl = lib.hm.generators.toKDL { escapeBackslashes = true; } document;
+
+      inherit (config.dotnix.wm.wayland) startup binds;
+      floating = config.dotnix.wm.rules.float;
+
+      settings = lib.modules.mkMerge [
+        { binds = lib.attrsets.listToAttrs (map toBind cfg.binds); }
+        (lib.modules.mkIf (shaders != { }) { animations = shaders; })
+      ];
+    };
+
+    xdg.configFile."niri/config.kdl".source = configFile;
+  };
 }

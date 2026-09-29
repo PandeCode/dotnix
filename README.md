@@ -1,49 +1,81 @@
-#### my nix config
+# dotnix
 
-This setup is primarily for my personal use and _will_ break about 95% of the time with hardcoded paths and bugs that I will refuse to fix for a while.
-Feel free to take inspiration from it, though I’m not sure why you would want to. its also easier for me if this is public
+My NixOS config. The private parts (secrets, network drives, private DNS)
+live in a separate repo that builds on this one.
 
-#### brainstorming
+```bash
+nix develop
+just switch     # build this machine and switch
+just build      # build and show what changes
+just check      # evaluate every host, run the checks
+just update     # update inputs
+just iso        # build the live system and installer
+```
 
-dotnix will be a specialArg but i will use it like
+## Layout
+
+```
+flake.nix           inputs only
+modules/
+  flake/            outputs, lib (mkHost), checks
+  generic/          every class: dotnix.* options, nix (lix, caches), home-manager
+  nixos/ wsl/ iso/ darwin/
+                    one per class; each imports generic/
+  home/             home-manager modules
+  profiles/         my bundles of settings, turned on per host
+  hardware/         drop-in hardware modules
+  wm/               window managers, drop-in modules
+packages/           scripts (bin/), c-tools (src/), dotnix-install
+hosts/<name>/       one folder per machine
+home/<user>/        one folder per user
+old/                the previous config, until it is ported
+```
+
+## Hosts
+
+A machine is `hosts/<name>/default.nix` plus one line in
+`modules/flake/default.nix`:
 
 ```nix
-{pkgs, ... } @ args: let dotnix = if args ? "dotnix" then args.dotnix else { config = { something_i_need = false; val = "default"; } }; in {}
+nixosConfigurations = mkHosts {
+  kazuha = { };
+  <name> = { };                        # x86_64 nixos
+  <name> = { arch = "aarch64"; };
+  <name> = { class = "iso"; };
+  <name> = { class = "wsl"; };         # needs the nixos-wsl input
+};
+
+darwinConfigurations = mkHosts {
+  <name> = { arch = "aarch64"; class = "darwin"; };   # needs the darwin input
+};
 ```
 
-sharedConfig -> dotnix.config
-dotutils -> dotnix.lib
-
-dotutils will also be an extension of Pandecode/nixutils.lib
-
-fancy idea
-
-have a script that will look for functions from dotnix.lib and implement them at the top of a module so if for some reason someone else likes a module i write then they can use it
-
-idk if i should minimize
-
-#### iso is broke
+`mkHost` loads `hosts/<name>` and `modules/<class>`, and sets the host
+name and platform. For a new machine, generate its hardware file on it:
 
 ```bash
-git clone --recurse-submodules --depth 1 --shallow-submodules
+nixos-generate-config --show-hardware-config > hosts/<name>/hardware.nix
 ```
 
-[![Build and Tag ISO](https://github.com/PandeCode/dotnix/actions/workflows/build_iso.yml/badge.svg)](https://github.com/PandeCode/dotnix/actions/workflows/build_iso.yml)
-[![Cachix](https://github.com/PandeCode/dotnix/actions/workflows/ci.yml/badge.svg)](https://github.com/PandeCode/dotnix/blob/cachix/.github/workflows/ci.yml)
+## Live system
 
-> Very much a WIP
+`just iso` builds `result/iso/*.iso`: my desktop, shell, editors and theme
+on any machine, logged in as me. Write it to a stick with
+`dd if=result/iso/*.iso of=/dev/sdX bs=4M status=progress`.
 
-The iso genetated is about 3GB+ and github releases have a max filesize of 2GB.
-So I split the iso into compatibale sizes using a prefix of ISO*PART*.
+On it, mount the target at `/mnt` and run `dotnix-install`. It installs
+one of the machines in `hosts/`, sets up a new one (a host folder, its
+hardware file and a line in the host list), or plain NixOS. The config
+ends up in `~/dotnix` on the new machine; commit the new host from there.
 
-Download the files(curl, wget, axel, Direct Download)
+## Drop-in modules
 
-Use cat in a shell with glob support(or a manual ref).
+Modules under `modules/wm/` (more to come) only read their own
+`dotnix.<name>` options, so they work in any config:
 
-```bash
-cat ISO_PART_* > nixiso.iso
-# or
-cat INSTALL_ISO_PART_* > nixiso.iso
+```nix
+imports = [ inputs.dotnix.nixosModules.niri ];
+dotnix.niri.enable = true;
 ```
 
-> Because of the nature of the files, it will trigger security in flashers like Rufus. You can ignore this.
+`nix flake check` evaluates each one alone to keep it that way.
