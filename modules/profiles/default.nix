@@ -5,6 +5,7 @@
     # keep-sorted start
     ./apps.nix
     ./base.nix
+    ./boot.nix
     ./desktop.nix
     ./dev.nix
     ./gaming.nix

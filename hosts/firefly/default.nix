@@ -1,14 +1,12 @@
-# Framework 16, AMD Ryzen AI 300
-{
-  inputs,
-  lib,
-  ...
-}:
+# ASUS TUF, Intel with an RTX 2050
+{ inputs, ... }:
 
 {
   imports = [
     ./hardware.nix
-    inputs.nixos-hardware.nixosModules.framework-16-amd-ai-300-series
+    inputs.nixos-hardware.nixosModules.common-cpu-intel
+    inputs.nixos-hardware.nixosModules.common-pc-laptop
+    inputs.nixos-hardware.nixosModules.common-pc-ssd
   ];
 
   dotnix = {
@@ -27,25 +25,21 @@
       laptop.enable = true;
     };
 
-    hardware.amd = {
+    hardware.nvidia = {
       enable = true;
-      rocm.enable = true;
+      prime = {
+        enable = true;
+        intelBusId = "PCI:0:2:0";
+        nvidiaBusId = "PCI:1:0:0";
+      };
+      syncSpecialisation = true;
     };
   };
 
-  programs.coolercontrol.enable = true;
-
-  boot.supportedFilesystems = lib.modules.mkForce [
-    "btrfs"
-    "cifs"
-    "f2fs"
-    "ntfs"
-    "reiserfs"
-    "vfat"
-    "xfs"
-  ];
-
-  virtualisation.waydroid.enable = true;
+  services = {
+    asusd.enable = true;
+    supergfxd.enable = true;
+  };
 
   swapDevices = [
     {
@@ -53,9 +47,6 @@
       size = 16 * 1024;
     }
   ];
-
-  # the laptop screen, for screen sharing under river
-  xdg.portal.wlr.settings.screencast.output_name = "eDP-1";
 
   # the release this machine was installed with, not the current one
   system.stateVersion = "25.05";

@@ -17,6 +17,8 @@ in
   # darwin hosts go in darwinConfigurations
   nixosConfigurations = mkHosts {
     # keep-sorted start block=yes newline_separated=yes
+    firefly = { };
+
     iso.class = "iso";
 
     kazuha = { };
@@ -29,6 +31,7 @@ in
     amd = ../hardware/amd.nix;
     i3 = ../wm/i3/nixos.nix;
     niri = ../wm/niri/nixos.nix;
+    nvidia = ../hardware/nvidia.nix;
     river = ../wm/river/nixos.nix;
     wayland = ../wm/wayland/nixos.nix;
     x11 = ../wm/x11/nixos.nix;

@@ -12,6 +12,7 @@
 
     # keep-sorted start
     ../hardware/amd.nix
+    ../hardware/nvidia.nix
     ../wm/i3/nixos.nix
     ../wm/niri/nixos.nix
     ../wm/river/nixos.nix

@@ -135,6 +135,20 @@ let
     };
   };
 
+  nvidia = nixos {
+    imports = [ self.nixosModules.nvidia ];
+    nixpkgs.config.allowUnfree = true;
+    dotnix.hardware.nvidia = {
+      enable = true;
+      prime = {
+        enable = true;
+        intelBusId = "PCI:0:2:0";
+        nvidiaBusId = "PCI:1:0:0";
+      };
+      syncSpecialisation = true;
+    };
+  };
+
   wm = home {
     imports = [ self.homeModules.wm ];
     dotnix.wm.terminal = "foot";
@@ -203,6 +217,19 @@ in
       == amd.dotnix.hardware.amd.rocm.enable
     ) "amd: /opt/rocm linked when it should not be, or not linked";
     pkgs.runCommandLocal "drop-in-amd" { } "touch $out";
+
+  drop-in-nvidia =
+    let
+      sync = nvidia.specialisation.nvidia-sync.configuration.hardware.nvidia.prime;
+    in
+    assert lib.asserts.assertMsg nvidia.hardware.nvidia.prime.offload.enable
+      "nvidia: offload not the default";
+    assert lib.asserts.assertMsg (
+      sync.sync.enable && !sync.offload.enable
+    ) "nvidia: nvidia-sync entry does not sync";
+    assert lib.asserts.assertMsg (lib.lists.elem "nvidia" nvidia.services.xserver.videoDrivers)
+      "nvidia: driver not loaded";
+    pkgs.runCommandLocal "drop-in-nvidia" { } "touch $out";
 
   drop-in-wm =
     assert lib.asserts.assertMsg (wm.dotnix.wm.terminal == "foot") "wm: declaration not readable";
