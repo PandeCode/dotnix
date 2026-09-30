@@ -28,6 +28,7 @@ in
         enable = true;
         enable32Bit = true;
       };
+      environment.sessionVariables.VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json";
     }
 
     (mkIf cfg.lact.enable { services.lact.enable = true; })
