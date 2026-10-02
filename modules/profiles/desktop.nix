@@ -59,6 +59,8 @@ in
         enable = true;
         xdgOpenUsePortal = true;
         extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+        # sessions without their own portal config, like i3
+        config.common.default = "gtk";
       };
 
       programs.ydotool = mkIf config.dotnix.wayland.enable {
