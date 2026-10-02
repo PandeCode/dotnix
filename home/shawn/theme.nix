@@ -20,7 +20,6 @@ lib.modules.mkIf osConfig.dotnix.profiles.theme.enable {
     icons = {
       enable = true;
       package = pkgs.arc-icon-theme;
-      polarity = "dark";
       dark = "Arc-Dark";
       light = "Arc";
     };
