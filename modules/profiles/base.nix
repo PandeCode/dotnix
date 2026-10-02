@@ -37,6 +37,9 @@ in
       plugins = [ pkgs.networkmanager-openvpn ];
     };
 
+    # the way between my machines, home or not
+    services.tailscale.enable = mkDefault true;
+
     boot.tmp.cleanOnBoot = true;
     zramSwap.enable = true;
     systemd.oomd.enable = true;

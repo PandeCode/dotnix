@@ -4,6 +4,7 @@
   imports = [
     ../generic
     ../profiles
+    ../services
 
     # keep-sorted start
     ./nix.nix

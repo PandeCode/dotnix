@@ -94,6 +94,11 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
 
       # https://mozilla.github.io/policy-templates/
       policies = {
+        # librewolf keeps its own list of CAs, apart from the system's
+        Certificates.Install = lib.lists.optional (
+          osConfig.dotnix.home.ca != null
+        ) "${osConfig.dotnix.home.ca}";
+
         Preferences."browser.tabs.warnOnClose" = {
           Value = false;
           Status = "locked";
