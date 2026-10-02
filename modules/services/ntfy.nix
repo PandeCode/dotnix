@@ -22,6 +22,7 @@ in
 
     dotnix = {
       home.sites.ntfy = { inherit port; };
+      backup.paths = [ "/var/lib/private/ntfy-sh" ];
       notify.url = lib.modules.mkDefault "http://127.0.0.1:${toString port}/${config.networking.hostName}";
     };
   };

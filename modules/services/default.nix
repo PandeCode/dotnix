@@ -2,6 +2,7 @@
 {
   imports = [
     # keep-sorted start
+    ./backup.nix
     ./home.nix
     ./navidrome.nix
     ./notify.nix

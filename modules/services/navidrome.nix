@@ -26,6 +26,9 @@ in
     # yours to fill, navidrome's to read
     systemd.tmpfiles.rules = [ "d ${cfg.musicFolder} 0755 ${config.dotnix.user} users -" ];
 
-    dotnix.home.sites.music.port = config.services.navidrome.settings.Port;
+    dotnix = {
+      home.sites.music.port = config.services.navidrome.settings.Port;
+      backup.paths = [ "/var/lib/navidrome" ];
+    };
   };
 }

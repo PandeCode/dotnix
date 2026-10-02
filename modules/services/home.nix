@@ -84,6 +84,9 @@ in
         ) cfg.sites;
       };
 
+      # caddy's CA: losing its key means trusting a new one everywhere
+      dotnix.backup.paths = [ "/var/lib/caddy" ];
+
       networking.firewall.interfaces.${config.services.tailscale.interfaceName} = {
         allowedTCPPorts = [
           53
