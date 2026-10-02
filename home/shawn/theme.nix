@@ -15,6 +15,8 @@ in
 
 lib.modules.mkIf osConfig.dotnix.profiles.theme.enable {
   stylix = {
+    enable = true;
+    polarity = "dark";
     icons = {
       enable = true;
       package = pkgs.arc-icon-theme;
