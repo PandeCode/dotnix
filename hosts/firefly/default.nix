@@ -37,6 +37,14 @@
 
   programs.libys.enable = false;
 
+  # the second drive: music, backups, anything big. nofail, so a dead drive
+  # costs the services on it, not the boot
+  fileSystems."/srv" = {
+    device = "/dev/disk/by-label/data";
+    fsType = "ext4";
+    options = [ "nofail" ];
+  };
+
   # the release this machine was installed with, not the current one
   system.stateVersion = "25.05";
 }
