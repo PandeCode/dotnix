@@ -3,6 +3,8 @@
   imports = [
     # keep-sorted start
     ./backup.nix
+    ./beszel.nix
+    ./dashboard.nix
     ./home.nix
     ./navidrome.nix
     ./notify.nix
