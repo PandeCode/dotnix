@@ -100,5 +100,14 @@
       repo = "nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # the search page of dotnix options and nixbuilds packages. its own
+    # nixpkgs, which its pinned npm dependency hash is made for
+    search = {
+      type = "github";
+      owner = "NuschtOS";
+      repo = "search";
+      inputs.nix-index-database.follows = "nix-index-database";
+    };
   };
 }

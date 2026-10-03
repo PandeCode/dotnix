@@ -35,11 +35,23 @@ in
     sites = mkOption {
       type = types.attrsOf (
         types.submodule {
-          options.port = mkOption { type = types.port; };
+          options = {
+            port = mkOption {
+              type = types.nullOr types.port;
+              default = null;
+              description = "A service on localhost to pass requests to.";
+            };
+
+            root = mkOption {
+              type = types.nullOr types.path;
+              default = null;
+              description = "A folder of files to serve instead.";
+            };
+          };
         }
       );
       default = { };
-      description = "Each <name> is served at https://<name>.<domain> from this port on localhost.";
+      description = "Each <name> is served at https://<name>.<domain>, from a port on localhost or a folder.";
     };
 
     ca = mkOption {
@@ -56,6 +68,11 @@ in
     })
 
     (mkIf cfg.enable {
+      assertions = lib.attrsets.mapAttrsToList (name: site: {
+        assertion = (site.port == null) != (site.root == null);
+        message = "dotnix.home.sites.${name} needs exactly one of port and root.";
+      }) cfg.sites;
+
       services.blocky = {
         enable = true;
         settings = {
@@ -78,8 +95,16 @@ in
           lib.attrsets.nameValuePair "${name}.${cfg.domain}" {
             extraConfig = ''
               tls internal
-              reverse_proxy 127.0.0.1:${toString site.port}
-            '';
+            ''
+            + (
+              if site.port != null then
+                "reverse_proxy 127.0.0.1:${toString site.port}"
+              else
+                ''
+                  root * ${site.root}
+                  file_server
+                ''
+            );
           }
         ) cfg.sites;
       };

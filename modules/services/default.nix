@@ -9,6 +9,7 @@
     ./navidrome.nix
     ./notify.nix
     ./ntfy.nix
+    ./search.nix
     # keep-sorted end
   ];
 }

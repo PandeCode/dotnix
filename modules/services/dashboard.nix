@@ -36,13 +36,18 @@ in
                     type = "monitor";
                     title = "Sites";
                     cache = "1m";
-                    sites = lib.attrsets.mapAttrsToList (name: site: {
-                      title = name;
-                      url = url name;
+                    sites = lib.attrsets.mapAttrsToList (
+                      name: site:
+                      {
+                        title = name;
+                        url = url name;
+                      }
                       # straight to the service, so a broken proxy still shows
                       # which services are up
-                      check-url = "http://127.0.0.1:${toString site.port}";
-                    }) home.sites;
+                      // lib.attrsets.optionalAttrs (site.port != null) {
+                        check-url = "http://127.0.0.1:${toString site.port}";
+                      }
+                    ) home.sites;
                   }
                 ];
               }

@@ -57,6 +57,14 @@ in
         directory = ../../packages;
       }
     )
+    // {
+      # a search of every dotnix.* option and nixbuilds package; kazuha has
+      # every module imported
+      search = pkgs.callPackage ../../docs/search {
+        inherit inputs self;
+        inherit (self.nixosConfigurations.kazuha) options;
+      };
+    }
   );
 
   checks = forAllPkgs (pkgs: import ./checks.nix { inherit pkgs inputs; });

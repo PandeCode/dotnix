@@ -30,3 +30,9 @@ fmt:
 # update all inputs, or only the ones named
 update *inputs:
     nix flake update {{ inputs }}
+
+# the search of every dotnix option and nixbuilds package, at
+# http://localhost:8080
+search:
+    nix build {{ flake }}#search
+    nix run nixpkgs#http-server -- result
