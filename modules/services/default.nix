@@ -5,6 +5,7 @@
     ./backup.nix
     ./beszel.nix
     ./dashboard.nix
+    ./files.nix
     ./forgejo.nix
     ./home.nix
     ./navidrome.nix
