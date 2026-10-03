@@ -83,7 +83,9 @@ in
           client.dns-resolver = "udp://127.0.0.1:53";
           conditions = [
             "[STATUS] < 500"
-            "[CERTIFICATE_EXPIRATION] > 48h"
+            # caddy's internal CA issues 12h certificates and renews them
+            # with about 4h left, so less than 1h means renewal is broken
+            "[CERTIFICATE_EXPIRATION] > 1h"
           ];
           alerts = lib.lists.optional ntfy { type = "ntfy"; };
         }) home.sites;
