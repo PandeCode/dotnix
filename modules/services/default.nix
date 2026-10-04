@@ -12,6 +12,7 @@
     ./notify.nix
     ./ntfy.nix
     ./search.nix
+    ./syncthing.nix
     # keep-sorted end
   ];
 }
