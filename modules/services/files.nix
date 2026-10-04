@@ -16,32 +16,33 @@ let
   cfg = config.dotnix.services.files;
 
   port = 8083;
+  state = "/var/lib/filebrowser-quantum";
 
-  # the password goes in at start, so it stays out of the store
-  settings = pkgs.writeText "copyparty.conf" ''
-    [global]
-      i: 127.0.0.1
-      p: ${toString port}
-      name: ${config.networking.hostName}
-      # index and thumbnails outside the shared folder
-      hist: /var/cache/copyparty
-      e2dsa
-      # caddy in front: the address it appends is the client's
-      rproxy: -1
-      xff-src: 127.0.0.1
+  settings = (pkgs.formats.yaml { }).generate "filebrowser.yaml" {
+    server = {
+      inherit port;
+      listen = "127.0.0.1";
+      database = "${state}/database.db";
+      cacheDir = "/var/cache/filebrowser-quantum";
+      externalUrl = "https://files.${config.dotnix.home.domain}";
+      disableUpdateCheck = true;
+      sources = [
+        {
+          path = cfg.folder;
+          name = "files";
+          config.defaultEnabled = true;
+        }
+      ];
       # group-readable, so services in the users group (navidrome) can read
       # what is uploaded
-      chmod-f: 640
-      chmod-d: 750
-
-    [accounts]
-      ${user}: @password@
-
-    [/]
-      ${cfg.folder}
-      accs:
-        rwmda: ${user}
-  '';
+      filesystem = {
+        createFilePermission = "640";
+        createDirectoryPermission = "750";
+      };
+    };
+    auth.adminUsername = user;
+    frontend.name = "files";
+  };
 in
 
 {
@@ -66,27 +67,27 @@ in
   };
 
   config = mkIf cfg.enable {
-    # the smb password is the browser's too, so no password, no browser
-    systemd.services.copyparty = mkIf (cfg.passwordFile != null) {
-      description = "copyparty";
+    # the maintained fork of file browser, which was archived in 2026. the
+    # smb password is the browser's too, so no password, no browser
+    systemd.services.filebrowser-quantum = mkIf (cfg.passwordFile != null) {
+      description = "FileBrowser Quantum";
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" ];
-      # its logins, in place of the user's home
-      environment.XDG_CONFIG_HOME = "/var/lib/copyparty";
+      environment.FILEBROWSER_CONFIG = settings;
+      # set again on every start, so changing the secret changes the login
       script = ''
-        install -m 600 ${settings} "$RUNTIME_DIRECTORY/copyparty.conf"
-        replace-secret @password@ "$CREDENTIALS_DIRECTORY/password" "$RUNTIME_DIRECTORY/copyparty.conf"
-        exec ${lib.meta.getExe pkgs.copyparty} -c "$RUNTIME_DIRECTORY/copyparty.conf"
+        FILEBROWSER_ADMIN_PASSWORD=$(cat "$CREDENTIALS_DIRECTORY/password")
+        export FILEBROWSER_ADMIN_PASSWORD
+        exec ${lib.meta.getExe pkgs.filebrowser-quantum}
       '';
-      path = [ pkgs.replace-secret ];
       serviceConfig = {
         # as the user, so files from the browser, smb and syncthing have one owner
         User = user;
         Group = "users";
         UMask = "0027";
-        RuntimeDirectory = "copyparty";
-        StateDirectory = "copyparty";
-        CacheDirectory = "copyparty";
+        StateDirectory = "filebrowser-quantum";
+        CacheDirectory = "filebrowser-quantum";
+        WorkingDirectory = state;
         LoadCredential = "password:${cfg.passwordFile}";
         Restart = "on-failure";
         NoNewPrivileges = true;
@@ -143,6 +144,7 @@ in
       # against deleting by mistake; a copy off this drive is still to come
       backup.paths = [
         cfg.folder
+        state
       ];
     };
   };
