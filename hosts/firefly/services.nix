@@ -8,7 +8,10 @@
       beszel.enable = true;
       builder.enable = true;
       cache.enable = true;
-      dashboard.enable = true;
+      dashboard = {
+        enable = true;
+        feeds = map (feed: feed.url) (import ../../home/shawn/feeds.nix);
+      };
       files.enable = true;
       forgejo.enable = true;
       navidrome.enable = true;

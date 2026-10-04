@@ -1,4 +1,5 @@
-# home.<domain>: a link and an up/down light for every site. status.<domain>:
+# home.<domain>: the weather, this machine's load, an up/down light for every
+# site, news and new releases of what it runs. status.<domain>:
 # gatus checking each site end to end, name, certificate and all, and
 # telling ntfy when one goes down
 { config, lib, ... }:
@@ -14,11 +15,50 @@ let
   url = name: "https://${name}.${home.domain}";
 
   ntfy = config.dotnix.services.ntfy.enable;
+
+  # where each service announces its releases
+  repos = {
+    atuin = "atuinsh/atuin";
+    beszel = "henrygd/beszel";
+    files = "filebrowser/filebrowser";
+    forgejo = "codeberg:forgejo/forgejo";
+    navidrome = "navidrome/navidrome";
+    ntfy = "binwiederhier/ntfy";
+    syncthing = "syncthing/syncthing";
+  };
 in
 
 {
-  options.dotnix.services.dashboard.enable =
-    lib.options.mkEnableOption "a start page and status checks for dotnix.home.sites";
+  options.dotnix.services.dashboard = {
+    enable = lib.options.mkEnableOption "a start page and status checks for dotnix.home.sites";
+
+    weather = lib.options.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "Worcester, United States";
+      description = "Place to show the weather for, or null for none.";
+    };
+
+    feeds = lib.options.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = "RSS and Atom feeds to show.";
+    };
+
+    releases = lib.options.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [
+        "glanceapp/glance"
+        "TwiN/gatus"
+        "0xERR0R/blocky"
+      ]
+      ++ lib.attrsets.attrValues (
+        lib.attrsets.filterAttrs (name: _: config.dotnix.services.${name}.enable) repos
+      );
+      defaultText = lib.literalMD "the start page, gatus, blocky and every enabled service";
+      description = "Repositories to show new releases of, in glance's notation.";
+    };
+  };
 
   config = lib.modules.mkIf cfg.enable {
     services.glance = {
@@ -29,6 +69,25 @@ in
           {
             name = config.networking.hostName;
             columns = [
+              {
+                size = "small";
+                widgets =
+                  lib.lists.optional (cfg.weather != null) {
+                    type = "weather";
+                    location = cfg.weather;
+                  }
+                  ++ [
+                    {
+                      type = "server-stats";
+                      servers = [
+                        {
+                          type = "local";
+                          name = config.networking.hostName;
+                        }
+                      ];
+                    }
+                  ];
+              }
               {
                 size = "full";
                 widgets = [
@@ -48,6 +107,25 @@ in
                         check-url = "http://127.0.0.1:${toString site.port}";
                       }
                     ) home.sites;
+                  }
+                ]
+                ++ lib.lists.optional (cfg.feeds != [ ]) {
+                  type = "rss";
+                  title = "News";
+                  limit = 20;
+                  collapse-after = 8;
+                  feeds = map (url: { inherit url; }) cfg.feeds;
+                };
+              }
+              {
+                size = "small";
+                widgets = [
+                  {
+                    type = "releases";
+                    # unauthenticated github allows 60 requests an hour
+                    cache = "6h";
+                    show-source-icon = true;
+                    repositories = cfg.releases;
                   }
                 ];
               }
