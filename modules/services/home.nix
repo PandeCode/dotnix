@@ -54,6 +54,27 @@ in
       description = "Each <name> is served at https://<name>.<domain>, from a port on localhost or a folder.";
     };
 
+    adblock = {
+      enable =
+        mkEnableOption "blocking ads and trackers for every machine that asks this server for DNS"
+        // {
+          default = true;
+        };
+
+      lists = mkOption {
+        type = types.listOf types.str;
+        default = [ "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro.txt" ];
+        description = "Blocklists to download, refreshed daily.";
+      };
+
+      allow = mkOption {
+        type = types.listOf types.str;
+        default = [ ];
+        example = [ "*.example.com" ];
+        description = "Domains to let through even when a list blocks them.";
+      };
+    };
+
     ca = mkOption {
       type = types.nullOr types.path;
       default = if builtins.pathExists ca then ca else null;
@@ -81,10 +102,24 @@ in
             "1.1.1.1"
             "9.9.9.9"
           ];
+          # list downloads and upstreams resolve without going through blocky itself
+          bootstrapDns = [ "1.1.1.1" ];
           # subdomains included
           customDNS.mapping.${cfg.domain} = cfg.address;
+          # for the blocky cli: `blocky blocking disable --duration 5m`
+          ports.http = "127.0.0.1:4000";
+          caching.prefetching = true;
+          blocking = mkIf cfg.adblock.enable {
+            denylists.ads = cfg.adblock.lists;
+            allowlists.ads = mkIf (cfg.adblock.allow != [ ]) [ (lib.strings.concatLines cfg.adblock.allow) ];
+            clientGroupsBlock.default = [ "ads" ];
+            # answer straight away and block once the lists are in, so names never stop resolving
+            loading.strategy = "fast";
+          };
         };
       };
+
+      environment.systemPackages = [ config.services.blocky.package ];
 
       services.caddy = {
         enable = true;
