@@ -10,7 +10,15 @@ esac
 
 dir="${XDG_PICTURES_DIR:-$HOME/Pictures}/Screenshots"
 mkdir -p "$dir"
-file="$dir/$(date +%Y-%m-%d_%H-%M-%S).png"
+read -r weekday day time < <(date "+%A %-d %H_%M_%S")
+case $day in
+1 | 21 | 31) suffix=st ;;
+2 | 22) suffix=nd ;;
+3 | 23) suffix=rd ;;
+*) suffix=th ;;
+esac
+# e.g. Monday_5th_17_23_01.png
+file="$dir/${weekday}_$day${suffix}_$time.png"
 
 if [[ -n ${WAYLAND_DISPLAY:-} ]]; then
 	if [[ $mode == area ]]; then
