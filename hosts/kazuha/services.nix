@@ -9,6 +9,8 @@ in
   dotnix = {
     profiles.ssh.enable = true;
 
+    services.builder.use = "firefly";
+
     # the device ids are private
     services.syncthing = {
       enable = true;
