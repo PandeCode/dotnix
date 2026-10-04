@@ -7,6 +7,7 @@
     ../services
 
     # keep-sorted start
+    ./mounts.nix
     ./nix.nix
     ./users.nix
     # keep-sorted end
