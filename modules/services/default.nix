@@ -2,6 +2,7 @@
 {
   imports = [
     # keep-sorted start
+    ./atuin.nix
     ./backup.nix
     ./beszel.nix
     ./dashboard.nix

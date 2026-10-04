@@ -4,6 +4,7 @@
 {
   dotnix = {
     services = {
+      atuin.enable = true;
       beszel.enable = true;
       dashboard.enable = true;
       files.enable = true;

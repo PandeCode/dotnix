@@ -103,7 +103,14 @@ in
 
     nushell.enable = true;
 
-    atuin = withShells;
+    atuin = withShells // {
+      # the sync server on the home server, once its certificates are trusted
+      settings = lib.modules.mkIf (osConfig.dotnix.home.ca != null) {
+        sync_address = "https://atuin.${osConfig.dotnix.home.domain}";
+        auto_sync = true;
+        sync_frequency = "5m";
+      };
+    };
     carapace = withShells;
     zoxide = withShells;
 
