@@ -20,7 +20,7 @@ let
   repos = {
     atuin = "atuinsh/atuin";
     beszel = "henrygd/beszel";
-    files = "filebrowser/filebrowser";
+    files = "9001/copyparty";
     forgejo = "codeberg:forgejo/forgejo";
     navidrome = "navidrome/navidrome";
     ntfy = "binwiederhier/ntfy";
