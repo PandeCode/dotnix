@@ -9,6 +9,7 @@
     # keep-sorted start
     ./mounts.nix
     ./nix.nix
+    ./secrets.nix
     ./users.nix
     # keep-sorted end
 

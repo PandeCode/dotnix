@@ -36,6 +36,9 @@
     };
   };
 
+  # opens its secrets with its own ssh host key
+  dotnix.secrets.hostKey = true;
+
   programs.libys.enable = false;
 
   # the second drive: music, backups, anything big. nofail, so a dead drive

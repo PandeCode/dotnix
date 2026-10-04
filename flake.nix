@@ -77,6 +77,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # secrets, encrypted in git and opened at boot
+    sops-nix = {
+      type = "github";
+      owner = "Mic92";
+      repo = "sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # colors, fonts and wallpaper for everything
     stylix = {
       type = "github";
