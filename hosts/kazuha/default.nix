@@ -8,6 +8,7 @@
 {
   imports = [
     ./hardware.nix
+    ./services.nix
     inputs.nixos-hardware.nixosModules.framework-16-amd-ai-300-series
   ];
 
