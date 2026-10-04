@@ -16,6 +16,7 @@
     ./ntfy.nix
     ./search.nix
     ./syncthing.nix
+    ./theme.nix
     # keep-sorted end
   ];
 }

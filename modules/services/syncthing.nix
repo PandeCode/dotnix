@@ -72,7 +72,11 @@ in
       services.syncthing = {
         guiAddress = "127.0.0.1:${toString guiPort}";
         # reached through caddy at sync.<domain>, a name the host check refuses
-        settings.gui.insecureSkipHostcheck = true;
+        settings.gui = {
+          insecureSkipHostcheck = true;
+          # closest to the stylix colors of its built-in themes
+          theme = lib.modules.mkIf (config.dotnix.home.theme != null) "black";
+        };
       };
       dotnix.home.sites.sync.port = guiPort;
     })

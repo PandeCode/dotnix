@@ -10,7 +10,15 @@ let
 in
 
 {
-  options.dotnix.profiles.theme.enable = lib.options.mkEnableOption "my stylix theme";
+  options.dotnix.profiles.theme = {
+    enable = lib.options.mkEnableOption "my stylix theme";
+
+    webFont = lib.options.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      description = "The font file the web apps load, for devices without the font.";
+    };
+  };
 
   config = lib.modules.mkIf config.dotnix.profiles.theme.enable {
     stylix = {
@@ -68,6 +76,8 @@ in
         plymouth.enable = false;
       };
     };
+
+    dotnix.profiles.theme.webFont = lib.modules.mkDefault "${config.stylix.fonts.monospace.package}/share/fonts/opentype/NerdFonts/OpenDyslexic/OpenDyslexicMNerdFontMono-Regular.otf";
 
     # for scripts that want the colors
     environment.sessionVariables = {

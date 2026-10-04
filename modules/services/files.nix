@@ -17,6 +17,7 @@ let
 
   port = 8083;
   state = "/var/lib/filebrowser-quantum";
+  inherit (config.dotnix.home) theme;
 
   settings = (pkgs.formats.yaml { }).generate "filebrowser.yaml" {
     server = {
@@ -41,7 +42,43 @@ let
       };
     };
     auth.adminUsername = user;
-    frontend.name = "files";
+    frontend = {
+      name = "files";
+      styling = lib.attrsets.optionalAttrs (theme != null) {
+        darkBackground = theme.colors.base00;
+        customCSS = toString (
+          pkgs.writeText "files.css" ''
+            ${theme.import}
+            .dark-mode {
+              --alt-background: var(--overlay);
+              --surfacePrimary: var(--surface);
+              --surfaceSecondary: var(--overlay);
+              --divider: var(--border);
+              --textPrimary: var(--text);
+              --textSecondary: var(--muted);
+              --iconBackground: var(--surface);
+              --activeWhiteIcon: var(--bright);
+            }
+            :root {
+              --primaryColor: var(--accent);
+              --blue: var(--base0D);
+              --dark-blue: var(--accent-hover);
+              --red: var(--base08);
+              --dark-red: var(--base08);
+              --icon-red: var(--base08);
+              --icon-orange: var(--base09);
+              --icon-yellow: var(--base0A);
+              --icon-green: var(--base0B);
+              --icon-blue: var(--base0D);
+              --icon-violet: var(--base0E);
+            }
+            body, input, button, textarea, select {
+              font-family: var(--font);
+            }
+          ''
+        );
+      };
+    };
   };
 in
 

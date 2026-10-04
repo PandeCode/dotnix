@@ -6,6 +6,7 @@
 
 let
   inherit (config.dotnix) home;
+  inherit (home) theme;
 
   cfg = config.dotnix.services.dashboard;
 
@@ -65,6 +66,16 @@ in
       enable = true;
       settings = {
         server.port = glancePort;
+        # stylix sets the colors; the accent and the font come from here
+        theme.primary-color = lib.modules.mkIf (theme != null) (
+          lib.modules.mkForce (lib.strings.replaceStrings [ "%" ] [ "" ] theme.hsl.base0D)
+        );
+        document.head = lib.modules.mkIf (theme != null) ''
+          <style>
+            ${theme.import}
+            html, body, input, button { font-family: var(--font); }
+          </style>
+        '';
         pages = [
           {
             name = config.networking.hostName;
@@ -138,6 +149,40 @@ in
     services.gatus = {
       enable = true;
       settings = {
+        ui = lib.attrsets.optionalAttrs (theme != null) {
+          dark-mode = true;
+          # its colors are "h s% l%" triplets
+          custom-css = ''
+            ${theme.import}
+            /* above its own :root and :root.dark, in light mode too */
+            html:root, html:root.dark {
+            ${lib.strings.concatLines (
+              lib.attrsets.mapAttrsToList (var: base: "  --${var}: ${theme.hsl.${base}};") {
+                background = "base00";
+                foreground = "base05";
+                card = "base01";
+                card-foreground = "base05";
+                popover = "base01";
+                popover-foreground = "base05";
+                primary = "base0D";
+                primary-foreground = "base00";
+                secondary = "base02";
+                secondary-foreground = "base05";
+                muted = "base02";
+                muted-foreground = "base04";
+                accent = "base02";
+                accent-foreground = "base07";
+                destructive = "base08";
+                destructive-foreground = "base00";
+                border = "base02";
+                input = "base02";
+                ring = "base0D";
+              }
+            )}
+            }
+            html, body, input, button { font-family: var(--font); }
+          '';
+        };
         web = {
           address = "127.0.0.1";
           port = gatusPort;

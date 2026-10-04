@@ -47,6 +47,12 @@ in
               default = null;
               description = "A folder of files to serve instead.";
             };
+
+            extraConfig = mkOption {
+              type = types.lines;
+              default = "";
+              description = "More caddy directives for the site.";
+            };
           };
         }
       );
@@ -130,6 +136,7 @@ in
           lib.attrsets.nameValuePair "${name}.${cfg.domain}" {
             extraConfig = ''
               tls internal
+              ${site.extraConfig}
             ''
             + (
               if site.port != null then
