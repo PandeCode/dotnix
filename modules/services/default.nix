@@ -5,6 +5,8 @@
     ./atuin.nix
     ./backup.nix
     ./beszel.nix
+    ./builder.nix
+    ./cache.nix
     ./dashboard.nix
     ./files.nix
     ./forgejo.nix

@@ -6,6 +6,8 @@
     services = {
       atuin.enable = true;
       beszel.enable = true;
+      builder.enable = true;
+      cache.enable = true;
       dashboard.enable = true;
       files.enable = true;
       forgejo.enable = true;

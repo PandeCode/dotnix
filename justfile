@@ -8,6 +8,10 @@ default:
 switch *args:
     nh os switch {{ flake }} {{ args }}
 
+# the same, with the builds on dotnix.services.builder.use
+switch-remote *args:
+    nh os switch {{ flake }} {{ args }} -- --builders @/etc/nix/machines
+
 # build this machine and switch to it on next boot
 boot *args:
     nh os boot {{ flake }} {{ args }}
