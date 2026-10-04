@@ -45,6 +45,11 @@ in
       };
     };
 
+    # nixpkgs keeps the folder and uploads to the user alone; group-readable
+    # instead, so services in the users group (navidrome) can read them
+    systemd.tmpfiles.settings.filebrowser.${cfg.folder}.d.mode = lib.modules.mkForce "0750";
+    systemd.services.filebrowser.serviceConfig.UMask = lib.modules.mkForce "0027";
+
     services.samba = {
       enable = true;
       # names come from blocky, not netbios broadcasts

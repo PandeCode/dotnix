@@ -10,7 +10,13 @@ in
 
     musicFolder = lib.options.mkOption {
       type = lib.types.str;
-      default = "/srv/music";
+      default =
+        if config.dotnix.services.files.enable then
+          "${config.dotnix.services.files.folder}/music"
+        else
+          "/srv/music";
+      defaultText = lib.literalExpression ''"''${files.folder}/music" with dotnix.services.files, else "/srv/music"'';
+      description = "Where the music is. Inside the shared folder, you can upload and edit it at files.<domain> and over smb.";
     };
   };
 
@@ -23,8 +29,9 @@ in
       };
     };
 
-    # yours to fill, navidrome's to read
-    systemd.tmpfiles.rules = [ "d ${cfg.musicFolder} 0755 ${config.dotnix.user} users -" ];
+    # yours to fill, navidrome's to read, through the users group
+    systemd.tmpfiles.rules = [ "d ${cfg.musicFolder} 0750 ${config.dotnix.user} users -" ];
+    users.users.${config.services.navidrome.user}.extraGroups = [ "users" ];
 
     dotnix = {
       home.sites.music.port = config.services.navidrome.settings.Port;
