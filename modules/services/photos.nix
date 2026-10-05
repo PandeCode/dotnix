@@ -190,6 +190,12 @@ in
     # the big drive mounts with nofail; immich waits for it or doesn't start
     systemd.services.immich-server.unitConfig.RequiresMountsFor = [ cfg.folder ];
 
+    # immich only makes its own folder when it's the default one
+    systemd.tmpfiles.settings.immich.${cfg.folder}.d = {
+      inherit (immich) user group;
+      mode = "0700";
+    };
+
     dotnix = {
       home.sites.photos.port = immich.port;
       # read-only at files.<domain>, like the other apps
