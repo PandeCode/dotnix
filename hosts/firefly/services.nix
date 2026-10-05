@@ -19,6 +19,7 @@ in
       dav.enable = true;
       files.enable = true;
       forgejo.enable = true;
+      money.enable = true;
       navidrome.enable = true;
       news = {
         enable = true;

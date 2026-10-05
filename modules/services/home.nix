@@ -15,6 +15,8 @@ let
   cfg = config.dotnix.home;
 
   ca = "${self}/keys/home-ca.crt";
+
+  protect = lib.lists.any (site: site.protect) (lib.attrsets.attrValues cfg.sites);
 in
 
 {
@@ -59,6 +61,8 @@ in
               default = true;
               description = "Shown on the start page. It is checked either way.";
             };
+
+            protect = mkEnableOption "asking for dotnix.user and dotnix.home.passwordFile first, for apps with no login of their own";
           };
         }
       );
@@ -87,6 +91,12 @@ in
       };
     };
 
+    passwordFile = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = "The password for protected sites, read at run time, so a secret's path.";
+    };
+
     ca = mkOption {
       type = types.nullOr types.path;
       default = if builtins.pathExists ca then ca else null;
@@ -101,10 +111,17 @@ in
     })
 
     (mkIf cfg.enable {
-      assertions = lib.attrsets.mapAttrsToList (name: site: {
-        assertion = (site.port == null) != (site.root == null);
-        message = "dotnix.home.sites.${name} needs exactly one of port and root.";
-      }) cfg.sites;
+      assertions =
+        lib.attrsets.mapAttrsToList (name: site: {
+          assertion = (site.port == null) != (site.root == null);
+          message = "dotnix.home.sites.${name} needs exactly one of port and root.";
+        }) cfg.sites
+        ++ [
+          {
+            assertion = protect -> cfg.passwordFile != null;
+            message = "dotnix.home.passwordFile is needed for protected sites.";
+          }
+        ];
 
       services.blocky = {
         enable = true;
@@ -142,6 +159,11 @@ in
           lib.attrsets.nameValuePair "${name}.${cfg.domain}" {
             extraConfig = ''
               tls internal
+              ${lib.strings.optionalString site.protect ''
+                basic_auth {
+                  ${config.dotnix.user} {$HOME_PASSWORD_HASH}
+                }
+              ''}
               ${site.extraConfig}
             ''
             + (
@@ -155,6 +177,25 @@ in
             );
           }
         ) cfg.sites;
+      };
+
+      # caddy only checks a hash, made from the secret before it starts
+      services.caddy.environmentFile = mkIf protect "/run/caddy-password/env";
+      systemd.services.caddy-password = mkIf protect {
+        description = "Hash dotnix.home.passwordFile for caddy";
+        requiredBy = [ "caddy.service" ];
+        before = [ "caddy.service" ];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          RuntimeDirectory = "caddy-password";
+          RuntimeDirectoryMode = "0700";
+          LoadCredential = "password:${cfg.passwordFile}";
+        };
+        script = ''
+          hash=$(${lib.meta.getExe config.services.caddy.package} hash-password <"$CREDENTIALS_DIRECTORY/password")
+          echo "HOME_PASSWORD_HASH='$hash'" >/run/caddy-password/env
+        '';
       };
 
       # caddy's CA: losing its key means trusting a new one everywhere

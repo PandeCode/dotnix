@@ -24,6 +24,7 @@ let
     dav = "Kozea/Radicale";
     files = "gtsteffaniak/filebrowser";
     forgejo = "codeberg:forgejo/forgejo";
+    money = "simonmichael/hledger";
     navidrome = "navidrome/navidrome";
     news = "miniflux/v2";
     ntfy = "binwiederhier/ntfy";

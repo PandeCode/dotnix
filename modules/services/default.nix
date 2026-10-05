@@ -12,6 +12,7 @@
     ./files.nix
     ./forgejo.nix
     ./home.nix
+    ./money.nix
     ./navidrome.nix
     ./news.nix
     ./notify.nix
