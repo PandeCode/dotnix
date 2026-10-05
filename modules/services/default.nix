@@ -20,12 +20,12 @@
     ./money.nix
     ./navidrome.nix
     ./news.nix
+    ./nix.nix
     ./notify.nix
     ./ntfy.nix
     ./pdf.nix
     ./photos.nix
     ./read.nix
-    ./search.nix
     ./syncthing.nix
     ./theme.nix
     # keep-sorted end

@@ -28,11 +28,11 @@ in
         enable = true;
         inherit feeds;
       };
+      nix.enable = true;
       ntfy.enable = true;
       pdf.enable = true;
       photos.enable = true;
       read.enable = true;
-      search.enable = true;
 
       # always on, so the vault syncs even when kazuha and the phone are never
       # online together. it lives in the shared folder, so files.<domain> shows it
