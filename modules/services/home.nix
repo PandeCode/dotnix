@@ -193,7 +193,8 @@ in
           LoadCredential = "password:${cfg.passwordFile}";
         };
         script = ''
-          hash=$(${lib.meta.getExe config.services.caddy.package} hash-password <"$CREDENTIALS_DIRECTORY/password")
+          # it reads one line and fails without the newline sops leaves off
+          hash=$({ cat "$CREDENTIALS_DIRECTORY/password"; echo; } | ${lib.meta.getExe config.services.caddy.package} hash-password)
           echo "HOME_PASSWORD_HASH='$hash'" >/run/caddy-password/env
         '';
       };
