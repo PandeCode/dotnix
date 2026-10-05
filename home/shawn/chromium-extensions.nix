@@ -2,20 +2,20 @@
 
   "privacy-badger" = {
     id = "pkehgijcmpdhfbdbbnkijodmdjhbjlgp";
-    sha256 = "sha256:09yz5w8jmn04fqzgag1d770nn8n7sg2a1vwdkdgl4x8il6kmpvxk";
-    version = "2026.8.7";
+    sha256 = "sha256:12pvw5gm9dxs28myv5ixk6vnrp1m7gl95xnw2f3i54bnl1q0q16h";
+    version = "2026.9.15";
   };
 
   "bitwarden-password-manage" = {
     id = "nngceckbapebfimnlniiiahkandclblb";
-    sha256 = "sha256:17ymclqqc34layqwjb53wym4q1jm429pk4m95lw06k93khnr99fi";
-    version = "2026.8.0";
+    sha256 = "sha256:08griqypy2jx66982z02gbkxmh9y6l4gkdrhlwcwn8qhl5hgcr4r";
+    version = "2026.9.3";
   };
 
   "dark-reader" = {
     id = "eimadpbcbfnmbkopoojfekhnkhdbieeh";
-    sha256 = "sha256:1ga601a49sz8g1v1wh7cyqx20pvsd5qjrmrfwzy8gxhr34lsiz44";
-    version = "4.9.130";
+    sha256 = "sha256:065rc62sw7z2gpxpsapxha39nndbmmfim6ic915ryy2h3l6z4f7f";
+    version = "4.9.133";
   };
 
   "vimium" = {
@@ -50,8 +50,8 @@
 
   "spectorjs" = {
     id = "denbgaamihkadbghdceggmchnflmhpmk";
-    sha256 = "sha256:10qwa0aigdbkx2349an9h0grxy427sk9n538v44rzjw0x7b0k966";
-    version = "0.9.32";
+    sha256 = "sha256:1xdrga9fbjx5ag5pkrf334cyyx1vbwhm3264lj6qc1fvzm2mvpc1";
+    version = "0.9.34";
   };
 
   "desmodder-for-desmos" = {
@@ -70,5 +70,11 @@
     id = "blipmdconlkpinefehnmjammfjpmpbjk";
     sha256 = "sha256:0rayp7432hl3b5q5j1xjza186cbavvbzzpza3nzb1ymvkb5vix52";
     version = "100.0.0.5";
+  };
+
+  "readeck" = {
+    id = "jnmcpmfimecibicbojhopfkcbmkafhee";
+    sha256 = "sha256:1i23z6a4axypqpq02yi1m4fn35vm5isgi664xfi0hfrs10q46fp6";
+    version = "2.6.3";
   };
 }
