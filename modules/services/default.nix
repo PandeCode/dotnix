@@ -1,4 +1,6 @@
 # services firefly runs for the other machines; each is off until enabled
+{ config, lib, ... }:
+
 {
   imports = [
     # keep-sorted start
@@ -19,8 +21,8 @@
     ./navidrome.nix
     ./news.nix
     ./notify.nix
-    ./pdf.nix
     ./ntfy.nix
+    ./pdf.nix
     ./photos.nix
     ./read.nix
     ./search.nix
@@ -28,4 +30,17 @@
     ./theme.nix
     # keep-sorted end
   ];
+
+  # the ones that need a password skip themselves without it; say so
+  warnings =
+    lib.attrsets.mapAttrsToList
+      (
+        name: _:
+        "dotnix.services.${name} is enabled without a passwordFile, so what needs the password is skipped"
+      )
+      (
+        lib.attrsets.filterAttrs (
+          _: s: s.enable or false && s ? passwordFile && s.passwordFile == null
+        ) config.dotnix.services
+      );
 }
