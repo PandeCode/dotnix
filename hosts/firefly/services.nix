@@ -27,6 +27,7 @@ in
         inherit feeds;
       };
       ntfy.enable = true;
+      pdf.enable = true;
       read.enable = true;
       search.enable = true;
 

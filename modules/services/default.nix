@@ -17,6 +17,7 @@
     ./navidrome.nix
     ./news.nix
     ./notify.nix
+    ./pdf.nix
     ./ntfy.nix
     ./read.nix
     ./search.nix
