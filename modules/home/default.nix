@@ -9,6 +9,7 @@
     ../wm/shared.nix
     ../wm/wayland/home.nix
     ../wm/x11/home.nix
+    ./modes.nix
     # keep-sorted end
   ];
 }

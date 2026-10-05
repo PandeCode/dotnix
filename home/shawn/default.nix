@@ -10,6 +10,7 @@
     ./git.nix
     ./i3.nix
     ./media.nix
+    ./modes.nix
     ./niri.nix
     ./river.nix
     ./shell.nix
