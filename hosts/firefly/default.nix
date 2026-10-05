@@ -16,6 +16,8 @@
     profiles = {
       base.enable = true;
       boot.enable = true;
+      # the gpu and the second drive, for projects that need them
+      compute.enable = true;
       desktop = {
         enable = true;
         minimal = true;

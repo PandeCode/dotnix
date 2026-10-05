@@ -6,6 +6,7 @@
     ./apps.nix
     ./base.nix
     ./boot.nix
+    ./compute.nix
     ./desktop.nix
     ./dev.nix
     ./gaming.nix
