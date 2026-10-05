@@ -13,6 +13,7 @@ urls=(
 	"desmodder-for-desmos/eclmfdfimjhkmjglgdldedokjaemjfjp"
 	"cc++-devtools-support-dwa/pdcpmagijalfljmkmjngeonclgbbannb"
 	"lighthouse/blipmdconlkpinefehnmjammfjpmpbjk"
+	"readeck/jnmcpmfimecibicbojhopfkcbmkafhee"
 )
 
 echo '{'

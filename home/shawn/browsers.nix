@@ -36,6 +36,10 @@ let
     name = "channel";
     value = "unstable";
   };
+
+  # the sites firefly serves, on machines that trust its certificates
+  home = osConfig.dotnix.home.ca != null;
+  inherit (osConfig.dotnix.home) domain;
 in
 
 lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
@@ -89,6 +93,23 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
             (searchTerms "query")
           ];
           "NixOS Wiki" = engine "@nw" "https://wiki.nixos.org/w/index.php" [ (searchTerms "search") ];
+        }
+        // lib.attrsets.optionalAttrs home {
+          Readeck = {
+            urls = [
+              {
+                template = "https://read.${domain}/bookmarks";
+                params = [
+                  {
+                    name = "bf";
+                    value = "1";
+                  }
+                  (searchTerms "search")
+                ];
+              }
+            ];
+            definedAliases = [ "@rd" ];
+          };
         };
       };
 
@@ -115,7 +136,11 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
               "{446900e4-71c2-419f-a6a7-df9c091e268b}" = "bitwarden-password-manager";
               "sponsorBlocker@ajay.app" = "sponsorblock";
               "uBlock0@raymondhill.net" = "ublock-origin";
-            };
+            }
+          // lib.attrsets.optionalAttrs home {
+            # saves the page to read.<domain>
+            "readeck@readeck.com" = "readeck";
+          };
 
         AppAutoUpdate = false;
         BackgroundAppUpdate = false;
