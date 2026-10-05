@@ -32,6 +32,7 @@ let
     news = "miniflux/v2";
     ntfy = "binwiederhier/ntfy";
     pdf = "alam00000/bentopdf";
+    photos = "immich-app/immich";
     read = "codeberg:readeck/readeck";
     syncthing = "syncthing/syncthing";
   };

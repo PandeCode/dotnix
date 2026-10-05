@@ -30,6 +30,7 @@ in
       };
       ntfy.enable = true;
       pdf.enable = true;
+      photos.enable = true;
       read.enable = true;
       search.enable = true;
 

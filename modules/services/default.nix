@@ -21,6 +21,7 @@
     ./notify.nix
     ./pdf.nix
     ./ntfy.nix
+    ./photos.nix
     ./read.nix
     ./search.nix
     ./syncthing.nix
