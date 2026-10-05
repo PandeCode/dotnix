@@ -1,5 +1,6 @@
-# syncthing as the user: every folder syncs with every other device in the
-# list, over tailscale unless lan is on. the gui is at sync.<domain>
+# syncthing as the user: a folder syncs with every other device in the list
+# unless it names some, over tailscale unless lan is on. the gui is at
+# sync.<domain>
 { config, lib, ... }:
 
 let
@@ -14,6 +15,30 @@ let
   others = lib.attrsets.filterAttrs (name: _: name != config.networking.hostName) cfg.devices;
 
   guiPort = 8384;
+
+  folder = types.submodule {
+    options = {
+      path = mkOption { type = types.str; };
+
+      devices = mkOption {
+        type = types.nullOr (types.listOf types.str);
+        default = null;
+        description = "The devices it syncs with; null for all of them.";
+      };
+
+      type = mkOption {
+        type = types.enum [
+          "sendreceive"
+          "sendonly"
+          "receiveonly"
+        ];
+        default = "sendreceive";
+        description = "sendonly ignores changes from the others; receiveonly keeps what you delete or change here out of theirs.";
+      };
+
+      keepDeleted = mkEnableOption "keeping files here that the others delete, for a copy that only grows";
+    };
+  };
 in
 
 {
@@ -27,12 +52,18 @@ in
     };
 
     folders = mkOption {
-      type = types.attrsOf types.str;
+      type = types.attrsOf (types.coercedTo types.str (path: { inherit path; }) folder);
       default = { };
       example = {
         notes = "/home/alice/notes";
+        screenshots = {
+          path = "/home/alice/Pictures/Screenshots";
+          devices = [ "server" ];
+          type = "sendonly";
+        };
+        # and on the server: type = "receiveonly"; keepDeleted = true;
       };
-      description = "Folders to sync, by id.";
+      description = "Folders to sync, by id: a path, or a path with options.";
     };
 
     lan = mkEnableOption "syncing over the local network too, not only tailscale";
@@ -49,9 +80,12 @@ in
 
         settings = {
           devices = lib.attrsets.mapAttrs (_: id: { inherit id; }) others;
-          folders = lib.attrsets.mapAttrs (_: path: {
-            inherit path;
-            devices = lib.attrsets.attrNames others;
+          folders = lib.attrsets.mapAttrs (_: f: {
+            inherit (f) path type;
+            ignoreDelete = f.keepDeleted;
+            devices = lib.lists.filter (name: others ? ${name}) (
+              if f.devices == null then lib.attrsets.attrNames cfg.devices else f.devices
+            );
             ignorePerms = false;
           }) cfg.folders;
         };
