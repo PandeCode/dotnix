@@ -60,6 +60,7 @@ in
 
     dotnix = {
       home.sites.dav = { inherit port; };
+      services.files.views.calendars = "${state}/collections/collection-root/${user}";
       backup.paths = [ state ];
     };
   };

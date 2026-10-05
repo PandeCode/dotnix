@@ -51,6 +51,9 @@ in
         # scan/school/x.pdf comes in tagged school
         PAPERLESS_CONSUMER_RECURSIVE = true;
         PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS = true;
+        # so the files read well at files.<domain> too
+        PAPERLESS_FILENAME_FORMAT = "{{ created_year }}/{{ correspondent }}/{{ title }}";
+        PAPERLESS_FILENAME_FORMAT_REMOVE_NONE = true;
       };
     };
 
@@ -64,6 +67,8 @@ in
 
     dotnix = {
       home.sites.docs.port = config.services.paperless.port;
+      # the searchable copies, with their text layer
+      services.files.views.docs = "${config.services.paperless.mediaDir}/documents/archive";
       backup = {
         paths = [ config.services.paperless.dataDir ];
         databases = [ "paperless" ];

@@ -101,6 +101,15 @@ in
         `sudo smbpasswd -a <user>`.
       '';
     };
+
+    views = mkOption {
+      type = types.attrsOf types.str;
+      default = { };
+      example = {
+        docs = "/var/lib/paperless/media/documents/archive";
+      };
+      description = "Folders of other services, shown read-only and as yours at apps/<name>.";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -175,6 +184,31 @@ in
     };
 
     networking.firewall.interfaces.${config.services.tailscale.interfaceName}.allowedTCPPorts = [ 445 ];
+
+    # bindfs shows the files as yours without touching the originals, and
+    # mounts on first use, once the service has made the folder
+    fileSystems = lib.attrsets.mapAttrs' (
+      name: source:
+      lib.attrsets.nameValuePair "${cfg.folder}/apps/${name}" {
+        device = source;
+        fsType = "fuse.bindfs";
+        options = [
+          "ro"
+          "allow_other"
+          "force-user=${user}"
+          "force-group=users"
+          "perms=0640:ug+X"
+          "x-systemd.automount"
+          "nofail"
+        ];
+      }
+    ) cfg.views;
+    system.fsPackages = lib.lists.optional (cfg.views != { }) pkgs.bindfs;
+
+    # each service backs up its own folder
+    services.restic.backups.main.exclude = lib.modules.mkIf (
+      config.dotnix.backup.enable && cfg.views != { }
+    ) [ "${cfg.folder}/apps" ];
 
     dotnix = {
       home.sites.files = mkIf (cfg.passwordFile != null) { inherit port; };
