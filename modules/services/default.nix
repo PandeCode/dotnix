@@ -12,6 +12,7 @@
     ./forgejo.nix
     ./home.nix
     ./navidrome.nix
+    ./news.nix
     ./notify.nix
     ./ntfy.nix
     ./search.nix

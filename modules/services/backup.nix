@@ -28,6 +28,12 @@ in
       default = [ ];
       description = "Added to by the services that keep state.";
     };
+
+    databases = mkOption {
+      type = types.listOf types.str;
+      default = [ ];
+      description = "Postgres databases to dump before each backup.";
+    };
   };
 
   config = lib.modules.mkIf cfg.enable {
@@ -46,6 +52,19 @@ in
       ];
       runCheck = true;
     };
+
+    # postgres is copied mid-write by restic; the dump is a consistent copy,
+    # made before the nightly backup and uncompressed so restic can deduplicate
+    services.postgresqlBackup = lib.modules.mkIf (cfg.databases != [ ]) {
+      enable = true;
+      inherit (cfg) databases;
+      compression = "none";
+      startAt = "*-*-* 23:30:00";
+    };
+
+    dotnix.backup.paths = lib.lists.optional (
+      cfg.databases != [ ]
+    ) config.services.postgresqlBackup.location;
 
     systemd.services.restic-backups-main.onFailure = lib.lists.optional (
       config.dotnix.notify.url != null

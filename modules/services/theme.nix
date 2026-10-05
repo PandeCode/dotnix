@@ -143,6 +143,7 @@ in
   config = lib.modules.mkIf enable {
     dotnix.home.sites.theme = {
       inherit root;
+      listed = false;
       # fonts load across sites only when allowed, and caddy would call
       # an .otf an office template
       extraConfig = ''

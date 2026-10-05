@@ -24,6 +24,7 @@ let
     files = "gtsteffaniak/filebrowser";
     forgejo = "codeberg:forgejo/forgejo";
     navidrome = "navidrome/navidrome";
+    news = "miniflux/v2";
     ntfy = "binwiederhier/ntfy";
     syncthing = "syncthing/syncthing";
   };
@@ -117,7 +118,7 @@ in
                       // lib.attrsets.optionalAttrs (site.port != null) {
                         check-url = "http://127.0.0.1:${toString site.port}";
                       }
-                    ) home.sites;
+                    ) (lib.attrsets.filterAttrs (_: site: site.listed) home.sites);
                   }
                 ]
                 ++ lib.lists.optional (cfg.feeds != [ ]) {

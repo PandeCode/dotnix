@@ -1,4 +1,4 @@
-# shared by newsboat and the start page
+# shared by newsboat, the start page and news.<domain>
 let
   feed = url: tags: { inherit url tags; };
   youtube = id: feed "https://www.youtube.com/feeds/videos.xml?channel_id=${id}";

@@ -53,6 +53,12 @@ in
               default = "";
               description = "More caddy directives for the site.";
             };
+
+            listed = mkOption {
+              type = types.bool;
+              default = true;
+              description = "Shown on the start page. It is checked either way.";
+            };
           };
         }
       );

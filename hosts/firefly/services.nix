@@ -1,6 +1,10 @@
 # what firefly serves; its address and passwords are private
 { config, ... }:
 
+let
+  feeds = import ../../home/shawn/feeds.nix;
+in
+
 {
   dotnix = {
     services = {
@@ -10,11 +14,15 @@
       cache.enable = true;
       dashboard = {
         enable = true;
-        feeds = map (feed: feed.url) (import ../../home/shawn/feeds.nix);
+        feeds = map (feed: feed.url) feeds;
       };
       files.enable = true;
       forgejo.enable = true;
       navidrome.enable = true;
+      news = {
+        enable = true;
+        inherit feeds;
+      };
       ntfy.enable = true;
       search.enable = true;
 
