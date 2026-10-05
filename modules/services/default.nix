@@ -26,6 +26,7 @@
     ./pdf.nix
     ./photos.nix
     ./read.nix
+    ./search.nix
     ./syncthing.nix
     ./theme.nix
     # keep-sorted end

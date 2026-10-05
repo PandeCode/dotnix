@@ -110,32 +110,38 @@ in
               }
               {
                 size = "full";
-                widgets = [
-                  {
-                    type = "monitor";
-                    title = "Sites";
-                    cache = "1m";
-                    sites = lib.attrsets.mapAttrsToList (
-                      name: site:
-                      {
-                        title = name;
-                        url = url name;
-                      }
-                      # straight to the service, so a broken proxy still shows
-                      # which services are up
-                      // lib.attrsets.optionalAttrs (site.port != null) {
-                        check-url = "http://127.0.0.1:${toString site.port}";
-                      }
-                    ) (lib.attrsets.filterAttrs (_: site: site.listed) home.sites);
+                widgets =
+                  lib.lists.optional config.dotnix.services.search.enable {
+                    type = "search";
+                    search-engine = "${url "search"}/search?q={QUERY}";
+                    autofocus = true;
                   }
-                ]
-                ++ lib.lists.optional (cfg.feeds != [ ]) {
-                  type = "rss";
-                  title = "News";
-                  limit = 20;
-                  collapse-after = 8;
-                  feeds = map (url: { inherit url; }) cfg.feeds;
-                };
+                  ++ [
+                    {
+                      type = "monitor";
+                      title = "Sites";
+                      cache = "1m";
+                      sites = lib.attrsets.mapAttrsToList (
+                        name: site:
+                        {
+                          title = name;
+                          url = url name;
+                        }
+                        # straight to the service, so a broken proxy still shows
+                        # which services are up
+                        // lib.attrsets.optionalAttrs (site.port != null) {
+                          check-url = "http://127.0.0.1:${toString site.port}";
+                        }
+                      ) (lib.attrsets.filterAttrs (_: site: site.listed) home.sites);
+                    }
+                  ]
+                  ++ lib.lists.optional (cfg.feeds != [ ]) {
+                    type = "rss";
+                    title = "News";
+                    limit = 20;
+                    collapse-after = 8;
+                    feeds = map (url: { inherit url; }) cfg.feeds;
+                  };
               }
               {
                 size = "small";

@@ -84,12 +84,14 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
 
       profiles.main.search = {
         force = true;
-        default = "ddg";
-        privateDefault = "ddg";
+        # firefly's searxng, or duckduckgo without it; @d is duckduckgo either way
+        default = if home then "SearXNG" else "ddg";
+        privateDefault = if home then "SearXNG" else "ddg";
         engines = {
           bing.metaData.hidden = true;
           # built-in engines take one extra alias only
           google.metaData.alias = "@g";
+          ddg.metaData.alias = "@d";
           "Nix Packages" = engine "@np" "https://search.nixos.org/packages" [
             unstable
             (searchTerms "query")
@@ -101,6 +103,21 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
           "NixOS Wiki" = engine "@nw" "https://wiki.nixos.org/w/index.php" [ (searchTerms "search") ];
         }
         // lib.attrsets.optionalAttrs home {
+          SearXNG = {
+            urls = [
+              {
+                template = "https://search.${domain}/search";
+                params = [ (searchTerms "q") ];
+              }
+              {
+                template = "https://search.${domain}/autocompleter";
+                type = "application/x-suggestions+json";
+                params = [ (searchTerms "q") ];
+              }
+            ];
+            icon = "https://search.${domain}/favicon.ico";
+            definedAliases = [ "@s" ];
+          };
           Readeck = {
             urls = [
               {
