@@ -25,6 +25,7 @@ let
     dav = "Kozea/Radicale";
     docs = "paperless-ngx/paperless-ngx";
     files = "gtsteffaniak/filebrowser";
+    firefox = "mozilla-services/syncstorage-rs";
     forgejo = "codeberg:forgejo/forgejo";
     money = "simonmichael/hledger";
     navidrome = "navidrome/navidrome";

@@ -76,6 +76,12 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
       enable = true;
       nativeMessagingHosts = [ pkgs.firefoxpwa ];
 
+      # syncs through firefly instead of mozilla's servers
+      profiles.main.settings = lib.attrsets.optionalAttrs home {
+        "identity.fxaccounts.enabled" = true;
+        "identity.sync.tokenserver.uri" = "https://firefox.${domain}/1.0/sync/1.5";
+      };
+
       profiles.main.search = {
         force = true;
         default = "ddg";
@@ -147,7 +153,7 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
         DisableAppUpdate = true;
 
         DisableBuiltinPDFViewer = true;
-        DisableFirefoxAccounts = true;
+        DisableFirefoxAccounts = !home;
         DisableFirefoxScreenshots = true;
         DisableForgetButton = true;
         DisableFormHistory = true;

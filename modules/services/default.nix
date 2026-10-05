@@ -12,6 +12,7 @@
     ./dav.nix
     ./docs.nix
     ./files.nix
+    ./firefox.nix
     ./forgejo.nix
     ./home.nix
     ./money.nix
