@@ -15,6 +15,7 @@
     ./news.nix
     ./notify.nix
     ./ntfy.nix
+    ./read.nix
     ./search.nix
     ./syncthing.nix
     ./theme.nix

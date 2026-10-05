@@ -24,6 +24,7 @@ in
         inherit feeds;
       };
       ntfy.enable = true;
+      read.enable = true;
       search.enable = true;
 
       # always on, so the vault syncs even when kazuha and the phone are never

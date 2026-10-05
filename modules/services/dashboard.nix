@@ -26,6 +26,7 @@ let
     navidrome = "navidrome/navidrome";
     news = "miniflux/v2";
     ntfy = "binwiederhier/ntfy";
+    read = "codeberg:readeck/readeck";
     syncthing = "syncthing/syncthing";
   };
 in

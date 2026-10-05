@@ -36,14 +36,21 @@ let
     "F"
   ];
 
+  rgb =
+    base:
+    map (channel: lib.strings.toInt config.lib.stylix.colors."${base}-rgb-${channel}") [
+      "r"
+      "g"
+      "b"
+    ];
+
   # "h s% l%", the form shadcn-style apps keep their colors in
   hsl =
     base:
     let
-      c = config.lib.stylix.colors;
-      r = lib.strings.toInt c."${base}-rgb-r" / 255.0;
-      g = lib.strings.toInt c."${base}-rgb-g" / 255.0;
-      b = lib.strings.toInt c."${base}-rgb-b" / 255.0;
+      r = builtins.elemAt (rgb base) 0 / 255.0;
+      g = builtins.elemAt (rgb base) 1 / 255.0;
+      b = builtins.elemAt (rgb base) 2 / 255.0;
       max = lib.lists.foldl' lib.trivial.max r [
         g
         b
@@ -126,7 +133,8 @@ in
     default =
       if enable then
         {
-          inherit colors;
+          inherit colors root;
+          rgb = lib.attrsets.genAttrs bases rgb;
           hsl = lib.attrsets.genAttrs bases hsl;
           font = name;
           url = "https://theme.${home.domain}/theme.css";
@@ -135,8 +143,9 @@ in
       else
         null;
     description = ''
-      The stylix theme for web apps, or null without stylix: colors as hex and
-      hsl, the font's name, and the stylesheet's url with css to import it.
+      The stylix theme for web apps, or null without stylix: colors as hex,
+      rgb and hsl, the font's name, the stylesheet's url with css to import
+      it, and its folder for apps that only load styles from themselves.
     '';
   };
 
