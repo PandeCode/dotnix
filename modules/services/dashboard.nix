@@ -22,6 +22,7 @@ let
     atuin = "atuinsh/atuin";
     beszel = "henrygd/beszel";
     dav = "Kozea/Radicale";
+    docs = "paperless-ngx/paperless-ngx";
     files = "gtsteffaniak/filebrowser";
     forgejo = "codeberg:forgejo/forgejo";
     money = "simonmichael/hledger";

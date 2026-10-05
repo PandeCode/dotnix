@@ -9,6 +9,7 @@
     ./cache.nix
     ./dashboard.nix
     ./dav.nix
+    ./docs.nix
     ./files.nix
     ./forgejo.nix
     ./home.nix

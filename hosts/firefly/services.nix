@@ -17,6 +17,7 @@ in
         feeds = map (feed: feed.url) feeds;
       };
       dav.enable = true;
+      docs.enable = true;
       files.enable = true;
       forgejo.enable = true;
       money.enable = true;
