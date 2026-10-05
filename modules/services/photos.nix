@@ -154,6 +154,9 @@ in
   config = lib.modules.mkIf (cfg.enable && cfg.passwordFile != null) {
     services.immich = {
       enable = true;
+      # its default, localhost, can end up on ipv6 only, where caddy and the
+      # seed don't look
+      host = "127.0.0.1";
       mediaLocation = cfg.folder;
       # to reach the gpu for video
       accelerationDevices = lib.modules.mkIf nvidia null;
