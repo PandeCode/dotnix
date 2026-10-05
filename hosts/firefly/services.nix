@@ -16,6 +16,7 @@ in
         enable = true;
         feeds = map (feed: feed.url) feeds;
       };
+      dav.enable = true;
       files.enable = true;
       forgejo.enable = true;
       navidrome.enable = true;

@@ -21,6 +21,7 @@ let
   repos = {
     atuin = "atuinsh/atuin";
     beszel = "henrygd/beszel";
+    dav = "Kozea/Radicale";
     files = "gtsteffaniak/filebrowser";
     forgejo = "codeberg:forgejo/forgejo";
     navidrome = "navidrome/navidrome";

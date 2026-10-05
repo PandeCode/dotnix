@@ -8,6 +8,7 @@
     ./builder.nix
     ./cache.nix
     ./dashboard.nix
+    ./dav.nix
     ./files.nix
     ./forgejo.nix
     ./home.nix
