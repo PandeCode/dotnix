@@ -9,6 +9,7 @@
     ./gaming.nix
     ./git.nix
     ./i3.nix
+    ./mail.nix
     ./media.nix
     ./modes.nix
     ./niri.nix

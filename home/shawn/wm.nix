@@ -192,6 +192,7 @@ in
         "6" = [
           "Mail"
           "Thunderbird"
+          "betterbird"
         ];
         "7" = [
           "riotclientux.exe"
