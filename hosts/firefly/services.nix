@@ -10,6 +10,7 @@ in
     services = {
       atuin.enable = true;
       beszel.enable = true;
+      books.enable = true;
       builder.enable = true;
       cache.enable = true;
       dashboard = {

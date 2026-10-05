@@ -5,6 +5,7 @@
     ./atuin.nix
     ./backup.nix
     ./beszel.nix
+    ./books.nix
     ./builder.nix
     ./cache.nix
     ./dashboard.nix

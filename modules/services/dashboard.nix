@@ -21,6 +21,7 @@ let
   repos = {
     atuin = "atuinsh/atuin";
     beszel = "henrygd/beszel";
+    books = "Kareadita/Kavita";
     dav = "Kozea/Radicale";
     docs = "paperless-ngx/paperless-ngx";
     files = "gtsteffaniak/filebrowser";
