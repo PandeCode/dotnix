@@ -13,6 +13,7 @@ in
       books.enable = true;
       builder.enable = true;
       cache.enable = true;
+      config.enable = true;
       dashboard = {
         enable = true;
         feeds = map (feed: feed.url) feeds;

@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>dotnix config</title>
+<!-- theme -->
+<style>
+  body {
+    margin: 0 auto;
+    max-width: 70rem;
+    padding: 1rem;
+    background: var(--bg, #181818);
+    color: var(--text, #d8d8d8);
+    font-family: var(--font, sans-serif);
+  }
+  header { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+  h1 { font-size: 1.2rem; margin: 0 1rem 0 0; color: var(--bright, #f8f8f8); }
+  input, button {
+    font: inherit;
+    color: inherit;
+    background: var(--surface, #282828);
+    border: 1px solid var(--border, #383838);
+    border-radius: 0.3rem;
+    padding: 0.3rem 0.6rem;
+  }
+  input { flex: 1; min-width: 12rem; }
+  button { cursor: pointer; }
+  button:hover { border-color: var(--accent, #7cafc2); }
+  details { margin-left: 1.2rem; }
+  body > details { margin-left: 0; }
+  summary { cursor: pointer; color: var(--bright, #f8f8f8); }
+  summary .count { color: var(--muted, #888); }
+  .leaf { margin-left: 1.2rem; white-space: pre-wrap; word-break: break-all; }
+  .key { color: var(--accent, #7cafc2); }
+  .string { color: var(--ok, #a1b56c); }
+  .number, .bool { color: var(--warn, #f7ca88); }
+  .null, .unset, .marker { color: var(--muted, #888); font-style: italic; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>dotnix config</h1>
+  <input id="filter" type="search" placeholder="filter by path, e.g. services.photos" autofocus>
+  <button id="open">open all</button>
+  <button id="close">close all</button>
+</header>
+<main id="tree"></main>
+<script>
+  const tree = document.getElementById("tree");
+
+  function leaf(key, value, path) {
+    const div = document.createElement("div");
+    div.className = "leaf";
+    div.dataset.path = path;
+    div.title = path;
+    const k = document.createElement("span");
+    k.className = "key";
+    k.textContent = key + " = ";
+    const v = document.createElement("span");
+    if (value === null) {
+      v.className = "null";
+      v.textContent = "null";
+    } else if (typeof value === "object") {
+      v.className = "unset";
+      v.textContent = "unset";
+    } else if (typeof value === "string" && /^<.*>$/.test(value)) {
+      v.className = "marker";
+      v.textContent = value;
+    } else if (typeof value === "string") {
+      v.className = "string";
+      v.textContent = JSON.stringify(value);
+    } else {
+      v.className = typeof value === "boolean" ? "bool" : "number";
+      v.textContent = String(value);
+    }
+    div.append(k, v);
+    return div;
+  }
+
+  function isBranch(value) {
+    return value !== null && typeof value === "object" && !(Object.keys(value).length === 1 && value["<unset>"]);
+  }
+
+  function node(key, value, path) {
+    if (!isBranch(value)) return leaf(key, value, path);
+    const list = Array.isArray(value);
+    const keys = Object.keys(value);
+    const d = document.createElement("details");
+    d.dataset.path = path;
+    const s = document.createElement("summary");
+    s.textContent = key + " ";
+    const c = document.createElement("span");
+    c.className = "count";
+    c.textContent = list ? "[" + keys.length + "]" : "{" + keys.length + "}";
+    s.append(c);
+    d.append(s);
+    // filled on first open, so big trees stay quick
+    let filled = false;
+    const fill = () => {
+      if (filled) return;
+      filled = true;
+      for (const k of keys) {
+        d.append(node(list ? "[" + k + "]" : k, value[k], path ? path + "." + k : k));
+      }
+    };
+    d.addEventListener("toggle", fill);
+    d.fill = fill;
+    return d;
+  }
+
+  function each(fn) {
+    // fills everything, so the filter and open all see every leaf
+    let found = true;
+    while (found) {
+      found = false;
+      for (const d of tree.querySelectorAll("details")) {
+        if (d.fill && !d.filled) {
+          d.filled = true;
+          d.fill();
+          found = true;
+        }
+      }
+    }
+    fn();
+  }
+
+  function filter(query) {
+    const q = query.trim().toLowerCase();
+    if (!q) {
+      for (const el of tree.querySelectorAll(".hidden")) el.classList.remove("hidden");
+      return;
+    }
+    each(() => {
+      for (const el of tree.querySelectorAll(".leaf")) {
+        const hit = el.dataset.path.toLowerCase().includes(q);
+        el.classList.toggle("hidden", !hit);
+      }
+      // a branch shows when its own path matches or something inside does
+      const branches = [...tree.querySelectorAll("details")].reverse();
+      for (const d of branches) {
+        const self = d.dataset.path.toLowerCase().includes(q);
+        const inside = d.querySelector(":scope > .leaf:not(.hidden), :scope > details:not(.hidden)");
+        d.classList.toggle("hidden", !self && !inside);
+        if (inside) d.open = true;
+      }
+    });
+  }
+
+  fetch("data.json")
+    .then((r) => r.json())
+    .then((data) => {
+      for (const [host, parts] of Object.entries(data)) {
+        const h = node(host, parts, host);
+        h.open = true;
+        tree.append(h);
+      }
+    });
+
+  let timer;
+  document.getElementById("filter").addEventListener("input", (e) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => filter(e.target.value), 150);
+  });
+  document.getElementById("open").addEventListener("click", () =>
+    each(() => tree.querySelectorAll("details").forEach((d) => (d.open = true))),
+  );
+  document.getElementById("close").addEventListener("click", () =>
+    tree.querySelectorAll("details").forEach((d) => (d.open = false)),
+  );
+</script>
+</body>
+</html>
