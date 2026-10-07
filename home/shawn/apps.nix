@@ -85,6 +85,12 @@ lib.modules.mkIf osConfig.dotnix.profiles.apps.enable {
 
   services.kdeconnect.enable = true;
 
+  # with the smb shares mounts.nix adds
+  gtk.gtk3.bookmarks = map (dir: "file://${config.home.homeDirectory}/${dir} ${dir}") [
+    "Downloads"
+    "Pictures"
+  ];
+
   xdg = {
     mimeApps = {
       enable = true;
