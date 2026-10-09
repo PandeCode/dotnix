@@ -1,5 +1,6 @@
 # Framework 16, AMD Ryzen AI 300
 {
+  pkgs,
   inputs,
   lib,
   ...
@@ -11,6 +12,8 @@
     ./services.nix
     inputs.nixos-hardware.nixosModules.framework-16-amd-ai-300-series
   ];
+
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   dotnix = {
     user = "shawn";
