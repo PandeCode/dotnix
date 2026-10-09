@@ -1,0 +1,76 @@
+name: "ISO"
+
+# after an update pr is merged, or by hand: build the live system and put
+# it on a release
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "flake.lock"
+  workflow_dispatch:
+
+permissions: {}
+
+# a newer merge replaces a build still running
+concurrency:
+  group: iso
+  cancel-in-progress: true
+
+jobs:
+  iso:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      # the image and the store it is made from don't fit next to the
+      # runner's preinstalled toolchains
+      - name: Free disk space
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # nix-community has neovim nightly, so hermes isn't built from source
+      - name: Install Nix
+        uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            extra-substituters = https://charon.cachix.org https://nix-community.cachix.org
+            extra-trusted-public-keys = charon.cachix.org-1:epdetEs1ll8oi8DT8OG2jEA4whj3FDbqgPFvapEPbY8= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=
+
+      - name: Build
+        run: nix build .#nixosConfigurations.iso.config.system.build.isoImage
+
+      # github takes files up to 2 GiB, so a bigger image goes up in parts
+      - name: Prepare
+        run: |
+          set -euo pipefail
+          mkdir upload
+          iso=$(echo result/iso/*.iso)
+          name=$(basename "$iso")
+          if [ "$(stat -L -c %s "$iso")" -gt 2000000000 ]; then
+            split -b 1900M "$iso" "upload/$name.part-"
+          else
+            cp -L "$iso" upload/
+          fi
+          (cd result/iso && sha256sum "$name") >upload/SHA256SUMS
+
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="iso-$(date -u +%Y-%m-%d)-${GITHUB_SHA::7}"
+          notes="Built from $GITHUB_SHA.
+
+          If the image is in parts, join them first: \`cat *.part-* >nixos.iso\`.
+          Check it with \`sha256sum -c SHA256SUMS\`."
+          gh release create "$tag" upload/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "$tag" \
+            --notes "$notes"
