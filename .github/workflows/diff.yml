@@ -1,0 +1,53 @@
+name: "Diff"
+
+# on a pr that changes a host: what each host's system gains, loses and
+# changes version of, as a comment on the pr
+on:
+  pull_request:
+    paths:
+      - "flake.lock"
+      - "**.nix"
+
+permissions: {}
+
+jobs:
+  diff:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            extra-substituters = https://charon.cachix.org
+            extra-trusted-public-keys = charon.cachix.org-1:epdetEs1ll8oi8DT8OG2jEA4whj3FDbqgPFvapEPbY8=
+
+      - name: Hosts
+        id: hosts
+        run: |
+          set -euo pipefail
+          {
+            echo "attributes<<EOF"
+            # shellcheck disable=SC2016
+            nix eval --impure --json --expr '
+              let flake = builtins.getFlake (toString ./.); in
+              map (name: {
+                displayName = name;
+                attribute = "nixosConfigurations.${name}.config.system.build.toplevel";
+              }) (builtins.attrNames flake.nixosConfigurations)'
+            echo "EOF"
+          } >>"$GITHUB_OUTPUT"
+
+      - name: Diff
+        uses: natsukium/nix-diff-action@4091452e4c7b3c7ea4ecbaec84be7f0066d810d7 # v1.1.1
+        with:
+          attributes: ${{ steps.hosts.outputs.attributes }}
+          comment-strategy: update
