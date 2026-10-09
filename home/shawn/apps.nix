@@ -143,6 +143,7 @@ lib.modules.mkIf osConfig.dotnix.profiles.apps.enable {
     proselint
     pscircle
     qbittorrent-enhanced-nox
+    raddebugger
     rnote
     signal-desktop
     silicon

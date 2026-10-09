@@ -439,11 +439,11 @@
         "zig-overlay": "zig-overlay"
       },
       "locked": {
-        "lastModified": 1791252819,
-        "narHash": "sha256-rxa5NNBF/AgcERAbD3PDIFf0z7Qdinc0a3Ibe9gzhfQ=",
+        "lastModified": 1791506936,
+        "narHash": "sha256-i8fkLHB11PbA181o5yAhajmLBB32nZspmCsIWDX/ATM=",
         "owner": "PandeCode",
         "repo": "nixbuilds",
-        "rev": "4bd88a2ee60aac5f4aabac1bcdac4f7d8ea11add",
+        "rev": "8e30523f9f4bd5d89073427210dff77876c6bc38",
         "type": "github"
       },
       "original": {
