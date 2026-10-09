@@ -2,8 +2,8 @@
 
   "privacy-badger" = {
     id = "pkehgijcmpdhfbdbbnkijodmdjhbjlgp";
-    sha256 = "sha256:12pvw5gm9dxs28myv5ixk6vnrp1m7gl95xnw2f3i54bnl1q0q16h";
-    version = "2026.9.15";
+    sha256 = "sha256:1p4pgl3whfg2kiyxyq36md42crz3r1fawjb2p63y8hyywxj00lwn";
+    version = "2026.9.15.1";
   };
 
   "bitwarden-password-manage" = {
