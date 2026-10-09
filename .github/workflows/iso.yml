@@ -39,8 +39,18 @@ jobs:
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
-            extra-substituters = https://charon.cachix.org https://nix-community.cachix.org
-            extra-trusted-public-keys = charon.cachix.org-1:epdetEs1ll8oi8DT8OG2jEA4whj3FDbqgPFvapEPbY8= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=
+            extra-substituters = https://nix-community.cachix.org
+            extra-trusted-public-keys = nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=
+
+      # pulls from charon and pushes what this run builds to it
+      - name: Setup Cachix
+        uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866 # v17
+        with:
+          name: charon
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+          # the image and its squashfs are gigabytes each and rebuilt every
+          # time; the release holds the image
+          pushFilter: "(\\.iso|squashfs(\\.img)?)$"
 
       - name: Build
         run: nix build .#nixosConfigurations.iso.config.system.build.isoImage

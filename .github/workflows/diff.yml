@@ -27,8 +27,13 @@ jobs:
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
-            extra-substituters = https://charon.cachix.org
-            extra-trusted-public-keys = charon.cachix.org-1:epdetEs1ll8oi8DT8OG2jEA4whj3FDbqgPFvapEPbY8=
+
+      # pulls from charon and pushes what this run builds to it
+      - name: Setup Cachix
+        uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866 # v17
+        with:
+          name: charon
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
 
       - name: Hosts
         id: hosts
