@@ -13,14 +13,6 @@ let
     text = builtins.readFile ../../bin/browser.sh;
   };
 
-  crx =
-    { id, sha256, ... }:
-    pkgs.fetchurl {
-      name = "${id}.crx";
-      url = "https://clients2.google.com/service/update2/crx?response=redirect&acceptformat=crx2,crx3&prodversion=${lib.versions.major pkgs.ungoogled-chromium.version}&x=id%3D${id}%26installsource%3Dondemand%26uc";
-      sha256 = lib.strings.removePrefix "sha256:" sha256;
-    };
-
   engine = alias: template: params: {
     urls = [ { inherit template params; } ];
     icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
@@ -53,23 +45,8 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
       enable = !osConfig.dotnix.profiles.desktop.minimal;
       package = pkgs.ungoogled-chromium;
       dictionaries = [ pkgs.hunspellDictsChromium.en_US ];
-      extensions =
-        let
-          ublock = rec {
-            id = "hifpfkolgdolnmfmncmfocfiiaofjikk";
-            version = "1.72.2";
-            crxPath = pkgs.fetchurl {
-              name = "${id}.crx";
-              url = "https://github.com/gorhill/uBlock/releases/download/${version}/uBlock0_${version}.chromium.zip";
-              sha256 = "0cz5fi9gnynja34cjv709a0nk0ma5vgax27zqfqpd3glw72cl16i";
-            };
-          };
-        in
-        [ ublock ]
-        ++ map (e: {
-          inherit (e) id version;
-          crxPath = crx e;
-        }) (builtins.attrValues (import ./chromium-extensions.nix));
+      # pinned in nixbuilds, which keeps them up to date
+      extensions = pkgs.chromium-extensions.extensions;
     };
 
     librewolf = {
