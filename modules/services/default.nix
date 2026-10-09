@@ -44,5 +44,8 @@
         lib.attrsets.filterAttrs (
           _: s: s.enable or false && s ? passwordFile && s.passwordFile == null
         ) config.dotnix.services
-      );
+      )
+    ++ lib.lists.optional (
+      config.dotnix.backup.enable && config.dotnix.backup.passwordFile == null
+    ) "dotnix.backup is enabled without a passwordFile, so there are no backups";
 }

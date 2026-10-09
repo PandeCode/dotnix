@@ -205,11 +205,6 @@ in
     ) cfg.views;
     system.fsPackages = lib.lists.optional (cfg.views != { }) pkgs.bindfs;
 
-    # each service backs up its own folder
-    services.restic.backups.main.exclude = lib.modules.mkIf (
-      config.dotnix.backup.enable && cfg.views != { }
-    ) [ "${cfg.folder}/apps" ];
-
     dotnix = {
       home.sites.files = mkIf (cfg.passwordFile != null) { inherit port; };
       # against deleting by mistake; a copy off this drive is still to come
@@ -217,6 +212,8 @@ in
         cfg.folder
         state
       ];
+      # each service backs up its own folder
+      backup.exclude = lib.lists.optional (cfg.views != { }) "${cfg.folder}/apps";
     };
   };
 }

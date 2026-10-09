@@ -19,8 +19,9 @@ in
     };
 
     passwordFile = mkOption {
-      type = types.str;
-      description = "Read at run time, so a secret's path, never the store.";
+      type = types.nullOr types.str;
+      default = null;
+      description = "Read at run time, so a secret's path, never the store. Without it there are no backups.";
     };
 
     paths = mkOption {
@@ -34,11 +35,22 @@ in
       default = [ ];
       description = "Postgres databases to dump before each backup.";
     };
+
+    exclude = mkOption {
+      type = types.listOf types.str;
+      default = [ ];
+      description = "Paths under dotnix.backup.paths to leave out.";
+    };
   };
 
-  config = lib.modules.mkIf cfg.enable {
+  config = lib.modules.mkIf (cfg.enable && cfg.passwordFile != null) {
     services.restic.backups.main = {
-      inherit (cfg) repository passwordFile paths;
+      inherit (cfg)
+        repository
+        passwordFile
+        paths
+        exclude
+        ;
       initialize = true;
       timerConfig = {
         OnCalendar = "daily";
