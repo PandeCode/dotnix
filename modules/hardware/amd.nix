@@ -27,8 +27,14 @@ in
       hardware.graphics = {
         enable = true;
         enable32Bit = true;
+        # opencl through mesa's rusticl, it also loads spir-v kernels
+        extraPackages = [ pkgs.mesa.opencl ];
       };
-      environment.sessionVariables.VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json";
+      environment.sessionVariables = {
+        VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json";
+        # rusticl keeps its drivers off until named here
+        RUSTICL_ENABLE = "radeonsi";
+      };
     }
 
     (mkIf cfg.lact.enable { services.lact.enable = true; })
