@@ -15,6 +15,10 @@
 
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
+  # suspend-then-hibernate resumes from the swapfile below: systemd writes its
+  # location to an efi variable on hibernate and the systemd initrd reads it
+  boot.initrd.systemd.enable = true;
+
   dotnix = {
     user = "shawn";
 
@@ -28,7 +32,10 @@
         enable = true;
         minecraft = true;
       };
-      laptop.enable = true;
+      laptop = {
+        enable = true;
+        power = "ppd";
+      };
     };
 
     hardware.amd = {

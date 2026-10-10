@@ -18,7 +18,18 @@ let
 in
 
 {
-  options.dotnix.profiles.laptop.enable = lib.options.mkEnableOption "my laptop power settings";
+  options.dotnix.profiles.laptop = {
+    enable = lib.options.mkEnableOption "my laptop power settings";
+    # amd laptops last longer on power-profiles-daemon, see nixos-hardware's framework amd module
+    power = lib.options.mkOption {
+      type = lib.types.enum [
+        "tlp"
+        "ppd"
+      ];
+      default = "tlp";
+      description = "What manages CPU power: TLP, or power-profiles-daemon.";
+    };
+  };
 
   config = mkIf cfg.enable {
     powerManagement = {
@@ -31,11 +42,10 @@ in
     services = {
       upower.enable = true;
 
-      # tlp instead
-      power-profiles-daemon.enable = mkForce false;
+      power-profiles-daemon.enable = mkForce (cfg.power == "ppd");
 
       tlp = {
-        enable = true;
+        enable = cfg.power == "tlp";
         settings = {
           CPU_SCALING_GOVERNOR_ON_AC = "performance";
           CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
