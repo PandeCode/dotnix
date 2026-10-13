@@ -20,6 +20,7 @@ in
       };
       dav.enable = true;
       docs.enable = true;
+      draw.enable = true;
       files.enable = true;
       firefox.enable = true;
       forgejo = {

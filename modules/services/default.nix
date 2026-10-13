@@ -14,6 +14,7 @@
     ./dashboard.nix
     ./dav.nix
     ./docs.nix
+    ./draw.nix
     ./files.nix
     ./firefox.nix
     ./forgejo.nix

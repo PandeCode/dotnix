@@ -24,6 +24,7 @@ let
     books = "Kareadita/Kavita";
     dav = "Kozea/Radicale";
     docs = "paperless-ngx/paperless-ngx";
+    draw = "excalidraw/excalidraw";
     files = "gtsteffaniak/filebrowser";
     firefox = "mozilla-services/syncstorage-rs";
     forgejo = "codeberg:forgejo/forgejo";
