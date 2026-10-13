@@ -1,0 +1,57 @@
+#!/usr/bin/env janet
+# clean [dir]: finds build and cache folders under dir (default .), shows
+# their sizes and deletes them after asking
+
+(def names {".direnv" true "target" true ".zig-cache" true "zig-out" true
+            "zig-pkg" true ".cargo" true "node_modules" true "__pycache__" true
+            "venv" true ".venv" true ".cache" true ".ccls-cache" true})
+
+(defn size [path]
+  (case (os/lstat path :mode)
+    :directory (sum (map |(size (string path "/" $)) (or (try (os/dir path) ([_] nil)) [])))
+    nil 0
+    (os/lstat path :size)))
+
+# a match is not walked into, so nested matches count once
+(defn find-dirs [dir]
+  (def found @[])
+  (defn walk [d]
+    (each name (sort (or (try (os/dir d) ([_] nil)) []))
+      (def path (string d "/" name))
+      (when (= :directory (os/lstat path :mode))
+        (if (names name) (array/push found path) (walk path)))))
+  (walk dir)
+  found)
+
+(defn human [bytes]
+  (var n bytes)
+  (var unit 0)
+  (while (and (>= n 1024) (< unit 4))
+    (set n (/ n 1024))
+    (++ unit))
+  (string (if (zero? unit) n (string/format "%.1f" n)) (["B" "K" "M" "G" "T"] unit)))
+
+(defn main [_ &opt dir]
+  (def dir (string/trimr (or dir ".") "/"))
+  (unless (= :directory (os/stat dir :mode))
+    (eprint "clean: not a folder: " dir)
+    (os/exit 1))
+  # ~/.cache and ~/.cargo match too, so not from home or above it
+  (def home (os/realpath (os/getenv "HOME")))
+  (when (string/has-prefix? (string (os/realpath dir) "/") (string home "/"))
+    (eprint "clean: run it inside a project, not on " dir)
+    (os/exit 1))
+  (def found (map |[$ (size $)] (find-dirs dir)))
+  (when (empty? found)
+    (print "Nothing found.")
+    (os/exit 0))
+  (print "Directories to delete:")
+  (each [path bytes] found
+    (print "  " path " (" (human bytes) ")"))
+  (print "\nTotal to recover: " (human (sum (map last found))))
+  (prin "Delete? (y/N) ")
+  (flush)
+  (def answer (string/trim (or (file/read stdin :line) "")))
+  (when (index-of answer ["y" "Y"])
+    (os/execute ["rm" "-rf" "--" ;(map first found)] :p)
+    (print "Done")))

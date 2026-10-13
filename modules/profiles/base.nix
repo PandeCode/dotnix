@@ -111,6 +111,7 @@ in
         imagemagick
         imgcat
         inetutils
+        janet
         jq
         just
         lm_sensors

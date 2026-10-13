@@ -1,0 +1,22 @@
+#!/usr/bin/env janet
+# replace_str OLD NEW: replaces every OLD with NEW, as plain text, in the
+# files under the current folder. skips .git, links and binary files
+
+(defn walk [dir f]
+  (each name (sort (os/dir dir))
+    (def path (if (= dir ".") name (string dir "/" name)))
+    (case (os/lstat path :mode)
+      :directory (unless (= name ".git") (walk path f))
+      :file (f path))))
+
+(defn main [_ & args]
+  (unless (and (= 2 (length args)) (not (empty? (first args))))
+    (eprint "usage: replace_str OLD NEW")
+    (os/exit 1))
+  (def [old new] args)
+  (walk "." (fn [path]
+              (def text (try (slurp path) ([err] (eprint path ": " err) "")))
+              # a nul byte is how grep -I tells binary files apart too
+              (when (and (string/find old text) (not (string/find "\0" text)))
+                (spit path (string/replace-all old new text))
+                (print path)))))
