@@ -49,6 +49,7 @@ format = "$icon {$signal_strength $ssid $frequency|Eth}"
 block = "sound"
 format = " $icon $output_name{ $volume|} "
 [block.mappings]
+"bluez_output.C4_A9_B8_A7_EA_06.1"           = "" # Bluetooth + Headset
 "bluez_output.08_EB_ED_13_30_46.1"           = "" # Bluetooth + Headset
 "bluez_output.B4.84_D5_C2_77_1F.1"           = "" # Bluetooth + Headset
 "bluez_output.20.18_5B_0E_6B_31.1"             = "󰓃" # Bluetooth + nf-md-laptop-speaker
