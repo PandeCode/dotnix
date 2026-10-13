@@ -42,17 +42,35 @@ in
         pkgs.git
         pkgs.util-linux
       ];
-      # built as you, since nix won't open a git repo someone else owns
+      # built as you, since nix won't open a git repo someone else owns.
+      # only committed work is built, and dotnix brings its own lock, since
+      # an override alone keeps the private lock's old pins under it
       script = ''
-        system=$(runuser -u ${user} -- env HOME=${home} nix build --no-link --print-out-paths \
-          --override-input dotnix ${cfg.dotnix} --no-write-lock-file \
-          "git+file://${cfg.flake}#nixosConfigurations.${config.networking.hostName}.config.system.build.toplevel")
-        if [ "$system" != "$(readlink -f /run/current-system)" ]; then
+        as() { runuser -u ${user} -- env HOME=${home} "$@"; }
+        flake="git+file://${cfg.flake}?ref=HEAD"
+        lock=$(as mktemp -d)/flake.lock
+        trap 'rm -rf "$(dirname "$lock")"' EXIT
+
+        as nix flake update dotnix --flake "$flake" \
+          --override-input dotnix ${cfg.dotnix} --output-lock-file "$lock"
+        system=$(as nix build --no-link --print-out-paths \
+          --reference-lock-file "$lock" --no-write-lock-file \
+          "$flake#nixosConfigurations.${config.networking.hostName}.config.system.build.toplevel")
+
+        # a switch that failed halfway is tried again the next night
+        if [ "$system" != "$(cat "$STATE_DIRECTORY/system" 2>/dev/null)" ]; then
           nix-env --profile /nix/var/nix/profiles/system --set "$system"
           "$system/bin/switch-to-configuration" switch
+          echo "$system" >"$STATE_DIRECTORY/system"
         fi
       '';
-      serviceConfig.Type = "oneshot";
+      wants = [ "network-online.target" ];
+      after = [ "network-online.target" ];
+      serviceConfig = {
+        Type = "oneshot";
+        StateDirectory = "dotnix-upgrade";
+        TimeoutStartSec = "3h";
+      };
       # the switch it runs must not stop it halfway
       restartIfChanged = false;
       unitConfig.X-StopOnRemoval = false;
