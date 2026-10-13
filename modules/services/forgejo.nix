@@ -91,10 +91,20 @@ let
   sshPort = 2222;
 
   domain = "git.${config.dotnix.home.domain}";
+
+  inherit (config.networking) hostName;
+  # a debian image with node, which most actions need
+  image = "docker://node:22-bookworm";
+  # the system's certificates, which trust the home ca too
+  certs = "/etc/ssl/certs/ca-certificates.crt";
 in
 
 {
-  options.dotnix.services.forgejo.enable = lib.options.mkEnableOption "forgejo, at git.<domain>";
+  options.dotnix.services.forgejo = {
+    enable = lib.options.mkEnableOption "forgejo, at git.<domain>";
+
+    runner = lib.options.mkEnableOption "an actions runner here, running each job in a docker container";
+  };
 
   config = lib.modules.mkIf cfg.enable {
     services.forgejo = {
@@ -118,6 +128,7 @@ in
         # accounts are made with `forgejo admin user create`
         service.DISABLE_REGISTRATION = true;
         session.COOKIE_SECURE = true;
+        actions.ENABLED = lib.modules.mkIf cfg.runner true;
         ui = lib.modules.mkIf (theme != null) {
           THEMES = "dotnix,forgejo-auto,forgejo-light,forgejo-dark";
           DEFAULT_THEME = "dotnix";
@@ -129,6 +140,58 @@ in
       "${config.services.forgejo.customDir}/public/assets/css/theme-dotnix.css"."L+".argument =
         toString themeCss;
     };
+
+    # registers once, with a token forgejo makes itself
+    systemd.services.forgejo-runner-token = lib.modules.mkIf cfg.runner {
+      description = "Make the token the actions runner registers with";
+      after = [ "forgejo.service" ];
+      requires = [ "forgejo.service" ];
+      before = [ "gitea-runner-${hostName}.service" ];
+      requiredBy = [ "gitea-runner-${hostName}.service" ];
+      path = [ config.services.forgejo.package ];
+      environment = {
+        HOME = config.services.forgejo.stateDir;
+        FORGEJO_WORK_DIR = config.services.forgejo.stateDir;
+        FORGEJO_CUSTOM = config.services.forgejo.customDir;
+      };
+      script = ''
+        if [ ! -s token ]; then
+          printf 'TOKEN=%s\n' "$(forgejo actions generate-runner-token)" >token
+        fi
+      '';
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        User = config.services.forgejo.user;
+        UMask = "0077";
+        StateDirectory = "forgejo-runner-token";
+        WorkingDirectory = "/var/lib/forgejo-runner-token";
+      };
+    };
+
+    services.gitea-actions-runner = lib.modules.mkIf cfg.runner {
+      package = pkgs.forgejo-runner;
+      instances.${hostName} = {
+        enable = true;
+        name = hostName;
+        url = "https://${domain}";
+        tokenFile = "/var/lib/forgejo-runner-token/token";
+        labels = [
+          "ubuntu-latest:${image}"
+          "debian-latest:${image}"
+        ];
+        settings = {
+          runner.envs.NODE_EXTRA_CA_CERTS = certs;
+          container = {
+            # on this machine's network, so git.<domain> resolves for checkouts
+            network = "host";
+            options = "-v ${certs}:${certs}:ro";
+            valid_volumes = [ certs ];
+          };
+        };
+      };
+    };
+    virtualisation.docker.enable = lib.modules.mkIf cfg.runner true;
 
     # for `forgejo admin`
     environment.systemPackages = [ config.services.forgejo.package ];

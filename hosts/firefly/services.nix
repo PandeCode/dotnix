@@ -22,7 +22,10 @@ in
       docs.enable = true;
       files.enable = true;
       firefox.enable = true;
-      forgejo.enable = true;
+      forgejo = {
+        enable = true;
+        runner = true;
+      };
       money.enable = true;
       navidrome.enable = true;
       news = {
