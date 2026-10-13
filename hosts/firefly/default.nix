@@ -40,6 +40,8 @@
 
   # opens its secrets with its own ssh host key
   dotnix.secrets.hostKey = true;
+  # a failing drive shows up in ntfy before it takes the files with it
+  dotnix.notify.disks = true;
 
   programs.libys.enable = false;
 
