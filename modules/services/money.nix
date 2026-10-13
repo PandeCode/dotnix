@@ -42,6 +42,7 @@ in
       Group = lib.modules.mkForce "users";
       UMask = "0027";
     };
+    systemd.services.hledger-web.unitConfig.RequiresMountsFor = [ cfg.folder ];
     # it won't start without a journal
     systemd.tmpfiles.rules = [
       "d ${cfg.folder} 0750 ${user} users -"

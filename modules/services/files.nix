@@ -163,7 +163,10 @@ in
         ProtectSystem = "strict";
         ReadWritePaths = [ cfg.folder ];
       };
+      # not onto the root drive when the folder's drive is missing
+      unitConfig.RequiresMountsFor = [ cfg.folder ];
     };
+    systemd.services.samba-smbd.unitConfig.RequiresMountsFor = [ cfg.folder ];
 
     systemd.tmpfiles.settings.files.${cfg.folder}.d = {
       inherit user;

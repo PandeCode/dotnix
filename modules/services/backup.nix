@@ -30,6 +30,13 @@ in
       description = "Added to by the services that keep state.";
     };
 
+    before = mkOption {
+      type = types.listOf types.str;
+      default = [ ];
+      example = [ "forgejo-dump" ];
+      description = "Services that run right before each backup, like dumps, so it has their newest output.";
+    };
+
     databases = mkOption {
       type = types.listOf types.str;
       default = [ ];
@@ -66,20 +73,29 @@ in
     };
 
     # postgres is copied mid-write by restic; the dump is a consistent copy,
-    # made before the nightly backup and uncompressed so restic can deduplicate
+    # uncompressed so restic can deduplicate
     services.postgresqlBackup = lib.modules.mkIf (cfg.databases != [ ]) {
       enable = true;
       inherit (cfg) databases;
       compression = "none";
-      startAt = "*-*-* 23:30:00";
+      # run by the backup instead
+      startAt = [ ];
     };
 
-    dotnix.backup.paths = lib.lists.optional (
-      cfg.databases != [ ]
-    ) config.services.postgresqlBackup.location;
+    dotnix = {
+      backup = {
+        before = map (db: "postgresqlBackup-${db}") cfg.databases;
+        paths = lib.lists.optional (cfg.databases != [ ]) config.services.postgresqlBackup.location;
+      };
+      notify.units = [ "restic-backups-main" ] ++ cfg.before;
+    };
 
-    systemd.services.restic-backups-main.onFailure = lib.lists.optional (
-      config.dotnix.notify.url != null
-    ) "notify-failure@%n.service";
+    # a failed dump is reported on its own, and the backup still runs. with
+    # the repository's drive missing it fails, instead of starting a new one
+    systemd.services.restic-backups-main = {
+      wants = map (unit: "${unit}.service") cfg.before;
+      after = map (unit: "${unit}.service") cfg.before;
+      unitConfig.RequiresMountsFor = lib.lists.optional (lib.strings.hasPrefix "/" cfg.repository) cfg.repository;
+    };
   };
 }

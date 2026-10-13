@@ -32,6 +32,7 @@ in
     # yours to fill, navidrome's to read, through the users group
     systemd.tmpfiles.rules = [ "d ${cfg.musicFolder} 0750 ${config.dotnix.user} users -" ];
     users.users.${config.services.navidrome.user}.extraGroups = [ "users" ];
+    systemd.services.navidrome.unitConfig.RequiresMountsFor = [ cfg.musicFolder ];
 
     dotnix = {
       home.sites.music.port = config.services.navidrome.settings.Port;

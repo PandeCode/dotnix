@@ -253,6 +253,7 @@ in
     # yours to fill, kavita's to read
     systemd.tmpfiles.rules = [ "d ${cfg.folder} 2770 ${user} users -" ];
     users.users.${kavita.user}.extraGroups = [ "users" ];
+    systemd.services.kavita.unitConfig.RequiresMountsFor = [ cfg.folder ];
 
     dotnix = {
       home.sites.books = { inherit port; };

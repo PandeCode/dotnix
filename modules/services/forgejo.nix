@@ -91,6 +91,7 @@ let
   sshPort = 2222;
 
   domain = "git.${config.dotnix.home.domain}";
+  backup = config.dotnix.backup;
 
   inherit (config.networking) hostName;
   # a debian image with node, which most actions need
@@ -114,6 +115,8 @@ in
         enable = true;
         # uncompressed, so restic can deduplicate between nights
         type = "tar";
+        # restic keeps the history
+        age = "3d";
       };
       settings = {
         server = {
@@ -200,9 +203,15 @@ in
       sshPort
     ];
 
+    # with backups on, the dump runs right before each one instead
+    systemd.timers.forgejo-dump.enable = !(backup.enable && backup.passwordFile != null);
+
     dotnix = {
       home.sites.git = { inherit port; };
-      backup.paths = [ config.services.forgejo.dump.backupDir ];
+      backup = {
+        paths = [ config.services.forgejo.dump.backupDir ];
+        before = [ "forgejo-dump" ];
+      };
     };
   };
 }

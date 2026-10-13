@@ -12,6 +12,8 @@ let
   inherit (config.dotnix) user;
   inherit (config.users.users.${user}) home;
 
+  inherit (config.dotnix.notify) url;
+
   cfg = config.dotnix.upgrade;
 in
 
@@ -34,11 +36,13 @@ in
   };
 
   config = lib.modules.mkIf cfg.enable {
+    dotnix.notify.units = [ "dotnix-upgrade" ];
+
     systemd.services.dotnix-upgrade = {
       description = "Switch to the newest dotnix";
-      onFailure = lib.lists.optional (config.dotnix.notify.url != null) "notify-failure@%n.service";
       path = [
         config.nix.package
+        pkgs.curl
         pkgs.git
         pkgs.util-linux
       ];
@@ -63,6 +67,15 @@ in
           "$system/bin/switch-to-configuration" switch
           echo "$system" >"$STATE_DIRECTORY/system"
         fi
+        ${lib.strings.optionalString (url != null) ''
+
+          # a new kernel only runs after a reboot
+          if [ "$(readlink -f /run/booted-system/kernel)" != "$(readlink -f "$system/kernel")" ]; then
+            curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 15 \
+              --header "Title: ${config.networking.hostName} needs a reboot" \
+              --data-binary "for its new kernel" ${lib.strings.escapeShellArg url}
+          fi
+        ''}
       '';
       wants = [ "network-online.target" ];
       after = [ "network-online.target" ];
