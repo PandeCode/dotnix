@@ -179,8 +179,9 @@ let
         post Library/create '${library}'
       fi
 
-      # no anonymous stats to kavita's servers
-      post Settings "$(get Settings | jq '.allowStatCollection = false | .hostName = "${url}"')"
+      # no anonymous stats to kavita's servers. folder watching is off for the
+      # whole server out of the box, which overrides the library's switch
+      post Settings "$(get Settings | jq '.allowStatCollection = false | .enableFolderWatching = true | .hostName = "${url}"')"
     '';
   };
 in
