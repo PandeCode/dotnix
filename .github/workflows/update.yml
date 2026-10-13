@@ -9,6 +9,11 @@ on:
 
 permissions: {}
 
+# with pipefail, so a failed update fails the run instead of opening no pr
+defaults:
+  run:
+    shell: bash
+
 jobs:
   update:
     runs-on: ubuntu-latest

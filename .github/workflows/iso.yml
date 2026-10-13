@@ -75,9 +75,10 @@ jobs:
         run: |
           set -euo pipefail
           tag="iso-$(date -u +%Y-%m-%d)-${GITHUB_SHA::7}"
+          name=$(awk '{print $2}' upload/SHA256SUMS)
           notes="Built from $GITHUB_SHA.
 
-          If the image is in parts, join them first: \`cat *.part-* >nixos.iso\`.
+          If the image is in parts, join them first: \`cat *.part-* >$name\`.
           Check it with \`sha256sum -c SHA256SUMS\`."
           gh release create "$tag" upload/* \
             --repo "$GITHUB_REPOSITORY" \
