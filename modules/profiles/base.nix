@@ -146,6 +146,7 @@ in
         wget
         xh
         xxd
+        yt-dlp
         zip
         # keep-sorted end
       ];

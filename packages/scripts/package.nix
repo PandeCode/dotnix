@@ -2,6 +2,7 @@
   lib,
   stdenvNoCC,
   bash,
+  janet,
   lua,
   perl,
   python3,
@@ -20,6 +21,7 @@ stdenvNoCC.mkDerivation {
   # for patchShebangs
   buildInputs = [
     bash
+    janet
     lua
     perl
     python3

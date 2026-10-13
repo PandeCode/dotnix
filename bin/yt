@@ -1,0 +1,62 @@
+#!/usr/bin/env janet
+# yt [preset] [url ...]: yt-dlp with my presets, saving into the shared
+# folder (on firefly, or its mount on the other machines). without a preset
+# or a url it asks through gum. `yt help` lists the presets
+
+(def order ["best" "1080" "720" "audio" "full" "playlist" "new"])
+
+(def presets
+  {"best" {:about "the best video and audio" :dir "videos" :args []}
+   "1080" {:about "at most 1080p" :dir "videos"
+           :args ["-f" "bv*[height<=1080]+ba/b[height<=1080]"]}
+   "720" {:about "at most 720p" :dir "videos"
+          :args ["-f" "bv*[height<=720]+ba/b[height<=720]"]}
+   "audio" {:about "audio only, into music" :dir "music"
+            :args ["-x" "--audio-format" "opus" "--embed-metadata" "--embed-thumbnail"]}
+   "full" {:about "with english subtitles, chapters and metadata" :dir "videos"
+           :args ["--embed-subs" "--sub-langs" "en.*" "--embed-chapters"
+                  "--embed-metadata" "--embed-thumbnail"]}
+   "playlist" {:about "a playlist, numbered, in its own folder" :dir "videos"
+               :args ["-o" "%(playlist)s/%(playlist_index)03d %(title)s.%(ext)s"]}
+   "new" {:about "only what isn't downloaded yet, for channels" :dir "videos"
+          :args [] :archive true}})
+
+# the share on firefly, else where the other machines mount it
+(defn folder [name]
+  (or (find os/stat [(string "/srv/files/" name) (string "/mnt/firefly/" name)])
+      "."))
+
+(defn gum [& args]
+  (def proc (os/spawn ["gum" ;args] :p {:out :pipe}))
+  (def out (string/trim (or (:read (proc :out) :all) "")))
+  (unless (and (zero? (os/proc-wait proc)) (not (empty? out)))
+    (os/exit 1))
+  out)
+
+(defn ask-preset []
+  (def choice
+    (gum "choose" "--header" "yt"
+         ;(map |(string/format "%-9s%s" $ ((presets $) :about)) order)))
+  (first (string/split " " choice)))
+
+(defn ask-urls []
+  (filter |(not (empty? $))
+          (string/split " " (gum "input" "--placeholder" "urls, space separated"))))
+
+(defn help []
+  (print "yt [preset] [url ...]")
+  (each name order
+    (print (string/format "  %-9s%s" name ((presets name) :about)))))
+
+(defn main [_ & args]
+  (when (index-of (first args) ["help" "-h" "--help"])
+    (help)
+    (os/exit 0))
+  (def named (presets (first args)))
+  (def preset (cond named (first args) (empty? args) (ask-preset) "best"))
+  (def urls (let [given (if named (slice args 1) args)]
+              (if (empty? given) (ask-urls) given)))
+  (def p (presets preset))
+  (def dir (folder (p :dir)))
+  (def archive (if (p :archive) ["--download-archive" (string dir "/.yt-archive")] []))
+  (os/exit (os/execute ["yt-dlp" "--paths" dir ;(p :args) ;archive ;urls] :p)))
