@@ -74,6 +74,7 @@ in
       (bind [ "Super" ] "e" explorer)
       (bind [ "Super" "Shift" ] "g" "gif.sh")
       (bind [ "Super" ] "r" "_tool_riot")
+      (bind [ "Super" ] "i" "info")
       (bind [ "Super" ] "p" "_tool_search")
       (bind [ "Super" "Shift" ] "c" "rofi-calc.sh")
       (bind [ "Super" "Ctrl" ] "v" "clipimg.sh")

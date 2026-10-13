@@ -1,0 +1,98 @@
+#!/usr/bin/env janet
+# info: cpu, memory, battery, volume, network and ping in one notification,
+# and printed too
+
+(defn read [path] (try (string/trim (slurp path)) ([_] nil)))
+
+(defn output [& args]
+  (def proc (try (os/spawn args :p {:out :pipe :err :pipe}) ([_] nil)))
+  (when proc
+    (def out (:read (proc :out) :all))
+    (when (zero? (os/proc-wait proc))
+      (string/trim (or out "")))))
+
+(defn words [s sep] (filter |(not (empty? $)) (string/split sep s)))
+
+(defn cpu-times []
+  (def times (map scan-number (slice (words (first (string/split "\n" (slurp "/proc/stat"))) " ") 1)))
+  # idle and iowait
+  [(sum times) (+ (times 3) (times 4))])
+
+# the interface the default route goes through
+(defn default-iface []
+  (var found nil)
+  (each line (slice (string/split "\n" (slurp "/proc/net/route")) 1)
+    (def cols (words line "\t"))
+    (when (and (nil? found) (= (get cols 1) "00000000"))
+      (set found (cols 0))))
+  found)
+
+(defn net-bytes [iface]
+  (when iface
+    (def rx (read (string "/sys/class/net/" iface "/statistics/rx_bytes")))
+    (def tx (read (string "/sys/class/net/" iface "/statistics/tx_bytes")))
+    (when (and rx tx) [(scan-number rx) (scan-number tx)])))
+
+(defn human [bytes]
+  (var n bytes)
+  (var unit 0)
+  (while (and (>= n 1024) (< unit 4))
+    (set n (/ n 1024))
+    (++ unit))
+  (string (if (zero? unit) n (string/format "%.1f" n)) (["B" "K" "M" "G" "T"] unit)))
+
+(defn meminfo []
+  (def info @{})
+  (each line (string/split "\n" (slurp "/proc/meminfo"))
+    (def [k v] (string/split ":" line))
+    (when v (put info k (* 1024 (scan-number (first (string/split " " (string/trim v))))))))
+  info)
+
+(defn batteries []
+  (def dir "/sys/class/power_supply")
+  (seq [name :in (sort (or (try (os/dir dir) ([_] nil)) []))
+        :when (string/has-prefix? "BAT" name)
+        :let [cap (read (string dir "/" name "/capacity"))
+              status (read (string dir "/" name "/status"))]
+        :when cap]
+    (string cap "% " (string/ascii-lower (or status "")))))
+
+(defn ping []
+  (def out (output "ping" "-c1" "-W1" "1.1.1.1"))
+  (when out
+    (when-let [at (string/find "time=" out)]
+      (first (string/split " " (slice out (+ at 5)))))))
+
+(defn main [&]
+  (def iface (default-iface))
+  (def cpu0 (cpu-times))
+  (def net0 (net-bytes iface))
+  (os/sleep 0.5)
+  (def cpu1 (cpu-times))
+  (def net1 (net-bytes iface))
+  (def busy (let [total (- (cpu1 0) (cpu0 0)) idle (- (cpu1 1) (cpu0 1))]
+              (if (pos? total) (math/round (* 100 (/ (- total idle) total))) 0)))
+  (def mem (meminfo))
+  (def lines @[(os/strftime "%a %d %b %H:%M" nil true)
+               (string/format "cpu      %d%%, load %s" busy
+                              (first (string/split " " (read "/proc/loadavg"))))
+               (string "memory   " (human (- (mem "MemTotal") (mem "MemAvailable")))
+                       " of " (human (mem "MemTotal")))])
+  (when (pos? (mem "SwapTotal"))
+    (array/push lines (string "swap     " (human (- (mem "SwapTotal") (mem "SwapFree")))
+                              " of " (human (mem "SwapTotal")))))
+  (each bat (batteries) (array/push lines (string "battery  " bat)))
+  (when-let [vol (output "pamixer" "--get-volume-human")]
+    (array/push lines (string "volume   " vol)))
+  (when iface
+    (def addr (output "ip" "-4" "-o" "addr" "show" "dev" iface))
+    # 2: wlan0    inet 192.168.1.5/24 brd ...
+    (def ip (when addr (first (string/split "/" (get (words addr " ") 3 "")))))
+    (array/push lines (string "network  " iface " " (or ip "")))
+    (when (and net0 net1)
+      (array/push lines (string "         down " (human (* 2 (- (net1 0) (net0 0))))
+                                "/s, up " (human (* 2 (- (net1 1) (net0 1)))) "/s"))))
+  (array/push lines (string "ping     " (or (when-let [ms (ping)] (string ms " ms")) "no network")))
+  (def body (string/join lines "\n"))
+  (print body)
+  (output "notify-send" "-a" "info" "-t" "8000" "info" body))
