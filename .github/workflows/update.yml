@@ -29,6 +29,7 @@ jobs:
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
+            accept-flake-config = true
 
       # pulls from charon and pushes what this run builds to it
       - name: Setup Cachix

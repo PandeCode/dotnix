@@ -1,5 +1,7 @@
 flake := justfile_directory()
 
+nix_args := "--keep-going --accept-flake-config"
+
 [private]
 default:
     @just --list --unsorted
@@ -11,37 +13,37 @@ guard:
 
 # build this machine and switch to it
 switch *args: guard
-    nh os switch {{ flake }} {{ args }}
+    nh os switch {{ flake }} {{ args }} -- {{ nix_args }}
 
 # the same, with the builds on dotnix.services.builder.use
 switch-remote *args: guard
-    nh os switch {{ flake }} {{ args }} -- --builders @/etc/nix/machines
+    nh os switch {{ flake }} {{ args }} -- {{ nix_args }} --builders @/etc/nix/machines
 
 # build this machine and switch to it on next boot
 boot *args: guard
-    nh os boot {{ flake }} {{ args }}
+    nh os boot {{ flake }} {{ args }} -- {{ nix_args }}
 
 # build this machine and show what would change
 build *args:
-    nh os build {{ flake }} {{ args }}
+    nh os build {{ flake }} {{ args }} -- {{ nix_args }}
 
 # build the live system, into result/iso/
 iso *args:
-    nix build {{ flake }}#nixosConfigurations.iso.config.system.build.isoImage {{ args }}
+    nix {{ nix_args }} build {{ flake }}#nixosConfigurations.iso.config.system.build.isoImage {{ args }}
 
 # evaluate every host and run the checks
 check *args:
-    nix flake check {{ args }}
+    nix flake check {{ nix_args }} {{ args }}
 
 fmt:
-    nix fmt
+    nix {{ nix_args }} fmt
 
 # update all inputs, or only the ones named
 update *inputs:
-    nix --accept-flake-config flake update {{ inputs }}
+    nix flake update {{ inputs }} {{ nix_args }}
 
 # the search of every dotnix option and nixbuilds package, at
 # http://localhost:8080
 search:
-    nix build {{ flake }}#search
+    nix {{ nix_args }} build {{ flake }}#search
     nix run nixpkgs#http-server -- result
