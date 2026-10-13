@@ -36,6 +36,7 @@ let
     photos = "immich-app/immich";
     read = "codeberg:readeck/readeck";
     syncthing = "syncthing/syncthing";
+    term = "tsl0922/ttyd";
   };
 in
 

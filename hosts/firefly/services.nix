@@ -36,6 +36,7 @@ in
       photos.enable = true;
       read.enable = true;
       search.enable = true;
+      term.enable = true;
 
       # always on, so the vault syncs even when kazuha and the phone are never
       # online together. it lives in the shared folder, so files.<domain> shows it

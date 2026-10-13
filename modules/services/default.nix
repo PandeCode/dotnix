@@ -30,6 +30,7 @@
     ./read.nix
     ./search.nix
     ./syncthing.nix
+    ./term.nix
     ./theme.nix
     # keep-sorted end
   ];
