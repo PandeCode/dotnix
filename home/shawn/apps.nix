@@ -136,7 +136,6 @@ lib.modules.mkIf osConfig.dotnix.profiles.apps.enable {
     ncdu
     neovide
     nix-search-cli
-    notify-send-py
     obsidian
     onlyoffice-desktopeditors
     pandoc
