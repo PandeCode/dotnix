@@ -30,14 +30,20 @@ in
       enable = true;
       inherit user port;
       interface = "lo";
+      # the same login caddy asks for, so the browser sends it on, and
+      # nothing else on this machine gets in without it
+      username = user;
+      inherit (config.dotnix.home) passwordFile;
       writeable = true;
       checkOrigin = true;
       # through a login shell, for the same path an ssh login gets. the
-      # service's own path is too bare for fish to load the nixos one
+      # service's own path is too bare for fish to load the nixos one. its
+      # own tmux server, so restarting ttyd leaves your other tmux alone;
+      # `tmux -L term attach` joins it over ssh
       entrypoint = [
         (lib.meta.getExe pkgs.bashInteractive)
         "-lc"
-        "exec ${lib.meta.getExe pkgs.tmux} new-session -A -s term"
+        "exec ${lib.meta.getExe pkgs.tmux} -L term new-session -A -s term"
       ];
       clientOptions = lib.attrsets.optionalAttrs (theme != null) {
         fontFamily = "${theme.font}, monospace";

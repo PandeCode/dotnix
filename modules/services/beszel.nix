@@ -1,5 +1,5 @@
 # stats.<domain>: the beszel hub. every machine runs an agent once
-# keys/beszel.pub, the hub's public key, is in the repo; the hub connects to
+# keys/beszel/hub.pub, the hub's public key, is in the repo; the hub connects to
 # the agents over tailscale
 {
   config,
@@ -15,7 +15,7 @@ let
 
   cfg = config.dotnix.services.beszel;
 
-  key = "${self}/keys/beszel.pub";
+  key = "${self}/keys/beszel/hub.pub";
   agentPort = 45876;
 in
 
@@ -26,7 +26,7 @@ in
     key = mkOption {
       type = types.nullOr types.str;
       default = if builtins.pathExists key then lib.strings.trim (builtins.readFile key) else null;
-      defaultText = lib.literalExpression ''the contents of "''${self}/keys/beszel.pub" when it exists'';
+      defaultText = lib.literalExpression ''the contents of "''${self}/keys/beszel/hub.pub" when it exists'';
       description = "The hub's public key. With it set, this machine runs an agent.";
     };
   };

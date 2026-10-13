@@ -161,8 +161,14 @@ in
 
       services.caddy = {
         enable = true;
-        # the store is read-only; machines trust the CA through dotnix.home.ca
-        globalConfig = "skip_install_trust";
+        # the store is read-only; machines trust the CA through dotnix.home.ca.
+        # no admin api, since anything on this machine could load a config
+        # through it and read the CA's key, so a new config restarts caddy
+        globalConfig = ''
+          skip_install_trust
+          admin off
+        '';
+        enableReload = false;
         virtualHosts = lib.attrsets.mapAttrs' (
           name: site:
           lib.attrsets.nameValuePair "${name}.${cfg.domain}" {

@@ -31,13 +31,10 @@ in
                   "${pkgs.systemd}/bin/systemctl hibernate"
                   "${pkgs.systemd}/bin/reboot"
                   "${pkgs.systemd}/bin/poweroff"
-                  (lib.meta.getExe pkgs.systemctl-tui)
                 ];
           }
         ];
-        # timestamp_timeout=-1: asks once per terminal, never again
         extraConfig = ''
-          Defaults timestamp_timeout=-1
           Defaults insults
           Defaults passwd_tries=5
         '';

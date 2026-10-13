@@ -112,7 +112,11 @@ in
           theme = lib.modules.mkIf (config.dotnix.home.theme != null) "black";
         };
       };
-      dotnix.home.sites.sync.port = guiPort;
+      dotnix.home.sites.sync = {
+        port = guiPort;
+        # the gui has no login of its own
+        protect = true;
+      };
     })
   ]);
 }

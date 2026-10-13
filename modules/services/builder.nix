@@ -56,7 +56,11 @@ in
           group = user;
           # nix-daemon --stdio runs in it
           useDefaultShell = true;
-          openssh.authorizedKeys.keyFiles = others;
+          # only the nix daemon, no shell or forwarding
+          openssh.authorizedKeys.keys = map (
+            key:
+            ''restrict,command="${config.nix.package}/bin/nix-daemon --stdio" ${lib.strings.fileContents key}''
+          ) others;
         };
         groups.${user} = { };
       };

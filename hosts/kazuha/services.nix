@@ -26,7 +26,6 @@ in
 
     weylus = {
       enable = true;
-      openFirewall = true;
       users = [ user ];
     };
   };
@@ -35,7 +34,6 @@ in
     xrdp = {
       enable = true;
       audio.enable = true;
-      openFirewall = true;
     };
 
     gvfs.enable = true;
@@ -55,8 +53,14 @@ in
     printing.enable = true;
   };
 
-  # vnc for wayvnc; kde connect and avahi open their own
-  networking.firewall.allowedTCPPorts = [ 5900 ];
+  # remote desktop only over tailscale: xrdp, weylus, wayvnc. kde connect
+  # and avahi open their own
+  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [
+    3389
+    1701
+    9001
+    5900
+  ];
 
   home-manager.users.${user}.programs.ledger.enable = true;
 }

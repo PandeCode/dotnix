@@ -155,8 +155,8 @@ let
 
       login=$(jq -n --arg p "$(cat "$CREDENTIALS_DIRECTORY/password")" '{username: "${user}", password: $p}')
       # the first user is the admin; later it is only a login
-      curl -sf -H 'Content-Type: application/json' -d "$login" "$api/Account/register" >/dev/null || true
-      if ! auth=$(curl -sf -H 'Content-Type: application/json' -d "$login" "$api/Account/login"); then
+      curl -sf -H 'Content-Type: application/json' -d @- "$api/Account/register" <<<"$login" >/dev/null || true
+      if ! auth=$(curl -sf -H 'Content-Type: application/json' -d @- "$api/Account/login" <<<"$login"); then
         echo "the password was changed in kavita, so it no longer matches the secret" >&2
         exit 0
       fi
