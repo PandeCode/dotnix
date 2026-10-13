@@ -34,7 +34,8 @@ in
   config = mkIf cfg.enable {
     powerManagement = {
       enable = true;
-      powertop.enable = true;
+      # it would undo what tlp sets
+      powertop.enable = cfg.power == "ppd";
     };
 
     hardware.acpilight.enable = true;

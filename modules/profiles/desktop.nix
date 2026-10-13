@@ -160,6 +160,11 @@ in
         loader.timeout = lib.modules.mkForce 4;
       };
 
+      # the portal's own path has none of your scripts
+      systemd.user.services.xdg-desktop-portal-wlr.path = [
+        "/etc/profiles/per-user/${config.dotnix.user}"
+      ];
+
       # screen sharing under river; the output is set per host
       xdg.portal.wlr.settings.screencast = {
         max_fps = 30;

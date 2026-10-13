@@ -2,7 +2,6 @@
 {
   pkgs,
   inputs,
-  lib,
   ...
 }:
 
@@ -46,12 +45,11 @@
 
   programs.coolercontrol.enable = true;
 
-  boot.supportedFilesystems = lib.modules.mkForce [
+  boot.supportedFilesystems = [
     "btrfs"
     "cifs"
     "f2fs"
     "ntfs"
-    "reiserfs"
     "vfat"
     "xfs"
   ];

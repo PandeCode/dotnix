@@ -25,7 +25,6 @@ choice=$(printf "%s\n" "${options[@]}" | rofi -dmenu -p "Choose an action" -them
 
 open_browser() {
 	xdg-open "$1" &>/dev/null &
-	wmctrl.sh ws 2
 }
 
 case "$choice" in
@@ -35,7 +34,7 @@ case "$choice" in
 "wifi") rofi-wifi-menu ;;
 "picom") neovide ~/.config/picom/picom.conf ;;
 "clipimg") clipimg.sh ;;
-"lock") lock.sh ;;
+"lock") lock ;;
 "color")
 	sleep 1
 	color=$(hyprpicker)

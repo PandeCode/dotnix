@@ -97,7 +97,7 @@ in
       }
     );
     default = { };
-    description = "Named modes, switched with `mode <name>` and `mode off`.";
+    description = "Named modes, switched with `mode <name>` and `mode off`. A mode can't add packages; install them in the main config.";
   };
 
   config = lib.modules.mkIf (cfg != { }) {

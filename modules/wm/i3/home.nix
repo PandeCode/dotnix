@@ -75,7 +75,11 @@ in
       config = {
         inherit (config.dotnix.wm) terminal;
 
-        keybindings = lib.attrsets.listToAttrs (map toKeybinding cfg.binds);
+        # these replace i3's defaults, so a way out stays
+        keybindings = {
+          "Mod4+Shift+e" = "exit";
+        }
+        // lib.attrsets.listToAttrs (map toKeybinding cfg.binds);
 
         startup = map (command: {
           inherit command;

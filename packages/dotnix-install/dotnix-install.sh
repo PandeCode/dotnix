@@ -39,6 +39,11 @@ if [[ $kind == "one of my machines" ]]; then
 else
 	host=$(gum input --header "Machine name" --placeholder "firefly")
 	user=$(gum input --header "User" --value "shawn")
+	# before anything touches the disk
+	if [[ ! -d $repo/home/$user ]]; then
+		echo "home/$user doesn't exist; add it first, or use an existing user" >&2
+		exit 1
+	fi
 	if [[ -e $repo/hosts/$host ]]; then
 		echo "hosts/$host already exists; install it as one of my machines" >&2
 		exit 1

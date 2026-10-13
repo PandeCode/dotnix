@@ -4,16 +4,21 @@ flake := justfile_directory()
 default:
     @just --list --unsorted
 
+# with the private flake here, it is the one that builds this machine
+[private]
+guard:
+    @if [ -d ~/dotnix-private ] && [ "{{ flake }}" != "$HOME/dotnix-private" ]; then echo "this machine is built from ~/dotnix-private; run it there, or just switch-local there to try this clone" >&2; exit 1; fi
+
 # build this machine and switch to it
-switch *args:
+switch *args: guard
     nh os switch {{ flake }} {{ args }}
 
 # the same, with the builds on dotnix.services.builder.use
-switch-remote *args:
+switch-remote *args: guard
     nh os switch {{ flake }} {{ args }} -- --builders @/etc/nix/machines
 
 # build this machine and switch to it on next boot
-boot *args:
+boot *args: guard
     nh os boot {{ flake }} {{ args }}
 
 # build this machine and show what would change

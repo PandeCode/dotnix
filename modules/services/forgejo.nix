@@ -194,7 +194,11 @@ in
         };
       };
     };
-    virtualisation.docker.enable = lib.modules.mkIf cfg.runner true;
+    virtualisation.docker = lib.modules.mkIf cfg.runner {
+      enable = true;
+      # job images pile up otherwise
+      autoPrune.enable = true;
+    };
 
     # for `forgejo admin`
     environment.systemPackages = [ config.services.forgejo.package ];

@@ -31,7 +31,6 @@ in
         extraPackages = [ pkgs.mesa.opencl ];
       };
       environment.sessionVariables = {
-        VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json";
         # rusticl keeps its drivers off until named here
         RUSTICL_ENABLE = "radeonsi";
       };
