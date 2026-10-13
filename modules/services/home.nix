@@ -17,6 +17,11 @@ let
   ca = "${self}/keys/home-ca.crt";
 
   protect = lib.lists.any (site: site.protect) (lib.attrsets.attrValues cfg.sites);
+
+  # site names by the port they proxy to
+  byPort = lib.lists.groupBy' (names: name: names ++ [ name ]) [ ] (
+    name: toString cfg.sites.${name}.port
+  ) (lib.lists.filter (name: cfg.sites.${name}.port != null) (lib.attrsets.attrNames cfg.sites));
 in
 
 {
@@ -121,7 +126,11 @@ in
             assertion = protect -> cfg.passwordFile != null;
             message = "dotnix.home.passwordFile is needed for protected sites.";
           }
-        ];
+        ]
+        ++ lib.attrsets.mapAttrsToList (port: names: {
+          assertion = lib.lists.length names == 1;
+          message = "dotnix.home.sites ${lib.strings.concatStringsSep " and " names} share port ${port}.";
+        }) byPort;
 
       services.blocky = {
         enable = true;

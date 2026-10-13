@@ -30,7 +30,7 @@ let
           "$colorsPath" $out
       '';
 
-  port = 8090;
+  port = 8092;
   secrets = "/var/lib/office-secrets";
 in
 
