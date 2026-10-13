@@ -25,7 +25,8 @@ in
   options.dotnix.services.term.enable =
     lib.options.mkEnableOption "ttyd, a shell in the browser at term.<domain>";
 
-  config = lib.modules.mkIf cfg.enable {
+  # a shell as you, so without a password it doesn't run at all
+  config = lib.modules.mkIf (cfg.enable && config.dotnix.home.passwordFile != null) {
     services.ttyd = {
       enable = true;
       inherit user port;
