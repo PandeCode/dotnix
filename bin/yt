@@ -24,7 +24,7 @@
 # the share on firefly, else where the other machines mount it
 (defn folder [name]
   (or (find os/stat [(string "/srv/files/" name) (string "/mnt/firefly/" name)])
-      "."))
+      (do (eprint "yt: the shared folder is not here, saving into .") ".")))
 
 (defn gum [& args]
   (def proc (os/spawn ["gum" ;args] :p {:out :pipe}))

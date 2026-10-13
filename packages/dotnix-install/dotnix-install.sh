@@ -1,6 +1,6 @@
 # the target must already be partitioned and mounted at /mnt
 if [[ $EUID -ne 0 ]]; then
-	exec sudo "$0" "$@"
+	exec sudo --preserve-env=DOTNIX,EDITOR "$0" "$@"
 fi
 
 source=${DOTNIX:-/etc/dotnix}
@@ -74,6 +74,7 @@ home=/mnt/home/$user
 mkdir -p "$home"
 rm -rf "$home/dotnix"
 cp -r "$repo" "$home/dotnix"
-chown -R 1000:100 "$home"
+# by name inside the new system, the live system does not know the user
+nixos-enter --root /mnt -c "chown -R $user:users /home/$user"
 
 echo "Installed $host. The config is in ~/dotnix; commit hosts/$host when you're back."

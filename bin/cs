@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
-
-input=$(cat)
-
-if [[ $XDG_SESSION_TYPE == "x11" ]]; then
-	echo "$input" | xclip -sel clip
-elif [[ $XDG_SESSION_TYPE == "wayland" ]]; then
-	echo "$input" | wl-copy
+# cs: copies stdin. without a display (tmux, ssh) it goes through the
+# terminal's clipboard, osc 52
+if [[ -n $WAYLAND_DISPLAY ]]; then
+	exec wl-copy
+elif [[ -n $DISPLAY ]]; then
+	exec xclip -selection clipboard
+elif [[ -n $TMUX ]]; then
+	exec tmux load-buffer -w -
+else
+	printf '\e]52;c;%s\a' "$(base64 -w0)" >/dev/tty
 fi

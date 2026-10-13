@@ -60,13 +60,19 @@ move_window_basic() {
 	fi
 }
 
-# Focus with fallback to workspace navigation
+focused_id() {
+	i3-msg -t get_tree | jq '.. | objects | select(.focused == true) | .id'
+}
+
+# Focus with fallback to workspace navigation. i3 reports success even at
+# the edge, so check whether the focus actually moved
 focus_or_switch_ws() {
 	local dir=$1
+	local before
+	before=$(focused_id)
 
-	# Try to focus in the given direction
-	if i3-msg focus "$dir" 2>/dev/null | jq -r '.success' | grep -q false; then
-		# If focus failed, switch workspace
+	i3-msg -q focus "$dir"
+	if [[ $(focused_id) == "$before" ]]; then
 		case "$dir" in
 		left) smart_workspace_nav -1 ;;
 		right) smart_workspace_nav 1 ;;

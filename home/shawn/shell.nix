@@ -8,12 +8,15 @@
 let
   inherit (osConfig.dotnix) flakePath;
 
-  abbreviations = {
-    lsblk = "lsblk | bat -l conf -p";
-    ps = "ps | bat -l conf -p";
-    lscpu = "lscpu | bat -l cpuinfo -p";
-    sensors = "sensors | bat -l cpuinfo -p";
+  # these print through bat, as functions so typed arguments reach them
+  paged = {
+    lsblk = "conf";
+    ps = "conf";
+    lscpu = "cpuinfo";
+    sensors = "cpuinfo";
+  };
 
+  abbreviations = {
     dirflake = "echo 'use flake' > .envrc; direnv allow";
     dirnix = "echo 'use nix' > .envrc; direnv allow";
     neo = "neovide $(fzf) 2>&1  > /dev/null & disown";
@@ -35,7 +38,7 @@ let
     dmkir = "mkdir";
     cp = "cp -ir";
     free = "free -m";
-    sizeof = "bash -c 'du -h --max-depth=0'";
+    sizeof = "du -sh";
     tree = "tre";
 
     clonec = "git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch --filter=blob:none -j$(nproc) $(cso)";
@@ -78,7 +81,10 @@ in
       # generating them from man pages is slow
       generateCompletions = false;
 
-      functions.cmd = "mkdir $argv; and cd $argv";
+      functions = {
+        cmd = "mkdir $argv; and cd $argv";
+      }
+      // lib.attrsets.mapAttrs (name: lang: "command ${name} $argv | bat -l ${lang} -p") paged;
 
       interactiveShellInit = ''
         set fish_greeting
@@ -99,6 +105,11 @@ in
     bash = {
       enable = true;
       shellAliases = abbreviations // aliases;
+      initExtra = lib.strings.concatLines (
+        lib.attrsets.mapAttrsToList (
+          name: lang: ''${name}() { command ${name} "$@" | bat -l ${lang} -p; }''
+        ) paged
+      );
     };
 
     nushell.enable = true;

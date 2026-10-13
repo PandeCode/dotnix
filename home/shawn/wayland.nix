@@ -28,17 +28,13 @@ lib.modules.mkIf osConfig.dotnix.wayland.enable {
 
   home.packages = with pkgs; [
     awww
-    brightnessctl
     cliphist
     gowall
     grim
     hyprpicker
-    pamixer
-    playerctl
     slurp
     sunsetr
     swaybg
-    translate-shell
     wayvnc
     wdisplays
     wev

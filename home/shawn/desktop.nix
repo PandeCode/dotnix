@@ -47,7 +47,14 @@ in
 lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
   programs.alacritty.enable = true;
 
+  # the media keys and _tool_clip use these in every session
   home.packages = [
+    pkgs.brightnessctl
+    pkgs.pamixer
+    pkgs.playerctl
+    pkgs.qrencode
+    pkgs.translate-shell
+    pkgs.zbar
     rofi
     rofi-wifi-menu
   ]

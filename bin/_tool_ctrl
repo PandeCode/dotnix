@@ -1,25 +1,21 @@
 #!/usr/bin/env bash
 
-NOTIFICATION_ID_FILE="/tmp/tool_ctrl_notification_id"
+NOTIFICATION_ID_FILE="${XDG_RUNTIME_DIR:-/tmp}/tool_ctrl_notification_id"
 APP_NAME="Tool Ctrl"
 NOTIFICATION_URGENCY="low"
 
+# replaces its last notification instead of stacking new ones
 send_notification() {
 	local title="$1"
 	local message="$2"
 	local value="$3"
-	local hint=""
+	local opts=(-p -u "$NOTIFICATION_URGENCY" -a "$APP_NAME")
+	local replace_id
 
-	if [[ -n $value ]]; then
-		hint="--hint int:value:$value"
-	fi
-
-	if [[ -f $NOTIFICATION_ID_FILE ]]; then
-		local replace_id=$(cat "$NOTIFICATION_ID_FILE")
-		notify-send.py -u "$NOTIFICATION_URGENCY" -a "$APP_NAME" "$title" "$message" $hint -r "$replace_id"
-	else
-		notify-send.py -u "$NOTIFICATION_URGENCY" -a "$APP_NAME" "$title" "$message" $hint >"$NOTIFICATION_ID_FILE"
-	fi
+	[[ -n $value ]] && opts+=(-h "int:value:$value")
+	replace_id=$(cat "$NOTIFICATION_ID_FILE" 2>/dev/null)
+	[[ -n $replace_id ]] && opts+=(-r "$replace_id")
+	notify-send "${opts[@]}" "$title" "$message" >"$NOTIFICATION_ID_FILE"
 }
 
 handle_keyboard_backlight() {
@@ -35,7 +31,7 @@ handle_keyboard_backlight() {
 		;;
 	esac
 
-	brightnessctl -d *::kbd_backlight set "$change"
+	brightnessctl -d "*::kbd_backlight" set "$change"
 	send_notification "Keyboard" "$action"
 }
 
@@ -55,7 +51,7 @@ handle_volume() {
 		;;
 	mute)
 		pactl set-sink-mute @DEFAULT_SINK@ toggle
-		local status=$(pamixer --get-mute && echo "Muted" || echo "Unmuted")
+		local status=$(pamixer --get-mute >/dev/null && echo "Muted" || echo "Unmuted")
 		local volume=$(pamixer --get-volume)
 		send_notification "Volume" "$status" "$volume"
 		;;
@@ -73,7 +69,7 @@ handle_microphone() {
 	case "$action" in
 	mute)
 		pactl set-source-mute @DEFAULT_SOURCE@ toggle
-		local status=$(pamixer --get-mute --source 0 && echo "Muted" || echo "Unmuted")
+		local status=$(pamixer --default-source --get-mute >/dev/null && echo "Muted" || echo "Unmuted")
 		send_notification "Microphone" "$status"
 		;;
 	*)
@@ -83,19 +79,24 @@ handle_microphone() {
 	esac
 }
 
+# percent of the screen backlight
+brightness() {
+	brightnessctl -m -c backlight | cut -d, -f4 | tr -d %
+}
+
 # Function to handle screen brightness
 handle_brightness() {
 	local action="$1"
 
 	case "$action" in
 	up)
-		light -A 5
-		local brightness=$(light | cut -d. -f1)
+		brightnessctl -q -c backlight set 5%+
+		local brightness=$(brightness)
 		send_notification "Brightness" "Up ($brightness%)" "$brightness"
 		;;
 	down)
-		light -U 5
-		local brightness=$(light | cut -d. -f1)
+		brightnessctl -q -c backlight set 5%-
+		local brightness=$(brightness)
 		send_notification "Brightness" "Down ($brightness%)" "$brightness"
 		;;
 	*)

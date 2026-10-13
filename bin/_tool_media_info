@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-mediaIdFile=/tmp/mediaId
+mediaIdFile="${XDG_RUNTIME_DIR:-/tmp}/mediaId"
 pictureCacheDir="$HOME/.cache/spotifyPictureCache"
 
 mkdir -p "$pictureCacheDir"
@@ -60,13 +60,10 @@ getMedia() {
 }
 
 sendNotify() {
+	set -- -p -t 2000 -i "$3" -h "int:value:$(getPercent)" "$1" "$2"
 	replace=$(cat "$mediaIdFile" 2>/dev/null)
-	percent=$(getPercent)
-	if [ -z "$replace" ]; then
-		notify-send.py -t 2000 "$1" "$2" -i "$3" --hint int:value:$percent >"$mediaIdFile"
-	else
-		notify-send.py -t 2000 "$1" "$2" -i "$3" -r "$replace" --hint int:value:$percent >"$mediaIdFile"
-	fi
+	[ -n "$replace" ] && set -- -r "$replace" "$@"
+	notify-send "$@" >"$mediaIdFile"
 }
 
 if isSpotify; then

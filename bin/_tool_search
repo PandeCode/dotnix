@@ -37,7 +37,11 @@ case "$choice" in
 "lock") lock ;;
 "color")
 	sleep 1
-	color=$(hyprpicker)
+	if [[ -n $WAYLAND_DISPLAY ]]; then
+		color=$(hyprpicker)
+	else
+		color=$(xcolor)
+	fi
 	echo "$color" | cs
 	notify-send Color "$color"
 	;;

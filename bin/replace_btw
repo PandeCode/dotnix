@@ -28,4 +28,6 @@ BEGIN {inside=0}
     }
 }' "$file" >"$temp_file"
 
-mv "$temp_file" "$file"
+# copied back, not moved, so the file keeps its mode
+cat "$temp_file" >"$file"
+rm "$temp_file"

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# gif-to-atlas.sh — Convert an animated GIF into a horizontal texture atlas
+# gif-to-atlas.sh: convert an animated GIF into a horizontal texture atlas
 
 set -euo pipefail
 
@@ -11,16 +11,7 @@ fi
 INPUT_GIF="$1"
 OUTPUT_ATLAS="$2"
 
-# Create a temporary directory
-TMPDIR=$(mktemp -d)
-
-# Extract all frames
-convert "$INPUT_GIF" "$TMPDIR/frame.png"
-
-# Concatenate frames horizontally into a texture atlas
-montage "$TMPDIR"/frame*.png -tile x1 -geometry +0+0 "$OUTPUT_ATLAS"
-
-# Clean up
-rm -r "$TMPDIR"
+# coalesce turns optimized frames back into full ones
+magick "$INPUT_GIF" -coalesce +append "$OUTPUT_ATLAS"
 
 echo "Texture atlas saved to: $OUTPUT_ATLAS"
