@@ -50,8 +50,8 @@ in
           enable = true;
           package = pkgs.kdePackages.sddm;
           wayland.enable = true;
-          theme = "sddm-custom-theme";
-          extraPackages = [ pkgs.sddm-custom-theme ];
+          theme = "foundry";
+          extraPackages = [ pkgs.sddm-foundry-theme ];
         };
       };
 
@@ -77,7 +77,7 @@ in
           networkmanagerapplet
           pavucontrol
           pulseaudio
-          sddm-custom-theme
+          sddm-foundry-theme
         ];
       };
 

@@ -436,14 +436,15 @@
         "nix-alien": "nix-alien",
         "nixpkgs": "nixpkgs",
         "nixutils": "nixutils",
+        "sddm-foundry-theme": "sddm-foundry-theme",
         "zig-overlay": "zig-overlay"
       },
       "locked": {
-        "lastModified": 1791856765,
-        "narHash": "sha256-h6AV8cyCW6ZyX9mWPkQWHHT3bLFLOsUSGXsMnQmGJAQ=",
+        "lastModified": 1791861435,
+        "narHash": "sha256-EuvwHQ90g93353mKkeWtnOOUJgJ1k8A1BXJEkvS2NM8=",
         "owner": "PandeCode",
         "repo": "nixbuilds",
-        "rev": "dd80e8069511c6a74e3b11ca7baa1692c9fe3dc2",
+        "rev": "cc2e32d265ec11378c159f6aaa4de6c34c997869",
         "type": "github"
       },
       "original": {
@@ -584,6 +585,31 @@
         "sops-nix": "sops-nix",
         "spicetify-nix": "spicetify-nix",
         "stylix": "stylix"
+      }
+    },
+    "sddm-foundry-theme": {
+      "inputs": {
+        "nixpkgs": [
+          "nixbuilds",
+          "nixpkgs"
+        ],
+        "nixutils": [
+          "nixbuilds",
+          "nixutils"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791861328,
+        "narHash": "sha256-Y1E71gON9K9ajWswZFgfAD1VJygQMtFNK1wal7J6/xw=",
+        "owner": "PandeCode",
+        "repo": "sddm-foundry-theme",
+        "rev": "a19a701d2b2cf9089b42531cbc5a29aa6583da99",
+        "type": "github"
+      },
+      "original": {
+        "owner": "PandeCode",
+        "repo": "sddm-foundry-theme",
+        "type": "github"
       }
     },
     "search": {
