@@ -31,6 +31,7 @@ in
       };
       nix.enable = true;
       ntfy.enable = true;
+      office.enable = true;
       pdf.enable = true;
       photos.enable = true;
       read.enable = true;

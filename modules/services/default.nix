@@ -24,6 +24,7 @@
     ./nix.nix
     ./notify.nix
     ./ntfy.nix
+    ./office.nix
     ./pdf.nix
     ./photos.nix
     ./read.nix

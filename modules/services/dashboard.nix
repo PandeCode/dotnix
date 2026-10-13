@@ -31,6 +31,7 @@ let
     navidrome = "navidrome/navidrome";
     news = "miniflux/v2";
     ntfy = "binwiederhier/ntfy";
+    office = "ONLYOFFICE/DocumentServer";
     pdf = "alam00000/bentopdf";
     photos = "immich-app/immich";
     read = "codeberg:readeck/readeck";

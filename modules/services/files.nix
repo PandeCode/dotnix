@@ -14,72 +14,85 @@ let
   inherit (config.dotnix) user;
 
   cfg = config.dotnix.services.files;
+  office = config.dotnix.services.office;
 
   port = 8083;
   state = "/var/lib/filebrowser-quantum";
-  inherit (config.dotnix.home) theme;
+  inherit (config.dotnix.home) theme domain;
 
-  settings = (pkgs.formats.yaml { }).generate "filebrowser.yaml" {
-    server = {
-      inherit port;
-      listen = "127.0.0.1";
-      database = "${state}/database.db";
-      cacheDir = "/var/cache/filebrowser-quantum";
-      externalUrl = "https://files.${config.dotnix.home.domain}";
-      disableUpdateCheck = true;
-      sources = [
-        {
-          path = cfg.folder;
-          name = "files";
-          config.defaultEnabled = true;
-        }
-      ];
-      # group-readable, so services in the users group (navidrome) can read
-      # what is uploaded
-      filesystem = {
-        createFilePermission = "640";
-        createDirectoryPermission = "750";
+  settings = (pkgs.formats.yaml { }).generate "filebrowser.yaml" (
+    {
+      server = {
+        inherit port;
+        listen = "127.0.0.1";
+        database = "${state}/database.db";
+        cacheDir = "/var/cache/filebrowser-quantum";
+        externalUrl = "https://files.${domain}";
+        disableUpdateCheck = true;
+        sources = [
+          {
+            path = cfg.folder;
+            name = "files";
+            config.defaultEnabled = true;
+          }
+        ];
+        # group-readable, so services in the users group (navidrome) can read
+        # what is uploaded
+        filesystem = {
+          createFilePermission = "640";
+          createDirectoryPermission = "750";
+        };
+      }
+      // lib.attrsets.optionalAttrs office.enable {
+        # where onlyoffice fetches and saves the documents you open
+        internalUrl = "http://127.0.0.1:${toString port}";
       };
-    };
-    auth.adminUsername = user;
-    frontend = {
-      name = "files";
-      styling = lib.attrsets.optionalAttrs (theme != null) {
-        darkBackground = theme.colors.base00;
-        customCSS = toString (
-          pkgs.writeText "files.css" ''
-            ${theme.import}
-            .dark-mode {
-              --alt-background: var(--overlay);
-              --surfacePrimary: var(--surface);
-              --surfaceSecondary: var(--overlay);
-              --divider: var(--border);
-              --textPrimary: var(--text);
-              --textSecondary: var(--muted);
-              --iconBackground: var(--surface);
-              --activeWhiteIcon: var(--bright);
-            }
-            :root {
-              --primaryColor: var(--accent);
-              --blue: var(--base0D);
-              --dark-blue: var(--accent-hover);
-              --red: var(--base08);
-              --dark-red: var(--base08);
-              --icon-red: var(--base08);
-              --icon-orange: var(--base09);
-              --icon-yellow: var(--base0A);
-              --icon-green: var(--base0B);
-              --icon-blue: var(--base0D);
-              --icon-violet: var(--base0E);
-            }
-            body, input, button, textarea, select {
-              font-family: var(--font);
-            }
-          ''
-        );
+      auth.adminUsername = user;
+      frontend = {
+        name = "files";
+        styling = lib.attrsets.optionalAttrs (theme != null) {
+          darkBackground = theme.colors.base00;
+          customCSS = toString (
+            pkgs.writeText "files.css" ''
+              ${theme.import}
+              .dark-mode {
+                --alt-background: var(--overlay);
+                --surfacePrimary: var(--surface);
+                --surfaceSecondary: var(--overlay);
+                --divider: var(--border);
+                --textPrimary: var(--text);
+                --textSecondary: var(--muted);
+                --iconBackground: var(--surface);
+                --activeWhiteIcon: var(--bright);
+              }
+              :root {
+                --primaryColor: var(--accent);
+                --blue: var(--base0D);
+                --dark-blue: var(--accent-hover);
+                --red: var(--base08);
+                --dark-red: var(--base08);
+                --icon-red: var(--base08);
+                --icon-orange: var(--base09);
+                --icon-yellow: var(--base0A);
+                --icon-green: var(--base0B);
+                --icon-blue: var(--base0D);
+                --icon-violet: var(--base0E);
+              }
+              body, input, button, textarea, select {
+                font-family: var(--font);
+              }
+            ''
+          );
+        };
       };
-    };
-  };
+    }
+    // lib.attrsets.optionalAttrs office.enable {
+      integrations.office = {
+        url = "https://office.${domain}";
+        internalUrl = "http://127.0.0.1:${toString config.dotnix.home.sites.office.port}";
+      };
+    }
+  );
 in
 
 {
@@ -124,6 +137,10 @@ in
       script = ''
         FILEBROWSER_ADMIN_PASSWORD=$(cat "$CREDENTIALS_DIRECTORY/password")
         export FILEBROWSER_ADMIN_PASSWORD
+        ${lib.strings.optionalString office.enable ''
+          FILEBROWSER_ONLYOFFICE_SECRET=$(cat "$CREDENTIALS_DIRECTORY/office")
+          export FILEBROWSER_ONLYOFFICE_SECRET
+        ''}
         exec ${lib.meta.getExe pkgs.filebrowser-quantum}
       '';
       serviceConfig = {
@@ -134,7 +151,10 @@ in
         StateDirectory = "filebrowser-quantum";
         CacheDirectory = "filebrowser-quantum";
         WorkingDirectory = state;
-        LoadCredential = "password:${cfg.passwordFile}";
+        LoadCredential = [
+          "password:${cfg.passwordFile}"
+        ]
+        ++ lib.lists.optional office.enable "office:${office.secretFile}";
         Restart = "on-failure";
         NoNewPrivileges = true;
         PrivateTmp = true;
