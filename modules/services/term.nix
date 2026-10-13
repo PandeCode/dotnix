@@ -32,12 +32,12 @@ in
       interface = "lo";
       writeable = true;
       checkOrigin = true;
+      # through a login shell, for the same path an ssh login gets. the
+      # service's own path is too bare for fish to load the nixos one
       entrypoint = [
-        (lib.meta.getExe pkgs.tmux)
-        "new-session"
-        "-A"
-        "-s"
-        "term"
+        (lib.meta.getExe pkgs.bashInteractive)
+        "-lc"
+        "exec ${lib.meta.getExe pkgs.tmux} new-session -A -s term"
       ];
       clientOptions = lib.attrsets.optionalAttrs (theme != null) {
         fontFamily = "${theme.font}, monospace";
