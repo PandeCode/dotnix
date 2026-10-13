@@ -10,6 +10,7 @@
     ./mounts.nix
     ./nix.nix
     ./secrets.nix
+    ./upgrade.nix
     ./users.nix
     # keep-sorted end
 

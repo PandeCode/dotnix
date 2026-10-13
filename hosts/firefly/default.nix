@@ -42,6 +42,8 @@
   dotnix.secrets.hostKey = true;
   # a failing drive shows up in ntfy before it takes the files with it
   dotnix.notify.disks = true;
+  # merged update prs switch in overnight
+  dotnix.upgrade.enable = true;
 
   programs.libys.enable = false;
 
