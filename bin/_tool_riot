@@ -1,47 +1,32 @@
-#!/bin/sh
+#!/usr/bin/env bash
+# _tool_riot: draw a rectangle and the focused window floats into it
 
-wm=$(echo "$XDG_CURRENT_DESKTOP $DESKTOP_SESSION $XDG_SESSION_DESKTOP" | tr '[:upper:]' '[:lower:]')
+set -euo pipefail
 
-if echo "$wm" | grep -q "hypr"; then
-	# Hyprland branch
-	data=$(slurp -f "%x %y %w %h")
+if [[ -n ${NIRI_SOCKET:-} ]]; then
+	read -r x y w h < <(slurp -f "%x %y %w %h")
+	# niri places floating windows relative to their output
+	read -r ox oy < <(niri msg -j focused-output | jq -r '"\(.logical.x) \(.logical.y)"')
+	if [[ $(niri msg -j focused-window | jq .is_floating) == false ]]; then
+		niri msg action toggle-window-floating
+	fi
+	niri msg action set-window-width "$w"
+	niri msg action set-window-height "$h"
+	niri msg action move-floating-window -x "$((x - ox))" -y "$((y - oy))"
 
-	X=$(echo "$data" | awk '{ print($1) }')
-	Y=$(echo "$data" | awk '{ print($2) }')
-	WIDTH=$(echo "$data" | awk '{ print($3) }')
-	HEIGHT=$(echo "$data" | awk '{ print($4) }')
-
-	hyprctl dispatch setfloating
-	hyprctl dispatch resizeactive exact "$WIDTH" "$HEIGHT"
-	hyprctl dispatch moveactive exact "$X" "$Y"
-
-elif echo "$wm" | grep -q "i3"; then
-	# i3 branch
-	data=$(slop -b 3 -c 0.96,0.5,0.09 -t 0 -f "%x %y %w %h")
-
-	X=$(echo "$data" | awk '{ print($1) }')
-	Y=$(echo "$data" | awk '{ print($2) }')
-	WIDTH=$(echo "$data" | awk '{ print($3) }')
-	HEIGHT=$(echo "$data" | awk '{ print($4) }')
-
-	i3-msg focus prev
-	i3-msg floating enable
-	i3-msg move window position "$X" "$Y"
-	i3-msg resize set "$WIDTH" "$HEIGHT"
-
-elif echo "$wm" | grep -q "sway"; then
-	data=$(slurp -f "%x %y %w %h")
-
-	X=$(echo "$data" | awk '{ print($1) }')
-	Y=$(echo "$data" | awk '{ print($2) }')
-	WIDTH=$(echo "$data" | awk '{ print($3) }')
-	HEIGHT=$(echo "$data" | awk '{ print($4) }')
-
+elif [[ -n ${SWAYSOCK:-} ]]; then
+	read -r x y w h < <(slurp -f "%x %y %w %h")
 	swaymsg floating enable
-	swaymsg move position "$X" "$Y"
-	swaymsg resize set "$WIDTH" "$HEIGHT"
+	swaymsg move position "$x" "$y"
+	swaymsg resize set "$w" "$h"
+
+elif [[ -n ${I3SOCK:-} ]] || pgrep -x i3 >/dev/null; then
+	read -r x y w h < <(slop -b 3 -c 0.96,0.5,0.09 -t 0 -f "%x %y %w %h")
+	i3-msg -q floating enable
+	i3-msg -q move window position "$x" "$y"
+	i3-msg -q resize set "$w" "$h"
 
 else
-	echo "Unsupported or unknown window manager."
+	notify-send "riot" "not supported in this session"
 	exit 1
 fi

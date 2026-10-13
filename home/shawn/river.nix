@@ -85,7 +85,12 @@ lib.modules.mkIf osConfig.dotnix.river.enable {
         (key superShift "j" (enum "move_window_to_workspace_below"))
 
         (key super "Escape" (enum "exit"))
-        (key super "r" (enum "reload_config"))
+        # super+r is riot, as in the other sessions
+        (key {
+          mod4 = true;
+          ctrl = true;
+          shift = true;
+        } "r" (enum "reload_config"))
       ];
   };
 }

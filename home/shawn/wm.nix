@@ -73,7 +73,7 @@ in
       (bind [ "Super" ] "Return" "${terminal} -e ${shell}")
       (bind [ "Super" ] "e" explorer)
       (bind [ "Super" "Shift" ] "g" "gif.sh")
-      (bind [ "Super" "Alt" "Ctrl" ] "f" "_tool_riot")
+      (bind [ "Super" ] "r" "_tool_riot")
       (bind [ "Super" ] "p" "_tool_search")
       (bind [ "Super" "Shift" ] "c" "rofi-calc.sh")
       (bind [ "Super" "Ctrl" ] "v" "clipimg.sh")
