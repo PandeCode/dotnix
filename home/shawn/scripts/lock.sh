@@ -6,7 +6,7 @@ if [[ -z ${WAYLAND_DISPLAY:-} ]]; then
 	exec i3lock --nofork --color=000000
 fi
 
-wallpaper=$(SILENT=1 bg.sh get-last 2>/dev/null || true)
+wallpaper=$(SILENT=1 wall get-last 2>/dev/null || true)
 config=$(mktemp)
 trap 'rm -f "$config"' EXIT
 

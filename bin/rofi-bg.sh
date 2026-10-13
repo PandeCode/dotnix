@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-
-BG_SCRIPT="bg.sh"
+# rofi-bg.sh: rofi menu over wall
 
 OPTIONS=(
 	"last"
@@ -13,9 +12,7 @@ OPTIONS=(
 
 USE_NIX=$(printf "no\nyes" | rofi -dmenu -i -p "Use GO_WALL=nix?")
 [[ -z $USE_NIX ]] && exit
-
-CMD_PREFIX=""
-[[ $USE_NIX == "yes" ]] && CMD_PREFIX="GO_WALL=nix"
+[[ $USE_NIX == "yes" ]] && export GO_WALL=nix
 
 while true; do
 	CHOSEN=$(printf "%s\n" "${OPTIONS[@]}" | rofi -dmenu -i -p "Wallpaper Action")
@@ -25,8 +22,8 @@ while true; do
 	if [[ $CHOSEN == "set" ]]; then
 		IMAGE_PATH=$(rofi -dmenu -p "Enter image path")
 		[[ -z $IMAGE_PATH ]] && continue
-		eval $CMD_PREFIX "$BG_SCRIPT" "$CHOSEN" "\"$IMAGE_PATH\""
+		wall set "${IMAGE_PATH/#\~/$HOME}"
 	else
-		eval $CMD_PREFIX "$BG_SCRIPT" "$CHOSEN"
+		wall "$CHOSEN"
 	fi
 done

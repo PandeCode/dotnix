@@ -1,0 +1,232 @@
+#!/usr/bin/env janet
+# wall COMMAND: sets the wallpaper and remembers it. `wall help` lists the
+# commands and the variables it reads
+
+# unset and empty read the same, as in the shell
+(defn env [name &opt default]
+  (def value (os/getenv name))
+  (if (or (nil? value) (empty? value)) default value))
+
+(def home (env "HOME"))
+(def cache (string (env "XDG_CACHE_HOME" (string home "/.cache")) "/wallpaper-manager"))
+(def state (string (env "XDG_STATE_HOME" (string home "/.local/state")) "/wallpaper-manager"))
+(def history (string state "/wallpaper-history.log"))
+(def id-file (string cache "/current-bg-id"))
+(def converted (string cache "/converted"))
+(def gowall-dir (string home "/Pictures/gowall"))
+(def walls (env "WALLPAPER_DIR" (string home "/Pictures/walls/walls-main/anime")))
+(def kinds {"jpg" true "jpeg" true "png" true "gif" true "mp4" true})
+
+(defn mkdirs [path]
+  (var at "")
+  (each part (string/split "/" path)
+    (set at (string at part "/"))
+    (os/mkdir at)))
+
+(defn basename [path] (last (string/split "/" path)))
+
+(defn ext [path]
+  (def parts (string/split "." (basename path)))
+  (if (one? (length parts)) "" (string/ascii-lower (last parts))))
+
+(defn stem [path]
+  (def name (basename path))
+  (def dot (last (string/find-all "." name)))
+  (if dot (slice name 0 dot) name))
+
+(defn words [s] (filter |(not (empty? $)) (string/split " " (or s ""))))
+
+(defn on-path? [prog]
+  (find |(os/stat (string $ "/" prog)) (string/split ":" (env "PATH" ""))))
+
+(defn run
+  "runs a program quietly, true when it succeeds"
+  [& args]
+  (with [null (file/open "/dev/null" :w)]
+    (zero? (os/execute args :p {:out null :err null}))))
+
+(defn output
+  "runs a program, its trimmed stdout when it succeeds"
+  [& args]
+  (def proc (os/spawn args :p {:out :pipe}))
+  (def out (:read (proc :out) :all))
+  (when (zero? (os/proc-wait proc))
+    (string/trim (or out ""))))
+
+(defn notify [title body & opts]
+  (if (env "SILENT")
+    (do (eprint title ": " body) nil)
+    (output "notify-send" ;opts title body)))
+
+# every image under the wallpaper folder, links not followed, as find did
+(defn images []
+  (def found @[])
+  (defn walk [dir]
+    (each name (or (try (os/dir dir) ([_] nil)) [])
+      (def path (string dir "/" name))
+      (case (os/lstat path :mode)
+        :directory (walk path)
+        :file (when (kinds (ext name)) (array/push found path)))))
+  (walk walls)
+  (when (empty? found) (error (string "no images in " walls)))
+  (sort found))
+
+(defn last-wall [&]
+  (def lines (filter |(not (empty? $)) (string/split "\n" (or (try (slurp history) ([_] nil)) ""))))
+  (or (last lines) (error "no wallpaper history")))
+
+# the image next to the last one in the folder, wrapping around
+(defn step [by]
+  (def all (images))
+  (def at (index-of (try (last-wall) ([_] nil)) all))
+  (get all (if at (mod (+ at by) (length all)) 0)))
+
+# animated walls are kept as gifs, which the daemons can play
+(defn playable [img]
+  (if (not= "mp4" (ext img))
+    img
+    (let [gif (string converted "/" (stem img) ".gif")]
+      (cond
+        (and (os/stat gif) (> (os/stat gif :modified) (os/stat img :modified))) gif
+        (run "ffmpeg" "-y" "-i" img "-vf" "fps=10,scale=480:-1:flags=lanczos" "-c:v" "gif" gif) gif
+        (error (string "could not convert " img))))))
+
+(defn effects []
+  @{:theme (env "GO_WALL")
+    :invert (env "GO_WALL_INVERT")
+    :pixelate (env "GO_WALL_PIXELATE")
+    :convert (words (env "CONVERT_EFFECT"))
+    :gowall (map words (filter |(not (empty? $)) (string/split "|" (env "GO_WALL_EFFECT" ""))))})
+
+# gowall writes its result into ~/Pictures/gowall under the same name
+(defn transform [img fx]
+  (var img img)
+  (def done @[])
+  (defn gowall [label & args]
+    (unless (run "gowall" ;args) (error (string "gowall " (first args) " failed on " img)))
+    (array/push done label)
+    (set img (string gowall-dir "/" (basename img))))
+  (when (on-path? "gowall")
+    (when (fx :theme) (gowall (fx :theme) "convert" img "-t" (fx :theme)))
+    (when (fx :invert) (gowall "inverted" "invert" img))
+    (when (fx :pixelate)
+      (gowall (string "pixelated(" (fx :pixelate) ")") "pixelate" img "-s" (fx :pixelate))))
+  (unless (empty? (fx :convert))
+    (def out (string gowall-dir "/convert_" (basename img)))
+    (mkdirs gowall-dir)
+    (unless (run "magick" img ;(fx :convert) out) (error (string "magick failed on " img)))
+    (array/push done (string "convert(" (string/join (fx :convert) " ") ")"))
+    (set img out))
+  (when (on-path? "gowall")
+    (each effect (fx :gowall)
+      (gowall (string "effect(" (string/join effect " ") ")") ;effect img)))
+  (unless (os/stat img) (error (string "image does not exist: " img)))
+  [img done])
+
+# the daemon starts along with the session, so give it a moment
+(defn awww-up? [ns]
+  (when (on-path? "awww")
+    (var up false)
+    (var tries 20)
+    (while (and (not up) (pos? tries))
+      (set up (run "awww" "query" ;ns))
+      (unless up (os/sleep 0.25) (-- tries)))
+    up))
+
+(defn show [img namespace]
+  (def ns (if namespace ["-n" namespace] []))
+  (cond
+    (env "WAYLAND_DISPLAY")
+    (cond
+      (awww-up? ns) (run "awww" "img" img ;ns "--transition-type" "wipe")
+      (run "pgrep" "-x" "swaybg")
+      (do
+        (run "pkill" "-x" "swaybg")
+        (os/execute ["setsid" "-f" "swaybg" "-i" img "-m" "fill"] :p))
+      (error "no wallpaper daemon running (awww or swaybg)"))
+    (env "DISPLAY") (run "feh" "--bg-fill" img)
+    (error "no graphical session")))
+
+(defn shown [wall img done]
+  (show img (env "NIRI_NAMESPACE"))
+  (spit history (string wall "\n") :ab)
+  # niri shows a blurred copy behind the overview
+  (when (env "NIRI_SOCKET")
+    (def fx (merge (effects) {:theme "nix" :convert ["-filter" "Gaussian" "-blur" "0x8"]}))
+    (show (first (transform (playable wall) fx)) "backdrop"))
+  (def id (string/trim (or (try (slurp id-file) ([_] nil)) "")))
+  (def label (if (empty? done) "" (string "[" (string/join done " ") "] ")))
+  (def new-id (notify "Wallpaper Changed" (string label (basename img))
+                      "-p" "--icon" img ;(if (empty? id) [] ["-r" id])))
+  (when new-id (spit id-file new-id))
+  (when (on-path? "rofi-make-config.sh")
+    (os/execute ["rofi-make-config.sh"] :p)))
+
+(defn apply-wall [wall get-only]
+  (def [img done] (transform (playable wall) (effects)))
+  (if get-only
+    (print img)
+    (shown wall img done)))
+
+(defn color [name]
+  (def png (string cache "/color-" name ".png"))
+  (unless (run "magick" "-size" "1x1" (string "xc:" name) png)
+    (error (string "not a color: " name)))
+  png)
+
+(def commands
+  {"last" last-wall
+   "reset" last-wall
+   "next" (fn [&] (step 1))
+   "prev" (fn [&] (step -1))
+   "random" (fn [&] (let [all (images)] (all (math/floor (* (math/random) (length all))))))
+   "set" os/realpath
+   "color" color})
+
+(defn help []
+  (print ```
+wall COMMAND
+
+  last, reset       the last wallpaper again
+  next, prev        the one after or before it in the folder
+  random            a random one from the folder
+  set IMAGE         this image
+  color COLOR       a plain color, anything magick knows (red, #1e1e2e)
+  get-COMMAND       print the image the command would set, without setting it
+
+  history: ~/.local/state/wallpaper-manager/wallpaper-history.log
+
+variables
+  WALLPAPER_DIR     the folder (~/Pictures/walls/walls-main/anime)
+  GO_WALL           a gowall theme to convert to
+  GO_WALL_INVERT    invert, any value
+  GO_WALL_PIXELATE  pixelate at this scale
+  GO_WALL_EFFECT    gowall commands, split by |
+  CONVERT_EFFECT    magick options, e.g. "-blur 0x8"
+  SILENT            print instead of notifying```))
+
+(defn main [_ &opt command arg]
+  (when (index-of command [nil "help" "-h" "--help"])
+    (help)
+    (os/exit (if command 0 1)))
+  (def get-only (string/has-prefix? "get-" command))
+  (def name (if get-only (slice command 4) command))
+  (def pick (commands name))
+  (unless pick
+    (eprint "wall: unknown command " command ", see wall help")
+    (os/exit 1))
+  (when (and (index-of name ["set" "color"]) (nil? arg))
+    (eprint "wall: " command " needs an argument")
+    (os/exit 1))
+  (math/seedrandom (os/cryptorand 8))
+  (mkdirs cache)
+  (mkdirs converted)
+  (mkdirs state)
+  (try
+    (apply-wall (if arg (pick arg) (pick)) get-only)
+    ([err]
+      (spit (string state "/debug.log")
+            (string (os/strftime "%Y-%m-%d %H:%M:%S" nil true) " [ERROR] " err "\n") :ab)
+      (eprint "wall: " err)
+      (notify "Wallpaper Error" (string err) "--urgency=critical")
+      (os/exit 1))))

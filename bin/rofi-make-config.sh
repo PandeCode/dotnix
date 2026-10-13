@@ -2,7 +2,7 @@
 
 # shellcheck disable=SC1091 # code is irrelevant because reasons
 
-image=$(bg.sh get-last)
+image=$(wall get-last)
 font=$(cat ~/.config/stylix/font)
 
 source "$HOME/.config/stylix/style.sh"

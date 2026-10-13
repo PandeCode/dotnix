@@ -212,7 +212,7 @@ in
         "xmodmap ~/.Xmodmap"
         "greenclip daemon"
         "dunst"
-        "bg.sh last"
+        "wall last"
         "picom -b"
       ];
 
@@ -226,7 +226,7 @@ in
         "wl-paste --type text --watch cliphist store"
         "wl-paste --type image --watch cliphist store"
         "awww-daemon"
-        "bg.sh last"
+        "wall last"
         "sunsetr"
       ];
 
