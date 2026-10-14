@@ -26,6 +26,7 @@
       type = "github";
       owner = "PandeCode";
       repo = "nixbuilds";
+      inputs.search.follows = "search";
     };
 
     # my lib and the shared formatter config
@@ -109,8 +110,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # the search page of dotnix options and nixbuilds packages. its own
-    # nixpkgs, which its pinned npm dependency hash is made for
+    # the search page of dotnix options, also used by nixbuilds for its
+    # packages. its own nixpkgs, which its pinned npm dependency hash is made for
     search = {
       type = "github";
       owner = "NuschtOS";

@@ -33,7 +33,6 @@ in
         enable = true;
         inherit feeds;
       };
-      nix.enable = true;
       ntfy.enable = true;
       office.enable = true;
       pdf.enable = true;

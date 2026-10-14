@@ -42,8 +42,8 @@ fmt:
 update *inputs:
     nix flake update {{ inputs }} {{ nix_args }}
 
-# the search of every dotnix option and nixbuilds package, at
-# http://localhost:8080
+# the search of every dotnix option, at http://localhost:8080; the published
+# one is at pandecode.github.io/dotnix
 search:
     nix {{ nix_args }} build {{ flake }}#search
     nix run nixpkgs#http-server -- result

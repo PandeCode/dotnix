@@ -58,8 +58,8 @@ in
       }
     )
     // {
-      # a search of every dotnix.* option and nixbuilds package; kazuha has
-      # every module imported
+      # a search of every dotnix.* option, for github pages; kazuha has every
+      # module imported
       search = pkgs.callPackage ../../docs/search {
         inherit inputs self;
         inherit (self.nixosConfigurations.kazuha) options;

@@ -1,11 +1,13 @@
-# a search of every dotnix.* option and every nixbuilds package, with
-# nuschtos search: the system side from one evaluated machine's options, the
-# home side from modules/home on its own
+# a search of every dotnix.* option, with nuschtos search: the system side
+# from one evaluated machine's options, the home side from modules/home on its
+# own. nixbuilds publishes its packages the same way. baseHref is where it is
+# served from: / locally, /dotnix/ on github pages
 {
   pkgs,
   inputs,
   options,
   self,
+  baseHref ? "/",
 }:
 
 let
@@ -40,7 +42,8 @@ in
 
 inputs.search.packages.${system}.mkMultiSearch {
   title = "dotnix";
-  # caddy's file_server has no fallback to index.html for other paths
+  inherit baseHref;
+  # github pages has no fallback to index.html for other paths
   hashLocation = true;
   scopes = [
     {
@@ -52,11 +55,6 @@ inputs.search.packages.${system}.mkMultiSearch {
       name = "home";
       optionsJSON = json { inherit (home) dotnix; };
       inherit urlPrefix;
-    }
-    {
-      name = "nixbuilds";
-      pkgs = inputs.nixbuilds.packages.${system};
-      urlPrefix = "https://github.com/PandeCode/nixbuilds/blob/main/";
     }
   ];
 }
