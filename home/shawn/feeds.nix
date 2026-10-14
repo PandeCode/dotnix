@@ -13,8 +13,6 @@ in
   (feed "https://lisyarus.github.io/blog/feed.xml" [ "graphics" ])
   (feed "https://raphlinus.github.io/feed.xml" [ "graphics" ])
   (feed "https://ciechanow.ski/atom.xml" [ "graphics" ])
-  (youtube "UCdmAhiG8HQDlz8uyekw4ENw" [ "graphics" ]) # inigo quilez
-  (youtube "UCmtyQOKKmrMVaKuRXz02jbQ" [ "graphics" ]) # sebastian lague
 
   (feed "https://haskellforall.com/rss.xml" [ "haskell" ])
   (feed "https://lexi-lambda.github.io/feeds/all.atom.xml" [ "haskell" ])
@@ -31,5 +29,10 @@ in
   (feed "https://kristoff.it/index.xml" [ "zig" ])
   (feed "https://mitchellh.com/feed.xml" [ "zig" ])
   (feed "https://www.dgtlgrove.com/feed" [ "zig" ]) # ryan fleury
+
+  (youtube "UCdmAhiG8HQDlz8uyekw4ENw" [ "graphics" ]) # inigo quilez
+  (youtube "UCmtyQOKKmrMVaKuRXz02jbQ" [ "graphics" ]) # sebastian lague
+  (youtube "UC2rO9hEjJkjqzktvtj0ggNQ" [ "graphics" ]) # programmingchaos8957
   (youtube "UCz-yrxeZYIYdpEZgHGvIydA" [ "zig" ]) # nic barker
+  (youtube "UC7M-Wz4zK8oikt6ATcoTwBA" [ "graphics" ]) # freya holmer
 ]
