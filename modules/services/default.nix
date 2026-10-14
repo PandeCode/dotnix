@@ -33,11 +33,6 @@
     ./term.nix
     ./theme.nix
     # keep-sorted end
-
-    # nix.<domain> moved to github pages
-    (lib.modules.mkRemovedOptionModule [ "dotnix" "services" "nix" "enable" ]
-      "The option and package search is on github pages now: pandecode.github.io/dotnix and pandecode.github.io/nixbuilds."
-    )
   ];
 
   # the ones that need a password skip themselves without it; say so
