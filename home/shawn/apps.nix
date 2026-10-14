@@ -80,7 +80,12 @@ lib.modules.mkIf osConfig.dotnix.profiles.apps.enable {
     lf.enable = true;
     ranger.enable = true;
     xplr.enable = true;
-    zathura.enable = true;
+    zathura = {
+      enable = true;
+      options = {
+        selection-clipboard = "clipboard";
+      };
+    };
   };
 
   services.kdeconnect.enable = true;
