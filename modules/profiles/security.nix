@@ -60,6 +60,13 @@ in
         gnupg.enable = true;
       };
 
+      # sddm reads the password before pam starts, so with fprintd ahead of
+      # unix a typed password still waited on the finger. unix goes first and
+      # an empty password falls through to the reader
+      pam.services.login.rules.auth.fprintd.order = lib.modules.mkIf config.services.fprintd.enable (
+        config.security.pam.services.login.rules.auth.unix.order + 10
+      );
+
       pam.loginLimits = [
         {
           domain = "@users";
