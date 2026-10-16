@@ -78,6 +78,7 @@ in
       (bind [ "Super" "Ctrl" ] "c" "_tool_clip")
       (bind [ "Super" ] "p" "_tool_search")
       (bind [ "Super" "Shift" ] "c" "rofi-calc.sh")
+      (bind [ "Super" "Shift" ] "b" "rofi-rbw")
       (bind [ "Super" "Ctrl" ] "v" "clipimg.sh")
       (bind [ "Super" ] "Print" "screenshot screen")
       (bind [ "Super" "Shift" ] "Print" "screenshot area")

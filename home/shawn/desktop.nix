@@ -31,6 +31,25 @@ let
     '';
   };
 
+  # the -x11 and -wayland builds pin one typer and clipboard tool, this one
+  # has both sets and lets rofi-rbw pick by session
+  rofi-rbw = pkgs.symlinkJoin {
+    name = "rofi-rbw";
+    paths = [ pkgs.rofi-rbw ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/rofi-rbw \
+        --prefix PATH : ${
+          lib.strings.makeBinPath [
+            pkgs.wl-clipboard
+            pkgs.wtype
+            pkgs.xclip
+            pkgs.xdotool
+          ]
+        }
+    '';
+  };
+
   # installed from the fetched file, not read into nix, so evaluation does
   # not have to download it
   rofi-wifi-menu = pkgs.runCommandLocal "rofi-wifi-menu" { } ''
@@ -56,6 +75,7 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
     pkgs.translate-shell
     pkgs.zbar
     rofi
+    rofi-rbw
     rofi-wifi-menu
   ]
   ++ lib.lists.optional osConfig.services.blueman.enable pkgs.rofi-bluetooth;
