@@ -1,4 +1,5 @@
-# every keys/*.pub may log in as dotnix.user, and nothing else can
+# every keys/*.pub may log in as dotnix.user, and nothing else can. keys in
+# keys/revoked never can, wherever they turn up
 {
   config,
   lib,
@@ -34,6 +35,7 @@ in
         KbdInteractiveAuthentication = false;
         PasswordAuthentication = false;
         PermitRootLogin = "no";
+        RevokedKeys = "${../../keys/revoked}";
       };
     };
 
