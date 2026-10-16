@@ -38,6 +38,8 @@ in
       pdf.enable = true;
       photos.enable = true;
       read.enable = true;
+      # the i3 session, to pick up where you left off from kazuha
+      screen.enable = true;
       search.enable = true;
       term.enable = true;
 

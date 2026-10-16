@@ -28,6 +28,7 @@
     ./pdf.nix
     ./photos.nix
     ./read.nix
+    ./screen.nix
     ./search.nix
     ./syncthing.nix
     ./term.nix
