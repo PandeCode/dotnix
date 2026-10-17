@@ -197,11 +197,11 @@
         "vlime": "vlime"
       },
       "locked": {
-        "lastModified": 1791922607,
-        "narHash": "sha256-MqdbFsd5ZLkpSoxciYhvvUfFATjI3FfL/XfC+EOSHQ0=",
+        "lastModified": 1792256200,
+        "narHash": "sha256-9vr2w6q+Q8UJLqQrb8fpvJnKtd6J1Ryd+g1+oEk1A08=",
         "owner": "PandeCode",
         "repo": "hermes",
-        "rev": "519df98a7b2cd8a7a0eb3bac9f711625aaf8286b",
+        "rev": "0194f6a5fb105a41468419059003bd5221a67b0d",
         "type": "github"
       },
       "original": {
