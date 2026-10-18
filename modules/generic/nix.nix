@@ -12,7 +12,14 @@ let
 
   cfg = config.dotnix.nix;
 
-  lix = pkgs.lixPackageSets.stable;
+  # nixpkgs passes -Dmimalloc to every lix, but only 2.96 has that option, so
+  # stable (2.95) fails to configure and hydra has no build of it. 2.96 is
+  # cached; this goes back to stable on its own once stable moves past 2.95
+  lixFrom =
+    sets:
+    if lib.strings.versionOlder sets.stable.lix.version "2.96" then sets.lix_2_96 else sets.stable;
+
+  lix = lixFrom pkgs.lixPackageSets;
 
   # my flakes that shells outside a flake can use as <name>, and the cli as
   # name#package, both at the revision this machine was built from
@@ -102,7 +109,7 @@ in
 
         # nix tools built against lix instead of cppnix
         (_: prev: {
-          inherit (prev.lixPackageSets.stable)
+          inherit (lixFrom prev.lixPackageSets)
             colmena
             nix-eval-jobs
             nix-fast-build
