@@ -13,6 +13,13 @@ let
   cfg = config.dotnix.nix;
 
   lix = pkgs.lixPackageSets.stable;
+
+  # my flakes that shells outside a flake can use as <name>, and the cli as
+  # name#package, both at the revision this machine was built from
+  mine = [
+    "nixbuilds"
+    "nixutils"
+  ];
 in
 
 {
@@ -56,7 +63,36 @@ in
         extra-substituters = map (cache: cache.url) cfg.caches;
         extra-trusted-public-keys = map (cache: cache.key) cfg.caches;
       };
+
+      registry = lib.attrsets.genAttrs mine (name: {
+        flake = inputs.${name};
+      });
+
+      # setting it drops the default from nixpkgs.flake.setNixPath, so nixpkgs
+      # and the channels are listed again. the /etc path stays the same across
+      # rebuilds, so open shells see a switch without logging in again
+      nixPath = [
+        "nixpkgs=flake:nixpkgs"
+      ]
+      ++ map (name: "${name}=/etc/nix/inputs/${name}") mine
+      ++ lib.lists.optional config.nix.channel.enable "/nix/var/nix/profiles/per-user/root/channels";
     };
+
+    # a flake has no default.nix, so <name> gets one that loads its outputs.
+    # `pkgs` is its legacyPackages for this machine
+    environment.etc = lib.attrsets.listToAttrs (
+      map (
+        name:
+        lib.attrsets.nameValuePair "nix/inputs/${name}/default.nix" {
+          text = ''
+            let
+              flake = builtins.getFlake "path:${inputs.${name}}?narHash=${inputs.${name}.narHash}";
+            in
+            flake // { pkgs = flake.legacyPackages.''${builtins.currentSystem} or { }; }
+          '';
+        }
+      ) mine
+    );
 
     nixpkgs = {
       config.allowUnfree = true;
