@@ -197,11 +197,11 @@
         "vlime": "vlime"
       },
       "locked": {
-        "lastModified": 1792273211,
-        "narHash": "sha256-11zGsjXO39UVI5Bhtwg1UJ2cLpy3z5BPhFdO9NLEX1M=",
+        "lastModified": 1792350009,
+        "narHash": "sha256-jMNoFPQ0gPgjRNYIpq8ystn6/IYtWBu2/1S09cD3KQI=",
         "owner": "PandeCode",
         "repo": "hermes",
-        "rev": "f38396bece67b8784421cae0edf0ef6379a513b7",
+        "rev": "efa11ba76e7c6dcca5889691d3cc906a8506079e",
         "type": "github"
       },
       "original": {
@@ -271,11 +271,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791922601,
-        "narHash": "sha256-dM4PzbSy4e/m9/M9/0Ov6CDxDLaszz5QiIja3+MWNbY=",
+        "lastModified": 1792350050,
+        "narHash": "sha256-/nyH8J0OTWH4SpVyVHzC3jS3XDImIbxUBdO8faGQFhc=",
         "owner": "PandeCode",
         "repo": "libys",
-        "rev": "b7a7f14941538c1472cafcb95803a88e750c32a7",
+        "rev": "7d38a3e020aa985f9a9b620109ed9ebb12ee7860",
         "type": "github"
       },
       "original": {
@@ -294,11 +294,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792195356,
-        "narHash": "sha256-SJVokL4BEYSrJfn59ZU1/pLd4Ruw+BF+7LB/FPnJOJw=",
+        "lastModified": 1792281765,
+        "narHash": "sha256-kfaumAzY4ewTapkBF5Ji8edyTazKzJpkuWHp7RQdA6s=",
         "owner": "nix-community",
         "repo": "neovim-nightly-overlay",
-        "rev": "07ad3806a51ff7908bf6ca2ac0d8eb3f57492365",
+        "rev": "8977fb0dcfff89738a49975b5d67f26d3416d919",
         "type": "github"
       },
       "original": {
@@ -310,11 +310,11 @@
     "neovim-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1792193591,
-        "narHash": "sha256-kk6r2Fc9/j5idU8UTzGLJRSR9jEbsWhB0EvK7J7qqRA=",
+        "lastModified": 1792251242,
+        "narHash": "sha256-6LIFE2ghwUFqP4+eiEttWw2Iyam9QLZe6PE2+UNCNVc=",
         "owner": "neovim",
         "repo": "neovim",
-        "rev": "9b7ec59580fddf671f7bf922f66ef114a59a51ee",
+        "rev": "0851e7dabed9fc9c019e22088029f36e9f3ec3e3",
         "type": "github"
       },
       "original": {
@@ -492,11 +492,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791922276,
-        "narHash": "sha256-oczplMqMte4a0OlTKeGDtXZdaeUsxGAVFX7BQZU5LAI=",
+        "lastModified": 1792349994,
+        "narHash": "sha256-I43qf1AbxrrnMLLGDlS/2jV6qtXQdRwAiZxZdTtjcaQ=",
         "owner": "PandeCode",
         "repo": "nixutils",
-        "rev": "a175788348fe514b56841f98c3071e939e2220f4",
+        "rev": "8f0b18647c0eb3c9160b3362ed29ceb21b9f2fdd",
         "type": "github"
       },
       "original": {
