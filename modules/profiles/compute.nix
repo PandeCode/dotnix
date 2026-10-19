@@ -42,7 +42,7 @@ in
       "docker"
     ];
 
-    # images that need the gpu: docker run --device nvidia.com/gpu=all
+    # images that need the gpu: docker run --gpus all
     virtualisation.docker = {
       enable = mkDefault true;
       daemon.settings.data-root = "${cfg.scratch}/docker";

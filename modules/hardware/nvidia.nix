@@ -101,6 +101,15 @@ in
       hardware.nvidia-container-toolkit.enable = mkDefault config.virtualisation.docker.enable;
     }
 
+    # docker only takes --gpus as nvidia when it finds nvidia-cdi-hook on its
+    # PATH, otherwise it tries an AMD CDI spec and fails. nixpkgs adds the
+    # hook for rootless docker only
+    (mkIf config.hardware.nvidia-container-toolkit.enable {
+      virtualisation.docker.extraPackages = [
+        (lib.getOutput "tools" config.hardware.nvidia-container-toolkit.package)
+      ];
+    })
+
     (mkIf cfg.prime.enable {
       hardware.nvidia = {
         prime = {
