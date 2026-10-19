@@ -98,6 +98,24 @@ let
   image = "docker://node:22-bookworm";
   # the system's certificates, which trust the home ca too
   certs = "/etc/ssl/certs/ca-certificates.crt";
+
+  labels = [
+    "ubuntu-latest:${image}"
+    "debian-latest:${image}"
+  ];
+  registration = "/var/lib/forgejo-runner-register";
+  runnerConfig = (pkgs.formats.yaml { }).generate "forgejo-runner.yaml" {
+    runner = {
+      envs.NODE_EXTRA_CA_CERTS = certs;
+      inherit labels;
+    };
+    container = {
+      # on this machine's network, so git.<domain> resolves for checkouts
+      network = "host";
+      options = "-v ${certs}:${certs}:ro";
+      valid_volumes = [ certs ];
+    };
+  };
 in
 
 {
@@ -144,9 +162,12 @@ in
         toString themeCss;
     };
 
-    # registers once, with a token forgejo makes itself
-    systemd.services.forgejo-runner-token = lib.modules.mkIf cfg.runner {
-      description = "Make the token the actions runner registers with";
+    # forgejo-runner 13 has no --token-file, which the nixpkgs module still
+    # registers with. so forgejo registers the runner itself from a secret
+    # made once, and the runner connects with that secret and the uuid
+    # registering prints
+    systemd.services.forgejo-runner-register = lib.modules.mkIf cfg.runner {
+      description = "Register the actions runner with forgejo";
       after = [ "forgejo.service" ];
       requires = [ "forgejo.service" ];
       before = [ "gitea-runner-${hostName}.service" ];
@@ -158,17 +179,18 @@ in
         FORGEJO_CUSTOM = config.services.forgejo.customDir;
       };
       script = ''
-        if [ ! -s token ]; then
-          printf 'TOKEN=%s\n' "$(forgejo actions generate-runner-token)" >token
+        if [ ! -s secret ]; then
+          printf '%s' "$(forgejo forgejo-cli actions generate-secret)" >secret
         fi
+        forgejo forgejo-cli actions register --secret-file secret --name ${hostName} >uuid
       '';
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
         User = config.services.forgejo.user;
         UMask = "0077";
-        StateDirectory = "forgejo-runner-token";
-        WorkingDirectory = "/var/lib/forgejo-runner-token";
+        StateDirectory = baseNameOf registration;
+        WorkingDirectory = registration;
       };
     };
 
@@ -178,22 +200,25 @@ in
         enable = true;
         name = hostName;
         url = "https://${domain}";
-        tokenFile = "/var/lib/forgejo-runner-token/token";
-        labels = [
-          "ubuntu-latest:${image}"
-          "debian-latest:${image}"
-        ];
-        settings = {
-          runner.envs.NODE_EXTRA_CA_CERTS = certs;
-          container = {
-            # on this machine's network, so git.<domain> resolves for checkouts
-            network = "host";
-            options = "-v ${certs}:${certs}:ro";
-            valid_volumes = [ certs ];
-          };
-        };
+        # loaded as the token credential
+        tokenFile = "${registration}/secret";
+        inherit labels;
       };
     };
+
+    systemd.services."gitea-runner-${hostName}".serviceConfig = lib.modules.mkIf cfg.runner {
+      ExecStartPre = lib.modules.mkForce [ ];
+      ExecStart = lib.modules.mkForce (
+        pkgs.writeShellScript "forgejo-runner-${hostName}" ''
+          exec ${lib.meta.getExe config.services.gitea-actions-runner.package} daemon --config ${runnerConfig} \
+            --url https://${domain} \
+            --uuid "$(cat "$CREDENTIALS_DIRECTORY/uuid")" \
+            --token-url "file:$CREDENTIALS_DIRECTORY/token"
+        ''
+      );
+      LoadCredential = [ "uuid:${registration}/uuid" ];
+    };
+
     virtualisation.docker = lib.modules.mkIf cfg.runner {
       enable = true;
       # job images pile up otherwise
