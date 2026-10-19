@@ -72,7 +72,7 @@
     ];
   };
   systemd.services.speaker-levels = {
-    description = "Set the speaker and headphone codec levels to full";
+    description = "Set the speaker codec levels to full";
     wantedBy = [ "sound.target" ];
     after = [ "sound.target" ];
     path = [ pkgs.alsa-utils ];
@@ -81,7 +81,7 @@
         grep -q 'Codec: Realtek ALC285' "$codec" || continue
         card=''${codec#/proc/asound/card}
         card=''${card%%/*}
-        for control in Master Speaker 'Bass Speaker' Headphone; do
+        for control in Master Speaker 'Bass Speaker'; do
           amixer -q -c "$card" sset "$control" 100% unmute
         done
       done
