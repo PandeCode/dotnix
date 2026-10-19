@@ -58,6 +58,37 @@
     ${lib.getExe' config.systemd.package "udevadm"} trigger -c bind -s usb -a idVendor=32ac
   '';
 
+  # the speakers are woofers and tweeters on a realtek alc285. pipewire turns
+  # the volume down on the codec's "Speaker" control, which only drives the
+  # woofers, so the bass is gone at low volume while the tweeters stay loud.
+  # software volume lowers both the same and leaves the codec at full
+  services.pipewire.wireplumber.extraConfig."50-speaker-soft-mixer" = {
+    "monitor.alsa.rules" = [
+      {
+        # the analog codec; the hdmi audio is function .1 of the gpu
+        matches = [ { "device.name" = "~alsa_card\\.pci-.*\\.6$"; } ];
+        actions.update-props."api.alsa.soft-mixer" = true;
+      }
+    ];
+  };
+  systemd.services.speaker-levels = {
+    description = "Set the speaker and headphone codec levels to full";
+    wantedBy = [ "sound.target" ];
+    after = [ "sound.target" ];
+    path = [ pkgs.alsa-utils ];
+    script = ''
+      for codec in /proc/asound/card*/codec#*; do
+        grep -q 'Codec: Realtek ALC285' "$codec" || continue
+        card=''${codec#/proc/asound/card}
+        card=''${card%%/*}
+        for control in Master Speaker 'Bass Speaker' Headphone; do
+          amixer -q -c "$card" sset "$control" 100% unmute
+        done
+      done
+    '';
+    serviceConfig.Type = "oneshot";
+  };
+
   boot.supportedFilesystems = [
     "btrfs"
     "cifs"
