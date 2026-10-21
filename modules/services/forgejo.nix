@@ -99,23 +99,15 @@ let
   # the system's certificates, which trust the home ca too
   certs = "/etc/ssl/certs/ca-certificates.crt";
 
-  labels = [
-    "ubuntu-latest:${image}"
-    "debian-latest:${image}"
-  ];
   registration = "/var/lib/forgejo-runner-register";
-  runnerConfig = (pkgs.formats.yaml { }).generate "forgejo-runner.yaml" {
-    runner = {
-      envs.NODE_EXTRA_CA_CERTS = certs;
-      inherit labels;
-    };
-    container = {
-      # on this machine's network, so git.<domain> resolves for checkouts
-      network = "host";
-      options = "-v ${certs}:${certs}:ro";
-      valid_volumes = [ certs ];
-    };
-  };
+  # forgejo makes a runner's uuid from the first 16 characters of its
+  # secret, and the nixpkgs module needs the uuid in the config. so those 16
+  # are fixed per host and only the other 24 are random
+  secretStart = builtins.substring 0 16 (builtins.hashString "sha256" "forgejo-runner-${hostName}");
+  uuidHex = lib.strings.concatMapStrings (c: lib.trivial.toHexString (lib.strings.charToInt c)) (
+    lib.strings.stringToCharacters secretStart
+  );
+  uuid = lib.strings.concatStringsSep "-" (builtins.match "(.{8})(.{4})(.{4})(.{4})(.{12})" uuidHex);
 in
 
 {
@@ -162,16 +154,13 @@ in
         toString themeCss;
     };
 
-    # forgejo-runner 13 has no --token-file, which the nixpkgs module still
-    # registers with. so forgejo registers the runner itself from a secret
-    # made once, and the runner connects with that secret and the uuid
-    # registering prints
+    # registers the runner with a secret made once, which it connects with
     systemd.services.forgejo-runner-register = lib.modules.mkIf cfg.runner {
       description = "Register the actions runner with forgejo";
       after = [ "forgejo.service" ];
       requires = [ "forgejo.service" ];
-      before = [ "gitea-runner-${hostName}.service" ];
-      requiredBy = [ "gitea-runner-${hostName}.service" ];
+      before = [ "forgejo-runner-${hostName}.service" ];
+      requiredBy = [ "forgejo-runner-${hostName}.service" ];
       path = [ config.services.forgejo.package ];
       environment = {
         HOME = config.services.forgejo.stateDir;
@@ -179,10 +168,11 @@ in
         FORGEJO_CUSTOM = config.services.forgejo.customDir;
       };
       script = ''
-        if [ ! -s secret ]; then
-          printf '%s' "$(forgejo forgejo-cli actions generate-secret)" >secret
+        if [ "$(head -c 16 secret 2>/dev/null)" != ${secretStart} ]; then
+          random=$(forgejo forgejo-cli actions generate-secret)
+          printf '%s%s' ${secretStart} "''${random:16}" >secret
         fi
-        forgejo forgejo-cli actions register --secret-file secret --name ${hostName} >uuid
+        forgejo forgejo-cli actions register --secret-file secret --name ${hostName}
       '';
       serviceConfig = {
         Type = "oneshot";
@@ -194,29 +184,30 @@ in
       };
     };
 
-    services.gitea-actions-runner = lib.modules.mkIf cfg.runner {
-      package = pkgs.forgejo-runner;
-      instances.${hostName} = {
-        enable = true;
-        name = hostName;
-        url = "https://${domain}";
-        # loaded as the token credential
-        tokenFile = "${registration}/secret";
-        inherit labels;
+    services.forgejo-runner.instances.${hostName} = lib.modules.mkIf cfg.runner {
+      enable = true;
+      settings = {
+        server.connections.${hostName} = {
+          url = "https://${domain}";
+          inherit uuid;
+          # from secrets below
+          token = null;
+        };
+        runner = {
+          labels = [
+            "ubuntu-latest:${image}"
+            "debian-latest:${image}"
+          ];
+          envs.NODE_EXTRA_CA_CERTS = certs;
+        };
+        container = {
+          # on this machine's network, so git.<domain> resolves for checkouts
+          network = "host";
+          options = "-v ${certs}:${certs}:ro";
+          valid_volumes = [ certs ];
+        };
       };
-    };
-
-    systemd.services."gitea-runner-${hostName}".serviceConfig = lib.modules.mkIf cfg.runner {
-      ExecStartPre = lib.modules.mkForce [ ];
-      ExecStart = lib.modules.mkForce (
-        pkgs.writeShellScript "forgejo-runner-${hostName}" ''
-          exec ${lib.meta.getExe config.services.gitea-actions-runner.package} daemon --config ${runnerConfig} \
-            --url https://${domain} \
-            --uuid "$(cat "$CREDENTIALS_DIRECTORY/uuid")" \
-            --token-url "file:$CREDENTIALS_DIRECTORY/token"
-        ''
-      );
-      LoadCredential = [ "uuid:${registration}/uuid" ];
+      secrets.server.connections.${hostName}.token_url = "${registration}/secret";
     };
 
     virtualisation.docker = lib.modules.mkIf cfg.runner {
