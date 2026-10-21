@@ -33,10 +33,6 @@ in
     hardware = {
       steam-hardware.enable = true;
       uinput.enable = true;
-      openrazer = {
-        enable = true;
-        users = [ config.dotnix.user ];
-      };
     };
 
     services = {
@@ -45,10 +41,5 @@ in
     };
 
     users.users.${config.dotnix.user}.extraGroups = [ "uinput" ];
-
-    environment.systemPackages = with pkgs; [
-      razer-cli
-      razergenie
-    ];
   };
 }
