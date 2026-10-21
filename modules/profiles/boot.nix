@@ -35,7 +35,7 @@ in
         theme = pkgs.grub-foundry-theme.override {
           inherit (cfg) scale;
           # the game's version string in the corner
-          corner = "GRUB ${config.boot.loader.grub.package.version} (build ${config.networking.hostName}, ${pkgs.stdenv.hostPlatform.system})";
+          corner = "GRUB ${pkgs.grub2.version} (build ${config.networking.hostName}, ${pkgs.stdenv.hostPlatform.system})";
         };
       };
     };
