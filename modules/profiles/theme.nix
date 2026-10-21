@@ -71,7 +71,7 @@ in
       };
 
       targets = {
-        # the hyperfluent theme and the blahaj splash stay
+        # the foundry boot menu and the blahaj splash stay
         grub.enable = false;
         plymouth.enable = false;
       };

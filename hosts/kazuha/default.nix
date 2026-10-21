@@ -26,7 +26,11 @@
     profiles = {
       apps.enable = true;
       base.enable = true;
-      boot.enable = true;
+      boot = {
+        enable = true;
+        # 2560x1600
+        scale = 1.5;
+      };
       desktop.enable = true;
       dev.enable = true;
       gaming = {

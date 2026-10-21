@@ -180,6 +180,31 @@
         "type": "gitlab"
       }
     },
+    "grub-foundry-theme": {
+      "inputs": {
+        "nixpkgs": [
+          "nixbuilds",
+          "nixpkgs"
+        ],
+        "nixutils": [
+          "nixbuilds",
+          "nixutils"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792546443,
+        "narHash": "sha256-8xqCSB8y3jR7BczK9iaI9Q6ncvGm1/xsQi62jiaCLUk=",
+        "owner": "PandeCode",
+        "repo": "grub-foundry-theme",
+        "rev": "7875337bdb3eacb15d7a932a98bcb167a22e952f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "PandeCode",
+        "repo": "grub-foundry-theme",
+        "type": "github"
+      }
+    },
     "hermes": {
       "inputs": {
         "neovim-nightly-overlay": "neovim-nightly-overlay",
@@ -392,6 +417,7 @@
     },
     "nixbuilds": {
       "inputs": {
+        "grub-foundry-theme": "grub-foundry-theme",
         "nix-alien": "nix-alien",
         "nixpkgs": "nixpkgs",
         "nixutils": "nixutils",
@@ -402,11 +428,11 @@
         "zig-overlay": "zig-overlay"
       },
       "locked": {
-        "lastModified": 1792466840,
-        "narHash": "sha256-iHDrI+BjmbXpjNGZB7V+pF62MOfhD/zIOGOj0WbvoOk=",
+        "lastModified": 1792546642,
+        "narHash": "sha256-j/C54qrSAOtKCAVR+WEzd5XOuBs7VCehsDmT/z0Z9eE=",
         "owner": "PandeCode",
         "repo": "nixbuilds",
-        "rev": "f03769cde86c9260b4d20ec24f5208be0a3d7a71",
+        "rev": "5f77d420cb2d8e3ac868054f90e81ed7d29932b2",
         "type": "github"
       },
       "original": {
