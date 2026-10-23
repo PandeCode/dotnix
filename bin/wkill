@@ -1,0 +1,3 @@
+#!/bin/sh
+
+kill (niri msg --json pick-window | jq .pid)

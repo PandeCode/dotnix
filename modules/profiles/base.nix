@@ -91,6 +91,7 @@ in
         bat-extras.batwatch
         bc
         bonsai
+        cachix
         caligula
         cmatrix
         cyme
@@ -119,7 +120,6 @@ in
         man-pages-posix
         net-tools
         nh
-        cachix
         nix-init
         nix-output-monitor
         nix-prefetch-github
