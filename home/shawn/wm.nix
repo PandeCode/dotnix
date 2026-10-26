@@ -7,7 +7,7 @@
 }:
 
 let
-  inherit (config.dotnix.wm) terminal shell explorer;
+  inherit (config.dotnix.wm) terminal explorer;
 
   rofiClip = ''rofi -modi "clipboard:greenclip print" -show clipboard -run-command '{cmd}' -theme /tmp/launcher.rasi'';
   greenclip = {
@@ -56,12 +56,14 @@ in
 
 {
   dotnix.wm = {
-    terminal = "alacritty";
+    terminal = "ghostty";
     shell = "fish";
     explorer = "nautilus";
 
+    # no -e: it would start a new ghostty instead of a window of the
+    # running one, and ghostty starts the shell itself
     startup = [
-      "${terminal} -e ${shell}"
+      terminal
     ]
     ++ lib.lists.optional osConfig.services.blueman.enable "blueman-applet"
     ++ [
@@ -70,7 +72,7 @@ in
     ];
 
     binds = [
-      (bind [ "Super" ] "Return" "${terminal} -e ${shell}")
+      (bind [ "Super" ] "Return" terminal)
       (bind [ "Super" ] "e" explorer)
       (bind [ "Super" "Shift" ] "g" "gif.sh")
       (bind [ "Super" ] "r" "_tool_riot")

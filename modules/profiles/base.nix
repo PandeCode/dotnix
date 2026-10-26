@@ -103,6 +103,7 @@ in
         fd
         ffmpeg
         file
+        ghostty.terminfo
         git
         gitoxide
         glow

@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   osConfig,
   pkgs,
@@ -64,7 +65,26 @@ let
 in
 
 lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
-  programs.alacritty.enable = true;
+  programs.ghostty = {
+    enable = true;
+    # the first ghostty stays running and every later one only asks it for
+    # a window, which skips the gtk start. the systemd unit would do the
+    # same, but it only works where the session exports its display to
+    # systemd, and i3 and river here do not
+    systemd.enable = false;
+    settings = {
+      command = config.dotnix.wm.shell;
+      gtk-single-instance = true;
+      quit-after-last-window-closed = false;
+
+      window-decoration = "server";
+      confirm-close-surface = false;
+      clipboard-trim-trailing-spaces = true;
+
+      # hosts without the terminfo get it copied over on first ssh
+      shell-integration-features = "ssh-env,ssh-terminfo";
+    };
+  };
 
   # the media keys and _tool_clip use these in every session
   home.packages = [
