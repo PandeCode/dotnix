@@ -222,11 +222,11 @@
         "vlime": "vlime"
       },
       "locked": {
-        "lastModified": 1792997913,
-        "narHash": "sha256-1T9X03H8tZXxFzGlEljQFUryUzzj5+D2Nbwg2UbH7rQ=",
+        "lastModified": 1793025876,
+        "narHash": "sha256-tHg/syBZy9Se5RLtbqeV4X3Gn3n/26cia0BPIpEJNsY=",
         "owner": "PandeCode",
         "repo": "hermes",
-        "rev": "8709c98a867fbc1cef42712d6cdeeadde372e5fb",
+        "rev": "95c5da63cfa436b8f822e5e410a192e6a687585b",
         "type": "github"
       },
       "original": {
