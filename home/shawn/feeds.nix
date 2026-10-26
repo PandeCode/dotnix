@@ -7,6 +7,8 @@ in
 [
   (feed "https://factorio.com/blog/rss" [ ])
 
+  (feed "https://interrupt.memfault.com/feed.xml" [ ])
+
   (feed "https://wpi-demolab.duckdns.org/rss.xml" [ "graphics" ])
   (feed "https://blog.wybxc.cc/rss.xml" [ "graphics" ])
   (feed "https://lyra.horse/blog/posts/index.xml" [ "graphics" ])
