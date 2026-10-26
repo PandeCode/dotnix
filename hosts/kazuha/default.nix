@@ -18,7 +18,7 @@
 
   # suspend-then-hibernate resumes from the swapfile below: systemd writes its
   # location to an efi variable on hibernate and the systemd initrd reads it
-  boot.initrd.systemd.enable = true;
+  # boot.initrd.systemd.enable = true;
 
   dotnix = {
     user = "shawn";
