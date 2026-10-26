@@ -62,8 +62,12 @@ in
       # it fetches and saves documents through files.<domain> on localhost
       allowLocalConnections = true;
     };
-    # rabbitmq's name server, only for this machine
-    services.epmd.listenStream = "127.0.0.1:4369";
+    # rabbitmq's name server, only for this machine. rabbitmq finds it by
+    # the hostname, which /etc/hosts points at 127.0.0.2
+    services.epmd.listenStream = [
+      "127.0.0.1:4369"
+      "127.0.0.2:4369"
+    ];
 
     # through caddy the links it makes say https and office.<domain>; asked
     # directly by files.<domain>, they stay on localhost
