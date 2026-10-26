@@ -112,8 +112,6 @@ in
       );
     };
 
-    nushell.enable = true;
-
     atuin = withShells // {
       # the sync server on the home server, once its certificates are trusted
       settings = lib.modules.mkIf (osConfig.dotnix.home.ca != null) {
