@@ -9,6 +9,7 @@
     ./compute.nix
     ./desktop.nix
     ./dev.nix
+    ./embedded.nix
     ./gaming.nix
     ./laptop.nix
     ./security.nix

@@ -34,6 +34,7 @@
       };
       desktop.enable = true;
       dev.enable = true;
+      embedded.enable = true;
       gaming = {
         enable = true;
         minecraft = true;
