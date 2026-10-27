@@ -10,6 +10,7 @@
     ./books.nix
     ./builder.nix
     ./cache.nix
+    ./code.nix
     ./compute.nix
     ./config.nix
     ./dashboard.nix

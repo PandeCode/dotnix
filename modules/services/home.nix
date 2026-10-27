@@ -49,6 +49,12 @@ in
               description = "A service on localhost to pass requests to.";
             };
 
+            socket = mkOption {
+              type = types.nullOr types.str;
+              default = null;
+              description = "A unix socket to pass requests to, for services only caddy should reach.";
+            };
+
             root = mkOption {
               type = types.nullOr types.path;
               default = null;
@@ -72,7 +78,7 @@ in
         }
       );
       default = { };
-      description = "Each <name> is served at https://<name>.<domain>, from a port on localhost or a folder.";
+      description = "Each <name> is served at https://<name>.<domain>, from a port on localhost, a socket or a folder.";
     };
 
     adblock = {
@@ -118,8 +124,13 @@ in
     (mkIf cfg.enable {
       assertions =
         lib.attrsets.mapAttrsToList (name: site: {
-          assertion = (site.port == null) != (site.root == null);
-          message = "dotnix.home.sites.${name} needs exactly one of port and root.";
+          assertion =
+            lib.lists.count (x: x != null) [
+              site.port
+              site.socket
+              site.root
+            ] == 1;
+          message = "dotnix.home.sites.${name} needs exactly one of port, socket and root.";
         }) cfg.sites
         ++ [
           {
@@ -184,6 +195,8 @@ in
             + (
               if site.port != null then
                 "reverse_proxy 127.0.0.1:${toString site.port}"
+              else if site.socket != null then
+                "reverse_proxy unix/${site.socket}"
               else
                 ''
                   root * ${site.root}
