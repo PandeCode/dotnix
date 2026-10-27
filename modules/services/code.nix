@@ -119,12 +119,18 @@ in
         User = user;
         WorkingDirectory = "~";
         Restart = "on-failure";
-        # the socket comes out as yours with the folder's group (setgid),
-        # but only group-writable once this runs, and caddy needs to write
-        ExecStartPost = pkgs.writeShellScript "codium-server-socket" ''
+        # systemd makes the folder fresh on every start and drops it on stop,
+        # so an old socket can't be left behind for the server to trip on
+        RuntimeDirectory = "codium-server";
+        RuntimeDirectoryMode = "0750";
+        ExecStartPre = "${lib.meta.getExe' pkgs.coreutils "rm"} -f ${socket}";
+        # as root (+): hand the folder and the socket to caddy's group, the
+        # socket comes out as you with group users, and caddy writes to it
+        ExecStartPost = "+${pkgs.writeShellScript "codium-server-socket" ''
           while [ ! -S ${socket} ]; do sleep 0.2; done
+          chgrp ${config.services.caddy.group} ${dir} ${socket}
           chmod 0660 ${socket}
-        '';
+        ''}";
         # through a login shell, so its terminals get the path an ssh login
         # gets, like term.<domain>
         ExecStart = utils.escapeSystemdExecArgs [
@@ -146,8 +152,6 @@ in
         ];
       };
     };
-
-    systemd.tmpfiles.rules = [ "d ${dir} 2750 ${user} ${config.services.caddy.group} -" ];
 
     dotnix.home.sites.code = {
       inherit socket;
