@@ -135,6 +135,10 @@ in
                         // lib.attrsets.optionalAttrs (site.port != null) {
                           check-url = "http://127.0.0.1:${toString site.port}";
                         }
+                        # caddy asking for the password means it is up
+                        // lib.attrsets.optionalAttrs site.protect {
+                          alt-status-codes = [ 401 ];
+                        }
                       ) (lib.attrsets.filterAttrs (_: site: site.listed) home.sites);
                     }
                   ]
@@ -229,7 +233,7 @@ in
             "[CERTIFICATE_EXPIRATION] > 1h"
           ];
           alerts = lib.lists.optional ntfy { type = "ntfy"; };
-        }) home.sites;
+        }) (lib.attrsets.filterAttrs (_: site: site.checked) home.sites);
       };
     };
 
