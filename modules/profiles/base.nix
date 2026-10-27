@@ -39,6 +39,8 @@ in
 
     # the way between my machines, home or not
     services.tailscale.enable = mkDefault true;
+    # tailscaled uploads its logs to tailscale by default
+    services.tailscale.extraDaemonFlags = [ "--no-logs-no-support" ];
 
     boot.tmp.cleanOnBoot = true;
     zramSwap.enable = true;

@@ -26,6 +26,8 @@ in
       settings = {
         Address = "127.0.0.1";
         MusicFolder = cfg.musicFolder;
+        # its daily usage report to insights.navidrome.org
+        EnableInsightsCollector = false;
       };
     };
 

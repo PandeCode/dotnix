@@ -77,6 +77,11 @@ in
         group = "users";
         dataDir = "/home/${user}";
         openDefaultPorts = cfg.lan;
+        # no crash reports, and no usage reporting, without asking in the gui
+        settings.options = {
+          crashReportingEnabled = false;
+          urAccepted = -1;
+        };
 
         settings = {
           devices = lib.attrsets.mapAttrs (_: id: { inherit id; }) others;

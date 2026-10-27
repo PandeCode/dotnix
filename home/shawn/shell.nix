@@ -170,11 +170,17 @@ in
   xdg = {
     enable = true;
     configFile."cava/shell".source = ../../config/cava/shell;
+    # what `go telemetry off` writes, so go and gopls neither count nor ask
+    configFile."go/telemetry/mode".text = "off\n";
   };
 
   home = {
     file = {
-      ".npmrc".text = "prefix=~/.npm-packages";
+      # no registry lookups for a newer npm
+      ".npmrc".text = ''
+        prefix=~/.npm-packages
+        update-notifier=false
+      '';
 
       ".tmux.conf".text = ''
         set -g default-shell ${lib.meta.getExe config.programs.fish.package}
@@ -184,6 +190,10 @@ in
 
     sessionVariables = {
       DOTFILES = flakePath;
+      # omnisharp runs the dotnet cli, which reports usage otherwise; other
+      # tools honor the generic one
+      DOTNET_CLI_TELEMETRY_OPTOUT = "1";
+      DO_NOT_TRACK = "1";
       GOPATH = "${config.home.homeDirectory}/go";
       GTK_USE_PORTAL = "1";
       PYTHONPYCACHEPREFIX = "${config.xdg.cacheHome}/__pycache__";

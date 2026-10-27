@@ -163,6 +163,8 @@ in
       # the admin page shows these read-only; change them here
       settings = {
         server.externalDomain = url;
+        # its lookup for new releases; nixpkgs brings them anyway
+        newVersionCheck.enabled = false;
         # photos land in library/<you>/<year>/<date>/
         storageTemplate = {
           enabled = true;

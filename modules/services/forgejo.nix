@@ -141,6 +141,8 @@ in
         # accounts are made with `forgejo admin user create`
         service.DISABLE_REGISTRATION = true;
         session.COOKIE_SECURE = true;
+        # a weekly lookup for new releases; nixpkgs brings them anyway
+        "cron.update_checker".ENABLED = false;
         actions.ENABLED = lib.modules.mkIf cfg.runner true;
         ui = lib.modules.mkIf (theme != null) {
           THEMES = "dotnix,forgejo-auto,forgejo-light,forgejo-dark";
