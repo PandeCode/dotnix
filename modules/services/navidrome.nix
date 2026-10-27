@@ -28,6 +28,9 @@ in
         MusicFolder = cfg.musicFolder;
         # its daily usage report to insights.navidrome.org
         EnableInsightsCollector = false;
+        # nixpkgs turns plugins on with their folder in the package, which
+        # has none without withPlugins, and navidrome dies trying to make it
+        Plugins.Enabled = false;
       };
     };
 
