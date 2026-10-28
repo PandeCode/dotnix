@@ -47,6 +47,7 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
       dictionaries = [ pkgs.hunspellDictsChromium.en_US ];
       # pinned in nixbuilds, which keeps them up to date
       extensions = pkgs.chromium-extensions.extensions;
+      defaultSearchProviderSearchURL = "https://search.${domain}/search?q=%s";
     };
 
     librewolf = {
