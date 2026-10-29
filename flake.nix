@@ -118,5 +118,14 @@
       repo = "search";
       inputs.nix-index-database.follows = "nix-index-database";
     };
+
+    # agda exercises in the browser, for dotnix.services.agda. its nixos
+    # container comes as a plain file, so no flake of its own
+    lets-play-agda = {
+      type = "github";
+      owner = "iblech";
+      repo = "lets-play-agda";
+      flake = false;
+    };
   };
 }

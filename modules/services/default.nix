@@ -4,6 +4,7 @@
 {
   imports = [
     # keep-sorted start
+    ./agda.nix
     ./atuin.nix
     ./backup.nix
     ./beszel.nix

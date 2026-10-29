@@ -55,6 +55,13 @@ in
               description = "A unix socket to pass requests to, for services only caddy should reach.";
             };
 
+            upstream = mkOption {
+              type = types.nullOr types.str;
+              default = null;
+              example = "10.233.1.2:80";
+              description = "An address and port off localhost to pass requests to, such as a container's.";
+            };
+
             root = mkOption {
               type = types.nullOr types.path;
               default = null;
@@ -84,7 +91,7 @@ in
         }
       );
       default = { };
-      description = "Each <name> is served at https://<name>.<domain>, from a port on localhost, a socket or a folder.";
+      description = "Each <name> is served at https://<name>.<domain>, from a port on localhost, a socket, another address or a folder.";
     };
 
     adblock = {
@@ -134,9 +141,10 @@ in
             lib.lists.count (x: x != null) [
               site.port
               site.socket
+              site.upstream
               site.root
             ] == 1;
-          message = "dotnix.home.sites.${name} needs exactly one of port, socket and root.";
+          message = "dotnix.home.sites.${name} needs exactly one of port, socket, upstream and root.";
         }) cfg.sites
         ++ [
           {
@@ -203,6 +211,8 @@ in
                 "reverse_proxy 127.0.0.1:${toString site.port}"
               else if site.socket != null then
                 "reverse_proxy unix/${site.socket}"
+              else if site.upstream != null then
+                "reverse_proxy ${site.upstream}"
               else
                 ''
                   root * ${site.root}

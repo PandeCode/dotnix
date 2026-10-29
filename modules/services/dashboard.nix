@@ -135,6 +135,9 @@ in
                         // lib.attrsets.optionalAttrs (site.port != null) {
                           check-url = "http://127.0.0.1:${toString site.port}";
                         }
+                        // lib.attrsets.optionalAttrs (site.upstream != null) {
+                          check-url = "http://${site.upstream}";
+                        }
                         # caddy asking for the password means it is up
                         // lib.attrsets.optionalAttrs site.protect {
                           alt-status-codes = [ 401 ];

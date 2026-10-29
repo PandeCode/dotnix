@@ -8,6 +8,7 @@ in
 {
   dotnix = {
     services = {
+      agda.enable = true;
       atuin.enable = true;
       beszel.enable = true;
       books.enable = true;

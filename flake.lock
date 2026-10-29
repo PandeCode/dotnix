@@ -280,6 +280,22 @@
         "type": "github"
       }
     },
+    "lets-play-agda": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792927606,
+        "narHash": "sha256-gTI3Mw3r1oh/xzuQr2MVUhpGcNucRvdpczBzhNYb48E=",
+        "owner": "iblech",
+        "repo": "lets-play-agda",
+        "rev": "cf12d923225a64d8382a46205a6688eed63bf892",
+        "type": "github"
+      },
+      "original": {
+        "owner": "iblech",
+        "repo": "lets-play-agda",
+        "type": "github"
+      }
+    },
     "libys": {
       "inputs": {
         "nixbuilds": [
@@ -511,6 +527,7 @@
       "inputs": {
         "hermes": "hermes",
         "home-manager": "home-manager",
+        "lets-play-agda": "lets-play-agda",
         "libys": "libys",
         "nix-index-database": "nix-index-database",
         "nixbuilds": "nixbuilds",
