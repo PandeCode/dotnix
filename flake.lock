@@ -221,11 +221,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793237746,
-        "narHash": "sha256-sUPfEfsFrU0zqScOdzN1xkYYDrCs1S9pgDN1YOz+yTo=",
+        "lastModified": 1793238882,
+        "narHash": "sha256-vmFE0WiznNUIN/8vjaimK+RQbwE/QbG139n2j7MfFbE=",
         "owner": "PandeCode",
         "repo": "hermes",
-        "rev": "7b1ffd006899ab15fdab10f036b412fa6bdfc602",
+        "rev": "0cfe8aec82b9888e10d99962fada5ac8ddf04ce6",
         "type": "github"
       },
       "original": {
