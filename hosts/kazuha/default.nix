@@ -39,6 +39,7 @@
         enable = true;
         minecraft = true;
       };
+      ios.enable = true;
       laptop = {
         enable = true;
         power = "ppd";

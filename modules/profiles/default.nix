@@ -11,6 +11,7 @@
     ./dev.nix
     ./embedded.nix
     ./gaming.nix
+    ./ios.nix
     ./laptop.nix
     ./security.nix
     ./server.nix
