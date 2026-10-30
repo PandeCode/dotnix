@@ -24,5 +24,11 @@ in
       xtool
       # keep-sorted end
     ];
+
+    boot = {
+      extraModulePackages = [ config.boot.kernelPackages.evdi ];
+      kernelModules = [ "evdi" ];
+      extraModprobeConfig = "options evdi initial_device_count=1";
+    };
   };
 }
