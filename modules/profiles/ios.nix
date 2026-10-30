@@ -9,6 +9,7 @@
 
 let
   cfg = config.dotnix.profiles.ios;
+  inherit (config.dotnix) user;
 in
 
 {
@@ -16,6 +17,7 @@ in
 
   config = lib.modules.mkIf cfg.enable {
     services.usbmuxd.enable = true;
+    users.users.${user}.extraGroups = [ "video" ];
 
     environment.systemPackages = with pkgs; [
       # keep-sorted start
