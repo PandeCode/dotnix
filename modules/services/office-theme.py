@@ -40,7 +40,9 @@ for i in range(7):
     ramp += [bases[i], mix(bases[i], bases[i + 1])]
 ramp.append(bases[7])
 
-hues = {f"base0{k}": colorsys.rgb_to_hls(*rgb(colors[f"base0{k}"]))[0] for k in "89ABCDE"}
+hues = {
+    f"base0{k}": colorsys.rgb_to_hls(*rgb(colors[f"base0{k}"]))[0] for k in "89ABCDE"
+}
 
 grays = sorted(
     {v.lower() for v in dark.values() if colorsys.rgb_to_hls(*rgb(v))[2] < 0.2},
@@ -65,7 +67,9 @@ out = sys.argv[3]
 theme = {k: recolor(v) for k, v in sorted(dark.items())}
 
 with open(f"{out}/themes.json", "w") as f:
-    json.dump({"themes": [{"id": "dark", "name": "Dark", "type": "dark", "colors": theme}]}, f)
+    json.dump(
+        {"themes": [{"id": "dark", "name": "Dark", "type": "dark", "colors": theme}]}, f
+    )
 
 # above its own dark theme, which sits on the same element
 with open(f"{out}/theme.css", "w") as f:
