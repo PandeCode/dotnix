@@ -14,12 +14,13 @@
     inputs.nixos-hardware.nixosModules.framework-16-amd-ai-300-series
   ];
 
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  # 7.3.0 freezes on resume from hibernation; back to latest once a 7.3
+  # point release fixes it
+  boot.kernelPackages = pkgs.linuxPackages_7_2;
   hardware.framework.enableKmod = lib.mkForce false;
 
   # suspend-then-hibernate resumes from the swapfile below: systemd writes its
-  # location to an efi variable on hibernate and the systemd initrd reads it
-  # boot.initrd.systemd.enable = true;
+  # location to an efi variable on hibernate and the initrd reads it
 
   dotnix = {
     user = "shawn";
