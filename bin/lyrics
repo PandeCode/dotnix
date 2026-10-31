@@ -1,0 +1,412 @@
+#!/usr/bin/env janet
+# prints the lyric line playing now: synced lyrics from lrclib for songs,
+# youtube captions (through python's youtube-transcript-api) for videos.
+# -f, --follow keeps running and prints a line whenever it changes. a
+# number N on stdin then seeks to word N of the line playing now, 0 to its
+# start.
+# --wrap BEFORE AFTER puts the words already sung between BEFORE and AFTER;
+# \e, \033, \x1b, \n, \r, \t and \\ in them are escapes.
+# --pango escapes & < > in the text, for pango markup in BEFORE and AFTER.
+# --ending END goes after each line instead of a newline.
+# PRINT_PLAYER=1 prints the player's name first.
+
+(def usage "usage: lyrics [-f|--follow] [--wrap BEFORE AFTER] [--pango] [--ending END]")
+
+(def follow-interval 0.5)
+# words move faster than lines
+(def wrap-interval 0.2)
+# the last line has no next one to end it
+(def last-line-us 4e6)
+# chromium writes its history every few seconds, so a video it has not
+# written yet is looked up again after this
+(def retry-s 5)
+
+# unset and empty read the same, as in the shell
+(defn env [name] (let [v (os/getenv name)] (if (or (nil? v) (empty? v)) nil v)))
+
+(defn output
+  "runs a program with input on stdin, its stdout when it succeeds"
+  [input & args]
+  (with [null (file/open "/dev/null" :w)]
+    (def proc (os/spawn args :p {:in :pipe :out :pipe :err null}))
+    (when input (:write (proc :in) input))
+    (:close (proc :in))
+    (def out (:read (proc :out) :all))
+    (when (zero? (os/proc-wait proc)) (or out ""))))
+
+# player
+
+(def fields ["playerInstance" "status" "title" "artist" "album" "position" "xesam:url"])
+
+# every player playerctl knows, one tab separated line each
+(defn players []
+  (def format (string/join (map |(string "{{" $ "}}") fields) "\t"))
+  (seq [line :in (string/split "\n" (or (output nil "playerctl" "--all-players" "metadata" "--format" format) ""))
+        :let [f (string/split "\t" line)]
+        :when (>= (length f) 2)]
+    (def [name status title artist album position url] f)
+    {:name name
+     # the playerctl instance, e.g. spotify or firefox.instance_1_42
+     :kind (first (string/split "." name))
+     :playing (= status "Playing")
+     :title (string/trim (or title ""))
+     :artist (string/trim (or artist ""))
+     :album (string/trim (or album ""))
+     :position (or (scan-number (or position "")) 0)
+     :url (or url "")}))
+
+# the first one playing, else the first one there is
+(defn pick [list]
+  (or (find |($ :playing) list) (first list)))
+
+(defn song-key [p]
+  (string/join (map p [:kind :title :artist :album :url]) "\n"))
+
+(defn fallback [p]
+  (if (empty? (p :artist)) (p :title) (string (p :title) " - " (p :artist))))
+
+# cache
+
+(def cache
+  (string (or (env "XDG_CACHE_HOME") (string (env "HOME") "/.cache")) "/lyrics"))
+
+(defn mkdirs [path]
+  (var at "")
+  (each part (string/split "/" path)
+    (set at (string at part "/"))
+    (os/mkdir at)))
+
+(defn url-encode [s]
+  (def out @"")
+  (each c s
+    (if (or (<= 48 c 57) (<= 65 c 90) (<= 97 c 122) (index-of c (string/bytes "-._~")))
+      (buffer/push-byte out c)
+      (buffer/push out (string/format "%%%02X" c))))
+  (string out))
+
+# the body of a GET, from the cache when it was fetched before. curl's
+# timeout keeps a dropped connection from hanging a bar
+(defn fetch [url]
+  (def file (string/format "%s/%08x" cache (mod (hash url) 4294967296)))
+  (or (try (slurp file) ([_] nil))
+      (let [body (output nil "curl" "-sfL" "--max-time" "10" "-A" "lyrics" url)]
+        (unless body (error (string "fetching " url " failed")))
+        (spit file body)
+        body)))
+
+# lrc
+
+# "mm:ss.xx", "mm:ss.xxx" or "mm:ss" in microseconds
+(defn parse-stamp [s]
+  (def [m sec] (string/split ":" s 0 2))
+  (def m (scan-number m))
+  (def sec (and sec (scan-number sec)))
+  (when (and m sec (>= m 0) (>= sec 0))
+    (+ (* m 60e6) (math/round (* sec 1e6)))))
+
+# an lrc file: "[00:12.34] text", with several stamps on one line allowed and
+# [ar:...] style tags skipped
+(defn parse-lrc [text]
+  (def lines @[])
+  (each raw (string/split "\n" text)
+    (var rest (string/trim raw " \t\r"))
+    (def stamps @[])
+    (var going true)
+    (while (and going (string/has-prefix? "[" rest))
+      (def close (string/find "]" rest))
+      (def us (and close (parse-stamp (slice rest 1 close))))
+      (if us
+        (do (array/push stamps us) (set rest (slice rest (inc close))))
+        (set going false)))
+    (each us stamps (array/push lines {:us us :text (string/trim rest " \t")})))
+  (sort-by |($ :us) lines))
+
+# the index of the line sung at position, nil before the first one
+(defn line-at [lines position]
+  (var found nil)
+  (var i 0)
+  (while (and (< i (length lines)) (<= ((lines i) :us) position))
+    (set found i)
+    (++ i))
+  found)
+
+# when line i starts and ends
+(defn line-span [lines i]
+  (def start ((lines i) :us))
+  [start (if (< (inc i) (length lines)) ((lines (inc i)) :us) (+ start last-line-us))])
+
+# how far into line i position is, 0 to 1
+(defn progress [lines i position]
+  (def [start end] (line-span lines i))
+  (if (<= end start) 1 (max 0 (min 1 (/ (- position start) (- end start))))))
+
+# [start word end] for each word of a line
+(defn words [text]
+  (peg/match ~(any (+ " " (group (* ($) (<- (some (if-not " " 1))) ($))))) text))
+
+(defn letters [text] (count |(not= $ (chr " ")) text))
+
+# the byte where the words sung by fraction f of the line end; words count by
+# their length
+(defn sung-until [text f]
+  (def reached (* f (letters text)))
+  (var done 0)
+  (var cut 0)
+  (var going true)
+  (each [start word end] (words text)
+    (when going
+      (+= done (length word))
+      (if (> done reached) (set going false) (set cut end))))
+  cut)
+
+# the fraction of the line where word n (from 1) starts, the inverse of
+# sung-until
+(defn word-start [text n]
+  (def ws (words text))
+  (when (<= 0 n (length ws))
+    (def total (letters text))
+    (if (zero? total) 0 (/ (sum (map |(length ($ 1)) (slice ws 0 (max 0 (dec n))))) total))))
+
+# the backslash escapes of --wrap and --ending arguments
+(def escapes
+  (peg/compile
+    ~(% (any (+ (* "\\e" (constant "\e"))
+                (* "\\033" (constant "\e"))
+                (* "\\x1" (set "bB") (constant "\e"))
+                (* "\\n" (constant "\n"))
+                (* "\\r" (constant "\r"))
+                (* "\\t" (constant "\t"))
+                (* "\\\\" (constant "\\"))
+                (<- 1))))))
+
+(defn unescape [s] (first (peg/match escapes s)))
+
+(defn escape-pango [s]
+  (->> s (string/replace-all "&" "&amp;") (string/replace-all "<" "&lt;") (string/replace-all ">" "&gt;")))
+
+(defn render [opts text cut]
+  (def [before after] (or (opts :wrap) ["" ""]))
+  (def esc (if (opts :pango) escape-pango identity))
+  (def sung (slice text 0 cut))
+  (def rest (slice text cut))
+  (if (and (pos? cut) (opts :wrap))
+    (string before (esc sung) after (esc rest))
+    (string (esc sung) (esc rest))))
+
+# sources
+
+(defn lrclib [p]
+  (def q (url-encode (string (p :title) " " (p :artist))))
+  (def body (fetch (string "https://lrclib.net/api/search?q=" q)))
+  # the first hit is not always synced
+  (def lrc (output body "jq" "-r" "map(.syncedLyrics // empty) | first // empty"))
+  (if (empty? lrc) @[] (parse-lrc lrc)))
+
+# the v= of a youtube watch url, or a youtu.be id
+(defn youtube-id [url]
+  (def id-peg '(<- (some (if-not (set "?&#/") 1))))
+  (def short (string/find "youtu.be/" url))
+  (def watch (string/find "youtube.com/watch?" url))
+  (cond
+    short (first (or (peg/match id-peg url (+ short 9)) []))
+    watch
+    (let [q (first (string/split "#" (slice url (+ watch 18))))]
+      (some |(when (string/has-prefix? "v=" $) (first (or (peg/match id-peg $ 2) [])))
+            (string/split "&" q)))))
+
+# a run length: 15 in the token means more bytes follow, each added, until
+# one under 255
+(defn lz4-length [src i n]
+  (var n n)
+  (var i i)
+  (when (= n 15)
+    (var going true)
+    (while (and going (< i (length src)))
+      (+= n (src i))
+      (set going (= (src i) 255))
+      (++ i)))
+  [n i])
+
+(defn lz4-block [src]
+  (def out @"")
+  (var i 0)
+  (var done false)
+  (while (and (not done) (< i (length src)))
+    (def token (src i))
+    (def [lit at] (lz4-length src (inc i) (brshift token 4)))
+    (when (> (+ at lit) (length src)) (error "corrupt lz4"))
+    (buffer/push out (slice src at (+ at lit)))
+    (set i (+ at lit))
+    # the last sequence has literals only
+    (if (= i (length src))
+      (set done true)
+      (do
+        (when (> (+ i 2) (length src)) (error "corrupt lz4"))
+        (def offset (+ (src i) (blshift (src (inc i)) 8)))
+        (def [len at] (lz4-length src (+ i 2) (band token 15)))
+        (set i at)
+        (def from (- (length out) offset))
+        (when (or (zero? offset) (neg? from)) (error "corrupt lz4"))
+        # matches may overlap what they copy, so byte by byte
+        (for k 0 (+ len 4) (buffer/push-byte out (out (+ from k)))))))
+  out)
+
+# mozilla's lz4 files: "mozLz40\0", the decompressed size, then one lz4 block
+(defn moz-lz4 [data]
+  (unless (and (>= (length data) 12) (= (slice data 0 8) "mozLz40\0")) (error "not mozlz4"))
+  (lz4-block (slice data 12)))
+
+# the newest file at that path in any profile under the bases in home
+(defn newest [bases file]
+  (var best nil)
+  (var best-mtime 0)
+  (each base bases
+    (def root (string (env "HOME") "/" base))
+    (each name (or (try (os/dir root) ([_] nil)) [])
+      (def path (string root "/" name "/" file))
+      (def mtime (os/stat path :modified))
+      (when (and mtime (or (nil? best) (> mtime best-mtime)))
+        (set best path)
+        (set best-mtime mtime))))
+  best)
+
+# the url of the tab looked at last, in the selected window
+(def tab-url
+  ``(.windows | length) as $n | select($n > 0)
+  | .windows[([(.selectedWindow // 1), 1] | max | [., $n] | min) - 1]
+  | .tabs | select(length > 0) | max_by(.lastAccessed // 0)
+  | .entries as $e | select($e | length > 0)
+  | $e[([(.index // ($e | length)), 1] | max | [., ($e | length)] | min) - 1].url // empty``)
+
+(defn firefox-url []
+  (when-let [path (newest [".zen" ".mozilla/firefox" ".librewolf"] "sessionstore-backups/recovery.jsonlz4")]
+    (def url (output (moz-lz4 (slurp path)) "jq" "-r" tab-url))
+    (when url (string/trim url))))
+
+# chromium keeps no session file worth reading, but its history has the
+# page title, which holds the video title the player reports. immutable
+# reads past the lock chromium holds on it
+(defn chromium-url [title]
+  (when-let [path (and (not (empty? title))
+                       (newest [".config/chromium" ".config/google-chrome" ".config/BraveSoftware/Brave-Browser"] "History"))]
+    (def query
+      (string "select url from urls where url like '%youtube.com/watch%' and instr(title, '"
+              (string/replace-all "'" "''" title)
+              "') > 0 order by last_visit_time desc limit 1"))
+    (def url (output nil "sqlite3" "-readonly" (string "file:" path "?immutable=1") query))
+    (when (and url (not (empty? (string/trim url)))) (string/trim url))))
+
+(def transcript-py
+  ``import sys
+from youtube_transcript_api import YouTubeTranscriptApi as Api
+try:
+    rows = [(s.start, s.text) for s in Api().fetch(sys.argv[1])]
+except AttributeError:
+    rows = [(s["start"], s["text"]) for s in Api.get_transcript(sys.argv[1])]
+for start, text in rows:
+    print(f"{start}\t{' '.join(text.split())}")``)
+
+# captions as "seconds\ttext" lines, cached per video, also when there are none
+(defn youtube [id]
+  (def file (string cache "/yt-" id))
+  (def text
+    (or (try (slurp file) ([_] nil))
+        (let [out (or (output nil "timeout" "30" "python3" "-c" transcript-py id) "")]
+          (spit file out)
+          out)))
+  (seq [line :in (string/split "\n" text)
+        :let [[sec words] (string/split "\t" line 0 2)
+              sec (scan-number sec)]
+        :when (and sec words)]
+    {:us (math/floor (* sec 1e6)) :text words}))
+
+# timed lines for what the player is on, empty when there are none, nil
+# when chromium has not written the video to its history yet
+(defn lookup [p]
+  (cond
+    (or (not (empty? (p :album))) (string/has-prefix? "spotify" (p :kind))) (lrclib p)
+    (index-of (p :kind) ["chromium" "chrome" "brave"])
+    (when-let [id (youtube-id (or (chromium-url (p :title)) ""))] (youtube id))
+    (let [url (cond
+                (not (empty? (p :url))) (p :url)
+                (index-of (p :kind) ["firefox" "zen" "librewolf"]) (or (firefox-url) "")
+                "")]
+      (if-let [id (youtube-id url)] (youtube id) @[]))))
+
+# lyrics of the song last looked up, kept while it plays
+(def song @{:key "" :lines @[]})
+
+(defn lines-for [p]
+  (def key (song-key p))
+  (when (or (not= key (song :key))
+            (and (song :retry-at) (>= (os/clock :monotonic) (song :retry-at))))
+    # a seek during the lookup sees no lines rather than the last song's
+    (put song :key key)
+    (put song :lines @[])
+    (put song :retry-at nil)
+    (def lines (try (lookup p)
+                 ([err] (eprint "lyrics: " (p :name) ": " err) @[])))
+    (put song :lines (or lines @[]))
+    (unless lines (put song :retry-at (+ (os/clock :monotonic) retry-s))))
+  (song :lines))
+
+(defn current [opts]
+  (when-let [p (pick (players))]
+    (def lines (lines-for p))
+    (def text
+      (if-let [i (line-at lines (p :position))]
+        (let [line ((lines i) :text)
+              cut (if (opts :wrap) (sung-until line (progress lines i (p :position))) 0)]
+          (render opts line cut))
+        (render opts (fallback p) 0)))
+    (if (os/getenv "PRINT_PLAYER") (string (p :name) "\n" text) text)))
+
+# moves the player to word n of the line it is on
+(defn seek [n]
+  (when-let [p (pick (players))
+             lines (lines-for p)
+             i (line-at lines (p :position))]
+    (def [start end] (line-span lines i))
+    (if-let [f (word-start ((lines i) :text) n)]
+      (output nil "playerctl" "--player" (p :name) "position"
+              (string/format "%.3f" (/ (+ start (* f (- end start))) 1e6)))
+      (eprint "lyrics: the line has no word " n))))
+
+# numbers typed on stdin, read in a thread since reading blocks
+(defn read-seeks []
+  (def typed (ev/thread-chan 16))
+  (ev/thread (fn [] (while (def line (file/read stdin :line)) (ev/give typed line)) (ev/give typed nil))
+             nil :n)
+  (while (def line (ev/take typed))
+    (def n (scan-number (string/trim line)))
+    (if (and n (int? n)) (seek n) (eprint "lyrics: not a word number: " (string/trim line)))))
+
+(defn main [_ & args]
+  (def opts @{:ending "\n"})
+  (var i 0)
+  (while (< i (length args))
+    (def arg (args i))
+    (cond
+      (index-of arg ["-f" "--follow"]) (put opts :follow true)
+      (= arg "--pango") (put opts :pango true)
+      (and (= arg "--wrap") (< (+ i 2) (length args)))
+      (do (put opts :wrap [(unescape (args (+ i 1))) (unescape (args (+ i 2)))]) (+= i 2))
+      (and (= arg "--ending") (< (inc i) (length args)))
+      (do (put opts :ending (unescape (args (inc i)))) (++ i))
+      (do (eprint usage) (os/exit 2)))
+    (++ i))
+  (mkdirs cache)
+  (unless (opts :follow)
+    (def text (or (current opts) ""))
+    (unless (empty? text) (prin text (opts :ending)))
+    (file/flush stdout)
+    (os/exit 0))
+  (ev/go read-seeks)
+  (var shown nil)
+  (forever
+    (def text (or (current opts) ""))
+    (unless (= text shown)
+      (prin text (opts :ending))
+      (file/flush stdout)
+      (set shown text))
+    (ev/sleep (if (opts :wrap) wrap-interval follow-interval))))
