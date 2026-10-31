@@ -215,7 +215,8 @@ in
   config = lib.modules.mkIf (cfg.enable && cfg.passwordFile != null) {
     services.kavita = {
       enable = true;
-      tokenKeyFile = token;
+      # fills the @token_key@ that settings.TokenKey defaults to
+      credentials.token_key = token;
       settings = {
         Port = port;
         IpAddresses = "127.0.0.1";

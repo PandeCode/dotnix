@@ -42,11 +42,11 @@ in
       enable = true;
       nssmdns4 = true;
       openFirewall = true;
-      publish = {
-        enable = true;
-        addresses = true;
-        workstation = true;
-        userServices = true;
+      settings.publish = {
+        disable-publishing = false;
+        disable-user-service-publishing = false;
+        publish-addresses = true;
+        publish-workstation = true;
       };
     };
 

@@ -50,7 +50,7 @@ let
         pkgs.gnuplot
       ]
     }:$PATH
-    exec ${lib.meta.getExe pkgs.octave} --persist --eval "warning('off', 'Octave:gnuplot-graphics');" "$@"
+    exec ${lib.meta.getExe' pkgs.octave "octave"} --persist --eval "warning('off', 'Octave:gnuplot-graphics');" "$@"
   '';
 
   # jupyterlab's theme variables are on :root too and load after this, so

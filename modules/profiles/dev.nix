@@ -86,7 +86,6 @@ in
         libnotify
         libogg
         libpng
-        libpng12
         libpulseaudio
         librsvg
         libsamplerate
@@ -177,8 +176,8 @@ in
       ))
       android-tools
       appimage-run
-      codeberg-cli
       fennel-ls
+      forgejo-cli
       gcc
       gnumake
       luajit
