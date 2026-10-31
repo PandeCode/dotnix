@@ -118,7 +118,6 @@ lib.modules.mkIf osConfig.dotnix.niri.enable {
           tap = { };
           natural-scroll = { };
           scroll-method = "two-finger";
-          disabled-on-external-mouse = { };
         };
       };
 
