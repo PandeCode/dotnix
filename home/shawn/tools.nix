@@ -61,5 +61,11 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
       wl-clipboard
       xclip
     ])
+
+    (tool "touchpad" [
+      coreutils
+      libnotify
+      systemd
+    ])
   ];
 }

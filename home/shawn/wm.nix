@@ -90,6 +90,8 @@ in
       (bind [ "Super" "Shift" ] "equal" "display-scale in")
       (bind [ "Super" "Shift" ] "minus" "display-scale out")
       (bind [ "Super" "Shift" ] "0" "display-scale reset")
+      (bind [ "Super" ] "t" "touchpad toggle")
+      (bind [ ] "XF86TouchpadToggle" "touchpad toggle")
       (bind [ "Alt" ] "space" "rofi-run.sh")
       (bind [ "Alt" "Shift" ] "space" "rofi-run-pr.sh")
 

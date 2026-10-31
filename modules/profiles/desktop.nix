@@ -55,6 +55,12 @@ in
         };
       };
 
+      # lets the touchpad tool (home/shawn/scripts/touchpad.sh) turn touchpads
+      # off in the kernel, which every session and the console respect
+      services.udev.extraRules = ''
+        ACTION=="add", SUBSYSTEM=="input", KERNEL=="input[0-9]*", ENV{ID_INPUT_TOUCHPAD}=="1", RUN+="${pkgs.coreutils}/bin/chgrp input /sys%p/inhibited", RUN+="${pkgs.coreutils}/bin/chmod g+w /sys%p/inhibited"
+      '';
+
       xdg.portal = {
         enable = true;
         xdgOpenUsePortal = true;
