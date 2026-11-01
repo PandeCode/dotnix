@@ -1,4 +1,4 @@
-# docs.<domain>: paperless-ngx, every paper and pdf ocr'd, tagged and
+# papers.<domain>: paperless-ngx, every paper and pdf ocr'd, tagged and
 # searchable. drop files in the scan folder and they show up here
 { config, lib, ... }:
 
@@ -7,12 +7,12 @@ let
   inherit (lib) types;
   inherit (config.dotnix) user;
 
-  cfg = config.dotnix.services.docs;
+  cfg = config.dotnix.services.papers;
 in
 
 {
-  options.dotnix.services.docs = {
-    enable = mkEnableOption "paperless-ngx, at docs.<domain>";
+  options.dotnix.services.papers = {
+    enable = mkEnableOption "paperless-ngx, at papers.<domain>";
 
     inbox = mkOption {
       type = types.str;
@@ -41,7 +41,7 @@ in
       enable = true;
       inherit (cfg) passwordFile;
       consumptionDir = cfg.inbox;
-      domain = "docs.${config.dotnix.home.domain}";
+      domain = "papers.${config.dotnix.home.domain}";
       database.createLocally = true;
       # ocr stays english, its default: naming a language rebuilds it from source
       settings = {
@@ -66,9 +66,9 @@ in
     users.users.${config.services.paperless.user}.extraGroups = [ "users" ];
 
     dotnix = {
-      home.sites.docs.port = config.services.paperless.port;
+      home.sites.papers.port = config.services.paperless.port;
       # the searchable copies, with their text layer
-      services.files.views.docs = "${config.services.paperless.mediaDir}/documents/archive";
+      services.files.views.papers = "${config.services.paperless.mediaDir}/documents/archive";
       backup = {
         paths = [ config.services.paperless.dataDir ];
         databases = [ "paperless" ];

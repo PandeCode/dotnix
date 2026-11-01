@@ -119,7 +119,7 @@ in
       type = types.attrsOf types.str;
       default = { };
       example = {
-        docs = "/var/lib/paperless/media/documents/archive";
+        papers = "/var/lib/paperless/media/documents/archive";
       };
       description = "Folders of other services, shown read-only and as yours at apps/<name>.";
     };

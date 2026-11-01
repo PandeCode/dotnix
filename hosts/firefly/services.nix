@@ -22,7 +22,6 @@ in
         feeds = map (feed: feed.url) feeds;
       };
       dav.enable = true;
-      docs.enable = true;
       draw.enable = true;
       files.enable = true;
       firefox.enable = true;
@@ -38,6 +37,7 @@ in
       };
       ntfy.enable = true;
       office.enable = true;
+      papers.enable = true;
       pdf.enable = true;
       photos.enable = true;
       read.enable = true;

@@ -23,7 +23,6 @@ let
     beszel = "henrygd/beszel";
     books = "Kareadita/Kavita";
     dav = "Kozea/Radicale";
-    docs = "paperless-ngx/paperless-ngx";
     draw = "excalidraw/excalidraw";
     files = "gtsteffaniak/filebrowser";
     firefox = "mozilla-services/syncstorage-rs";
@@ -33,6 +32,7 @@ let
     news = "miniflux/v2";
     ntfy = "binwiederhier/ntfy";
     office = "ONLYOFFICE/DocumentServer";
+    papers = "paperless-ngx/paperless-ngx";
     pdf = "alam00000/bentopdf";
     photos = "immich-app/immich";
     read = "codeberg:readeck/readeck";

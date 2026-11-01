@@ -16,7 +16,6 @@
     ./config.nix
     ./dashboard.nix
     ./dav.nix
-    ./docs.nix
     ./draw.nix
     ./files.nix
     ./firefox.nix
@@ -28,6 +27,7 @@
     ./notify.nix
     ./ntfy.nix
     ./office.nix
+    ./papers.nix
     ./pdf.nix
     ./photos.nix
     ./read.nix
