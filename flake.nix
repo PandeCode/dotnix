@@ -127,13 +127,5 @@
       repo = "lets-play-agda";
       flake = false;
     };
-
-    # better spotify player
-    spotifast = {
-      type = "github";
-      owner = "crmne";
-      repo = "spotifast";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 }

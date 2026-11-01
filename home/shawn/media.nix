@@ -127,8 +127,6 @@ in
       nsxiv
       pqiv
       vlc
-
-      inputs.spotifast.packages."${pkgs.stdenv.hostPlatform.system}".default
     ];
   };
 }
