@@ -35,7 +35,7 @@ lib.modules.mkIf osConfig.dotnix.niri.enable {
       "awww-daemon -n backdrop"
     ];
 
-    includes = [ "~/dotnix/config/niri/live.kdl" ];
+    includes = [ "./live.kdl" ];
 
     shaders = {
       open = ../../config/niri/shaders/open.glsl;
