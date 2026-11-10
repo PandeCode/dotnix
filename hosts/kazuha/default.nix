@@ -14,9 +14,9 @@
     inputs.nixos-hardware.nixosModules.framework-16-amd-ai-300-series
   ];
 
-  # 7.3.0 freezes on resume from hibernation; back to latest once a 7.3
-  # point release fixes it
-  boot.kernelPackages = pkgs.linuxPackages_7_2;
+  # 7.3.0 froze on resume from hibernation. if a 7.3 point release still
+  # does, linuxPackages_6_18 is the newest lts
+  boot.kernelPackages = pkgs.linuxPackages_latest;
   hardware.framework.enableKmod = lib.mkForce false;
 
   # suspend-then-hibernate resumes from the swapfile below: systemd writes its
