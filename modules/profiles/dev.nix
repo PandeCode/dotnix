@@ -65,7 +65,6 @@ in
         glib
         glibc
         gsettings-desktop-schemas
-        gtk2
         gtk3
         gtk4
         icu
