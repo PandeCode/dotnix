@@ -137,7 +137,6 @@ lib.modules.mkIf osConfig.dotnix.profiles.apps.enable {
     freerdp
     gnome-clocks
     gram
-    manga-tui
     ncdu
     neovide
     nix-search-cli
