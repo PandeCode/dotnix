@@ -49,12 +49,23 @@ let
   generated = pkgs.writeText "niri-generated.kdl" cfg.kdl;
 
   # validated before the includes are added: those are live files that do
-  # not exist at build time
+  # not exist at build time. optional, so a missing one never stops niri
   configFile = pkgs.runCommand "niri-config.kdl" { nativeBuildInputs = [ cfg.package ]; } ''
     niri validate -c ${generated}
     cat ${generated} > $out
-    ${concatMapStrings (file: "echo 'include \"${file}\"' >> $out\n") cfg.includes}
+    ${concatMapStrings (file: "echo 'include optional=true \"${file}\"' >> $out\n") cfg.includes}
   '';
+
+  # where niri looks for an include: ~ is home, a relative path is next to
+  # config.kdl
+  includePath =
+    file:
+    if hasPrefix "~/" file then
+      "$HOME/${removePrefix "~/" file}"
+    else if hasPrefix "/" file then
+      file
+    else
+      "${config.xdg.configHome}/niri/${file}";
 
   shaders = lib.attrsets.mapAttrs' (name: file: {
     name = "window-${name}";
@@ -136,7 +147,9 @@ in
       description = ''
         Files included at the end of config.kdl. They override the
         generated config and niri reloads them on change, so they are good
-        for trying things without a switch.
+        for trying things without a switch. A relative path is next to
+        config.kdl. Each one is created empty if missing and left alone
+        after that.
       '';
     };
   };
@@ -162,5 +175,15 @@ in
     };
 
     xdg.configFile."niri/config.kdl".source = configFile;
+
+    # an empty file to write into, never overwritten once there
+    home.activation.niriIncludes = lib.hm.dag.entryAfter [ "writeBoundary" ] (
+      concatMapStrings (file: ''
+        if [ ! -e "${includePath file}" ]; then
+          run mkdir -p "$(dirname "${includePath file}")"
+          run touch "${includePath file}"
+        fi
+      '') cfg.includes
+    );
   };
 }
