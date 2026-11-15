@@ -120,7 +120,11 @@ in
         sync_frequency = "5m";
       };
     };
-    carapace = withShells;
+    carapace = withShells // {
+      # carapace parses these with cobra, which rejects signal flags like
+      # `kill -9`; fish's own completions take them and list processes
+      environment.CARAPACE_EXCLUDES = "kill,killall,pkill";
+    };
     zoxide = withShells;
 
     direnv = withShells // {
