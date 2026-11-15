@@ -1,18 +1,12 @@
 name: "ISO"
 
-# after an update pr is merged, or by hand: build the live system and put
-# it on a release
+# by hand only: build the live system and put it on a release
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "flake.lock"
   workflow_dispatch:
 
 permissions: {}
 
-# a newer merge replaces a build still running
+# a newer run replaces a build still running
 concurrency:
   group: iso
   cancel-in-progress: true
