@@ -96,12 +96,13 @@ configuration {
       delay:  0;
     }
 
+          /* typing works like insert mode in nvim, the list like its completion menu */
           kb-accept-alt             : "Shift+Return";
           kb-accept-custom          : "Control+Alt+Return";
           kb-accept-custom-alt      : "Control+Shift+Alt+Return";
-          kb-accept-entry           : "Return,KP_Enter";
-          kb-cancel                 : "Escape";
-          kb-clear-line             : "Control+w";
+          kb-accept-entry           : "Return,KP_Enter,Control+y,Control+m,Control+j";
+          kb-cancel                 : "Escape,Control+bracketleft,Control+g,MouseSecondary";
+          kb-clear-line             : "";
           kb-custom-10              : "Alt+0";
           kb-custom-11              : "Alt+exclam";
           kb-custom-12              : "Alt+at";
@@ -123,33 +124,35 @@ configuration {
           kb-custom-9               : "Alt+9";
           kb-delete-entry           : "Shift+Delete";
           kb-ellipsize              : "Alt+period";
+          kb-element-next           : "Tab";
+          kb-element-prev           : "ISO_Left_Tab";
           kb-mode-complete          : "Control+space";
           kb-mode-next              : "Control+Tab";
           kb-mode-previous          : "Control+ISO_Left_Tab";
           kb-move-char-back         : "Left";
           kb-move-char-forward      : "Right";
-          kb-move-end               : "Control+e";
-          kb-move-front             : "Control+a";
-          kb-move-word-back         : "Control+Left";
-          kb-move-word-forward      : "Control+Right";
-          kb-page-next              : "Control+l";
-          kb-page-prev              : "Control+h";
+          kb-move-end               : "Control+e,End";
+          kb-move-front             : "Control+b,Control+a,Home";
+          kb-move-word-back         : "Shift+Left,Control+Left";
+          kb-move-word-forward      : "Shift+Right,Control+Right";
+          kb-page-next              : "Page_Down";
+          kb-page-prev              : "Page_Up";
           kb-primary-paste          : "Control+V,Shift+Insert";
-          kb-remove-char-back       : "BackSpace";
+          kb-remove-char-back       : "BackSpace,Shift+BackSpace,Control+h";
           kb-remove-char-forward    : "Delete";
-          kb-remove-to-eol          : "";
-          kb-remove-to-sol          : "";
-          kb-remove-word-back       : "Control+BackSpace";
-          kb-remove-word-forward    : "";
-          kb-row-down               : "Control+j";
-          kb-row-first              : "Home,KP_Home";
-          kb-row-last               : "End,KP_End";
+          kb-remove-to-eol          : "Control+k";
+          kb-remove-to-sol          : "Control+u";
+          kb-remove-word-back       : "Control+w,Control+BackSpace";
+          kb-remove-word-forward    : "Control+Delete";
+          kb-row-down               : "Down,Control+n";
+          kb-row-first              : "Control+Home";
+          kb-row-last               : "Control+End";
           kb-row-left               : "Control+Page_Up";
           kb-row-right              : "Control+Page_Down";
           kb-row-select             : "Control+Return";
-          /* kb-row-tab                : "Tab"; */
-          kb-row-up                 : "Control+k";
+          kb-row-up                 : "Up,Control+p";
           kb-screenshot             : "Alt+S";
+          kb-secondary-copy         : "Control+c";
           kb-secondary-paste        : "Control+v,Insert";
           kb-select-10              : "Super+0";
           kb-select-1               : "Super+1";
@@ -161,7 +164,7 @@ configuration {
           kb-select-7               : "Super+7";
           kb-select-8               : "Super+8";
           kb-select-9               : "Super+9";
-          kb-toggle-case-sensitivity: "grave,dead_grave";
+          kb-toggle-case-sensitivity: "Alt+c";
           kb-toggle-sort            : "Alt+grave";
           me-accept-custom          : "Control+MouseDPrimary";
           me-accept-entry           : "MouseDPrimary";
