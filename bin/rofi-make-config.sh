@@ -7,16 +7,21 @@ font=$(cat ~/.config/stylix/font)
 
 source "$HOME/.config/stylix/style.sh"
 
+base00="${base00:-#000000}"
 base01="${base01:-#1c1f24}"
 base02="${base02:-#2c313a}"
+base04="${base04:-#565c64}"
 base05="${base05:-#abb2bf}"
 base07="${base07:-#c8ccd4}"
-base0A="${base0A:-#e5c07b}"
+base0B="${base0B:-#89ca78}"
 base0D="${base0D:-#61afef}"
+base0E="${base0E:-#d55fde}"
 
+# laid out like an nvim window: modes in the tabline, the list as the
+# completion menu, then the statusline and the command line
 cat <<EOF >/tmp/launcher.rasi
 configuration {
-  font: "$font";
+  font: "$font 12";
   modi: "drun,run,filebrowser,window,calc";
 }
 
@@ -26,103 +31,155 @@ configuration {
   padding: 0;
   spacing: 0;
 
-  bg: $base01;
-  bg-alt: $base02;
+  bg: $base00;
+  panel: $base01;
+  line: $base02;
+  dim: $base04;
   fg: $base05;
   fg-alt: $base07;
+  insert: $base0B;
   accent: $base0D;
-  active: $base0A;
+  colon: $base0E;
 
-  background-color: @bg;
+  background-color: transparent;
   text-color: @fg;
 }
 
 window {
   transparency: "real";
-  width: 900px;
-  border: 2px;
-  border-color: @accent;
-  border-radius: 12px;
+  width: 760px;
+  background-color: @bg;
+  border: 1px;
+  border-color: @line;
+  border-radius: 6px;
 }
 
 mainbox {
-  children: [imagebox, listbox];
+  children: [tabline, message, listview, statusline, cmdline];
+}
+
+tabline {
+  expand: false;
   orientation: horizontal;
+  background-color: @panel;
+  children: [mode-switcher, wallpaper];
 }
 
-imagebox {
-  padding: 20px;
-  background-color: transparent;
-  background-image: url("$image", height);
-  orientation: vertical;
-  children: [inputbar];
+mode-switcher {
+  expand: false;
 }
 
-listbox {
-  padding: 20px;
-  background-color: transparent;
-  orientation: vertical;
-  children: [message, listview];
+button {
+  expand: false;
+  padding: 6px 16px;
+  text-color: @dim;
+  background-color: @panel;
+}
+
+button selected {
+  text-color: @bg;
+  background-color: @accent;
+}
+
+wallpaper {
+  background-image: url("$image", width);
 }
 
 message {
-  background-color: transparent;
-  padding: 0px 0px 10px 0px;
+  padding: 8px 14px;
+  background-color: @panel;
+  border: 1px 0 0 0;
+  border-color: @line;
 }
 
 textbox {
-  background-color: @bg-alt;
-  text-color: @accent;
-  padding: 15px;
-  border-radius: 8px;
-}
-
-inputbar {
-  background-color: @bg-alt;
-  children: [prompt, entry];
-  border-radius: 8px;
-}
-
-entry {
-  background-color: inherit;
-  padding: 12px 3px;
-  text-color: @fg-alt;
-}
-
-prompt {
-  background-color: inherit;
-  padding: 12px;
   text-color: @accent;
 }
 
 listview {
   lines: 8;
-  padding: 0px;
+  padding: 6px 0;
+  fixed-height: true;
+  scrollbar: true;
+}
+
+scrollbar {
+  handle-width: 4px;
+  handle-color: @line;
 }
 
 element {
-  children: [element-icon, element-text];
-  border-radius: 8px;
-  padding: 8px;
+  padding: 4px 14px;
+  spacing: 12px;
 }
 
-element selected {
-  background-color: @bg-alt;
+element selected.normal {
+  background-color: @line;
 }
 
 element-icon {
-  padding: 0px 10px;
-  size: 20px;
-  background-color: transparent;
+  size: 22px;
 }
 
 element-text {
-  padding: 0px 0px;
-  background-color: transparent;
+  vertical-align: 0.5;
 }
 
 element-text selected {
-  text-color: @accent;
+  text-color: @fg-alt;
+}
+
+statusline {
+  expand: false;
+  orientation: horizontal;
+  background-color: @panel;
+  children: [textbox-mode, prompt, fill, num-filtered-rows, textbox-slash, num-rows];
+}
+
+textbox-mode {
+  expand: false;
+  content: " INSERT ";
+  padding: 3px 6px;
+  text-color: @bg;
+  background-color: @insert;
+}
+
+prompt {
+  padding: 3px 10px;
+}
+
+num-filtered-rows, textbox-slash, num-rows {
+  expand: false;
+  padding: 3px 0;
+  text-color: @dim;
+}
+
+textbox-slash {
+  content: "/";
+}
+
+num-rows {
+  padding: 3px 12px 3px 0;
+}
+
+cmdline {
+  expand: false;
+  orientation: horizontal;
+  padding: 8px 12px;
+  children: [textbox-colon, entry];
+}
+
+textbox-colon {
+  expand: false;
+  content: ":";
+  padding: 0 6px 0 0;
+  text-color: @colon;
+}
+
+entry {
+  text-color: @fg-alt;
+  cursor-color: @insert;
+  cursor-width: 2px;
 }
 EOF
 
