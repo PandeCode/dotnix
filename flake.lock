@@ -221,11 +221,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795115396,
-        "narHash": "sha256-veyl26UhCn4ySDss/JDO9wVakPoB1gf0kSC4z/Isbo0=",
+        "lastModified": 1795115562,
+        "narHash": "sha256-zB1cmAKaCOQ7dwejhrlXJ8iC/xsfeF9Jvn5I2ObseN8=",
         "owner": "PandeCode",
         "repo": "hermes",
-        "rev": "a00caba69ec81167ecc69a530af5b41caaab2716",
+        "rev": "d27afbb8789307d86e598bf4d4183323952b3c7c",
         "type": "github"
       },
       "original": {
@@ -395,11 +395,11 @@
         "zig-overlay": "zig-overlay"
       },
       "locked": {
-        "lastModified": 1794665947,
-        "narHash": "sha256-X9qx3D7YPTygdaNvCYf84i2tt//JQHPsxCX4tjRmFQo=",
+        "lastModified": 1795115568,
+        "narHash": "sha256-y5wm7cZEBhCIhbum6VuRnOss7oH+pCfcJF7jFOUcFYg=",
         "owner": "PandeCode",
         "repo": "nixbuilds",
-        "rev": "d839acbdacb23c8809fb384c39a7661b33c7e330",
+        "rev": "4852fcd49e8287312183cb39f43317753aa4a01c",
         "type": "github"
       },
       "original": {

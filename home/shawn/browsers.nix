@@ -29,6 +29,9 @@ let
     value = "unstable";
   };
 
+  # starts hermes for the firenvim extension
+  firenvimHost = lib.lists.optional osConfig.programs.hermes.enable osConfig.programs.hermes.firenvimHost;
+
   # the sites firefly serves, on machines that trust its certificates
   home = osConfig.dotnix.home.ca != null;
   inherit (osConfig.dotnix.home) domain;
@@ -47,15 +50,12 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
       dictionaries = [ pkgs.hunspellDictsChromium.en_US ];
       # pinned in nixbuilds, which keeps them up to date
       extensions = pkgs.chromium-extensions.extensions;
+      nativeMessagingHosts = firenvimHost;
     };
 
     librewolf = {
       enable = true;
-      # firenvim's host starts hermes for the extension
-      nativeMessagingHosts = [
-        pkgs.firefoxpwa
-      ]
-      ++ lib.lists.optional osConfig.programs.hermes.enable osConfig.programs.hermes.firenvimHost;
+      nativeMessagingHosts = [ pkgs.firefoxpwa ] ++ firenvimHost;
 
       # syncs through firefly instead of mozilla's servers
       profiles.main.settings = lib.attrsets.optionalAttrs home {
