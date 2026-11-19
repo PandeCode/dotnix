@@ -32,6 +32,71 @@ let
   # starts hermes for the firenvim extension
   firenvimHost = lib.lists.optional osConfig.programs.hermes.enable osConfig.programs.hermes.firenvimHost;
 
+  # the keys browsers keep for themselves, handed to firenvim. outside a
+  # firenvim frame it does what the browser would have done
+  firenvimKeys = {
+    "send_C-n" = "Ctrl+N";
+    "send_C-t" = "Ctrl+T";
+    "send_C-w" = "Ctrl+W";
+    "send_CS-n" = "Ctrl+Shift+N";
+    "send_CS-t" = "Ctrl+Shift+T";
+    "send_CS-w" = "Ctrl+Shift+W";
+  };
+
+  # extension shortcuts live in profile state that the browser rewrites, so
+  # they are merged in on each switch while the browser is closed (its lock is
+  # gone), and the file is only replaced when something changed
+  setFirenvimKeys = pkgs.writeShellScript "set-firenvim-keys" ''
+    jq=${lib.meta.getExe pkgs.jq}
+    keys='${builtins.toJSON firenvimKeys}'
+
+    # merge FILE LOCK FILTER: run the jq filter over FILE unless LOCK exists.
+    # it only warns, so a browser's state never stops a switch
+    merge() {
+      [ -e "$1" ] || return 0
+      if [ -L "$2" ] || [ -e "$2" ]; then
+        echo "firenvim keys: $1 is in use, close the browser and switch again" >&2
+        return 0
+      fi
+      if ! "$jq" -c --argjson keys "$keys" "$3" "$1" > "$1.tmp"; then
+        rm -f "$1.tmp"
+        echo "firenvim keys: can't read $1, left alone" >&2
+        return 0
+      fi
+      if ${pkgs.diffutils}/bin/cmp -s "$1" "$1.tmp"; then
+        rm "$1.tmp"
+      else
+        mv "$1.tmp" "$1"
+      fi
+    }
+
+    # librewolf: user-set shortcuts in extension-settings.json, one entry per
+    # command name with a precedence list of extensions
+    librewolf=$HOME/.librewolf/main
+    [ -d "$librewolf" ] && [ ! -e "$librewolf/extension-settings.json" ] &&
+      echo '{"version":4}' > "$librewolf/extension-settings.json"
+    merge "$librewolf/extension-settings.json" "$librewolf/lock" '
+      .commands //= {}
+      | reduce ($keys | to_entries[]) as $k (.;
+          .commands[$k.key].precedenceList =
+            ([.commands[$k.key].precedenceList[]? | select(.id != "firenvim@lacamb.re")]
+             + [{id: "firenvim@lacamb.re", installDate: 0,
+                 value: {shortcut: $k.value}, enabled: true}]))
+    '
+
+    # chromium: extensions.commands, keyed by platform and accelerator
+    chromium=$HOME/.config/chromium
+    merge "$chromium/Default/Preferences" "$chromium/SingletonLock" '
+      .extensions.commands //= {}
+      | reduce ($keys | to_entries[]) as $k (.;
+          .extensions.commands["linux:" + $k.value] = {
+            command_name: $k.key,
+            extension: "egpjdkipkomnmjhjmdamaniclmdlobbo",
+            global: false
+          })
+    '
+  '';
+
   # the sites firefly serves, on machines that trust its certificates
   home = osConfig.dotnix.home.ca != null;
   inherit (osConfig.dotnix.home) domain;
@@ -41,6 +106,9 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
   home = {
     packages = [ browser ];
     sessionVariables.BROWSER = lib.meta.getExe browser;
+    activation.firenvimKeys = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      run ${setFirenvimKeys}
+    '';
   };
 
   programs = {
