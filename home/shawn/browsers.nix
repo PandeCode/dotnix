@@ -51,7 +51,11 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
 
     librewolf = {
       enable = true;
-      nativeMessagingHosts = [ pkgs.firefoxpwa ];
+      # firenvim's host starts hermes for the extension
+      nativeMessagingHosts = [
+        pkgs.firefoxpwa
+      ]
+      ++ lib.lists.optional osConfig.programs.hermes.enable osConfig.programs.hermes.firenvimHost;
 
       # syncs through firefly instead of mozilla's servers
       profiles.main.settings = lib.attrsets.optionalAttrs home {
@@ -134,6 +138,8 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
             })
             {
               "{446900e4-71c2-419f-a6a7-df9c091e268b}" = "bitwarden-password-manager";
+              # nvim in text boxes and in typst.app's editor
+              "firenvim@lacamb.re" = "firenvim";
               "sponsorBlocker@ajay.app" = "sponsorblock";
               "uBlock0@raymondhill.net" = "ublock-origin";
             }
