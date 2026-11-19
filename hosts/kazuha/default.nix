@@ -61,6 +61,10 @@
   # ansi copilot
   services.udev.extraRules = ''
     ACTION=="add|bind", SUBSYSTEM=="usb", ATTR{idVendor}=="32ac", ATTR{idProduct}=="0012|0013|0014|0018|0019|0030", TEST=="power/control", ATTR{power/control}="on"
+
+    # the analog codec's mixer exists once its control device shows up, see
+    # speaker-levels below
+    ACTION=="add", SUBSYSTEM=="sound", KERNEL=="controlC*", KERNELS=="*:00.6", TAG+="systemd", ENV{SYSTEMD_WANTS}+="speaker-levels.service"
   '';
   powerManagement.powertop.postStart = ''
     ${lib.getExe' config.systemd.package "udevadm"} trigger -c bind -s usb -a idVendor=32ac
@@ -79,12 +83,15 @@
       }
     ];
   };
+  # the soft mixer leaves the codec alone, and the kernel brings it up muted,
+  # so this unmutes it every boot. sound.target is too early: the hdmi card
+  # can reach it before the codec is probed, and then this finds nothing.
+  # the udev rule above starts it when the codec's card is ready instead
   systemd.services.speaker-levels = {
     description = "Set the speaker codec levels to full";
-    wantedBy = [ "sound.target" ];
-    after = [ "sound.target" ];
     path = [ pkgs.alsa-utils ];
     script = ''
+      found=
       for codec in /proc/asound/card*/codec#*; do
         grep -q 'Codec: Realtek ALC285' "$codec" || continue
         card=''${codec#/proc/asound/card}
@@ -92,7 +99,12 @@
         for control in Master Speaker 'Bass Speaker'; do
           amixer -q -c "$card" sset "$control" 100% unmute
         done
+        found=1
       done
+      if [ -z "$found" ]; then
+        echo "no ALC285 codec in /proc/asound" >&2
+        exit 1
+      fi
     '';
     serviceConfig.Type = "oneshot";
   };
