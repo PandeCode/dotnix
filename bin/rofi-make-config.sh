@@ -138,7 +138,7 @@ statusline {
 
 textbox-mode {
   expand: false;
-  content: " INSERT ";
+  content: " (っ•̀ω•́)っ ";
   padding: 3px 6px;
   text-color: @bg;
   background-color: @insert;
