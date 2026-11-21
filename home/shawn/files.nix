@@ -75,6 +75,22 @@ let
     ]
   );
 
+  # adds the bookmarks set in nix that the file lacks, and keeps the rest
+  seedBookmarks = pkgs.writeShellScript "seed-bookmarks" ''
+    file=${config.xdg.configHome}/gtk-3.0/bookmarks
+    mkdir -p "$(dirname "$file")"
+    touch "$file"
+    # so the first line added does not join the last one
+    if [ -s "$file" ] && [ -n "$(tail -c 1 "$file")" ]; then
+      echo >> "$file"
+    fi
+    while read -r uri name; do
+      if ! ${lib.meta.getExe pkgs.gawk} -v uri="$uri" '$1 == uri { found = 1 } END { exit !found }' "$file"; then
+        echo "$uri''${name:+ $name}" >> "$file"
+      fi
+    done < ${pkgs.writeText "bookmarks" (lib.strings.concatLines config.gtk.gtk3.bookmarks)}
+  '';
+
   yazi-picker = pkgs.writeShellApplication {
     name = "yazi-picker";
     runtimeInputs = [ yazi.finalPackage ];
@@ -96,7 +112,10 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
       pkgs.util-linux
     ];
 
-    plugins.mount = pkgs.yaziPlugins.mount;
+    plugins = {
+      bookmarks = ../../config/yazi/bookmarks.yazi;
+      inherit (pkgs.yaziPlugins) mount;
+    };
 
     settings.mgr = {
       sort_by = "natural";
@@ -104,6 +123,27 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
     };
 
     keymap.mgr.prepend_keymap = [
+      {
+        on = "'";
+        run = "plugin bookmarks -- jump";
+        desc = "Jump to a bookmark";
+      }
+      {
+        on = [
+          "b"
+          "a"
+        ];
+        run = "plugin bookmarks -- add";
+        desc = "Bookmark this folder";
+      }
+      {
+        on = [
+          "b"
+          "d"
+        ];
+        run = "plugin bookmarks -- remove";
+        desc = "Remove a bookmark";
+      }
       {
         on = "M";
         run = "plugin mount";
@@ -126,6 +166,12 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
       }
     ];
   };
+
+  # the bookmarks file is yazi's to change too, gtk.gtk3.bookmarks only seeds it
+  xdg.configFile."gtk-3.0/bookmarks".enable = false;
+  home.activation.gtkBookmarks = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    run ${seedBookmarks}
+  '';
 
   # the portal runs this for every open and save dialog, in a ghostty of its
   # own that niri floats (yazi.picker in wm.nix)
