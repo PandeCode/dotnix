@@ -125,6 +125,7 @@ in
         "nsxiv"
         "hyprbind"
         "dragon-drop"
+        "yazi.picker"
 
         "title:Blender Preferences"
         "title:Picture-in-picture"

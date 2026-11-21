@@ -80,6 +80,12 @@ lib.modules.mkIf osConfig.dotnix.niri.enable {
             ];
         open-maximized = true;
       }
+      # the open and save dialogs, from home/shawn/files.nix
+      {
+        match._props.app-id = "^yazi\\.picker$";
+        default-column-width.proportion = 0.6;
+        default-window-height.proportion = 0.7;
+      }
       {
         match._props.app-id = "^zen-twilight$";
         variable-refresh-rate = true;

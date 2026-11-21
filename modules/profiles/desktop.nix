@@ -63,9 +63,23 @@ in
       xdg.portal = {
         enable = true;
         xdgOpenUsePortal = true;
-        extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-        # sessions without their own portal config, like i3
-        config.common.default = "gtk";
+        extraPortals = [
+          pkgs.xdg-desktop-portal-gtk
+          pkgs.xdg-desktop-portal-termfilechooser
+        ];
+        # yazi picks the files (home/shawn/files.nix). a session's own
+        # portals.conf replaces the common one, so each gets it
+        config =
+          lib.attrsets.genAttrs [ "niri" "river" ] (_: {
+            "org.freedesktop.impl.portal.FileChooser" = "termfilechooser";
+          })
+          // {
+            # sessions without their own portal config, like i3
+            common = {
+              default = "gtk";
+              "org.freedesktop.impl.portal.FileChooser" = "termfilechooser";
+            };
+          };
       };
 
       programs.ydotool = mkIf config.dotnix.wayland.enable {

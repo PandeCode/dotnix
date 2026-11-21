@@ -192,9 +192,16 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
           osConfig.dotnix.home.ca != null
         ) "${osConfig.dotnix.home.ca}";
 
-        Preferences."browser.tabs.warnOnClose" = {
-          Value = false;
-          Status = "locked";
+        Preferences = {
+          "browser.tabs.warnOnClose" = {
+            Value = false;
+            Status = "locked";
+          };
+          # open and save dialogs through the portal, so yazi
+          "widget.use-xdg-desktop-portal.file-picker" = {
+            Value = 1;
+            Status = "default";
+          };
         };
 
         ExtensionSettings =
