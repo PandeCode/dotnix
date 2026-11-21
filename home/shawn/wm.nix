@@ -58,7 +58,9 @@ in
   dotnix.wm = {
     terminal = "ghostty";
     shell = "fish";
-    explorer = "nautilus";
+    # +new-window asks the running ghostty for the window, -e and all, so
+    # it opens as fast as a new terminal
+    explorer = "${terminal} +new-window --title=Files -e yazi";
 
     # no -e: it would start a new ghostty instead of a window of the
     # running one, and ghostty starts the shell itself
@@ -122,6 +124,7 @@ in
         "feh"
         "nsxiv"
         "hyprbind"
+        "dragon-drop"
 
         "title:Blender Preferences"
         "title:Picture-in-picture"

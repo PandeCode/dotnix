@@ -102,16 +102,16 @@ lib.modules.mkIf osConfig.dotnix.profiles.apps.enable {
       defaultApplications = {
         "application/pdf" = "org.pwmt.zathura.desktop";
         "image/png" = "feh.desktop";
-        "inode/directory" = "xranger.desktop";
+        "inode/directory" = "yazi-folder.desktop";
       };
     };
 
     desktopEntries = {
-      xranger = {
-        name = "xranger";
+      yazi-folder = {
+        name = "Files";
         genericName = "File Manager";
-        exec = "${open-tui}/bin/open-tui ranger %F";
-        icon = "utilities-terminal";
+        exec = "${open-tui}/bin/open-tui yazi %F";
+        icon = "system-file-manager";
         terminal = false;
         type = "Application";
         categories = [
