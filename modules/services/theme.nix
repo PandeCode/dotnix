@@ -1,6 +1,7 @@
-# theme.<domain>: the stylix colors and font as one stylesheet, for the web
-# apps to import. sixteen colors are too few for a web ui, so it adds roles
-# (surface, border, accent, ...) and a ramp of shades from base00 to base07
+# theme.<domain>: the stylix colors and fonts as one stylesheet, for the web
+# apps to import. sixteen colors are too few for a web ui, so it adds the
+# palette's roles (surface, border, accent, ...) and a ramp of shades from
+# base00 to base07
 {
   config,
   lib,
@@ -15,7 +16,8 @@ let
 
   colors = config.lib.stylix.colors.withHashtag;
   inherit (config.stylix.fonts.sansSerif) name;
-  inherit (config.dotnix.profiles.theme) webFont;
+  mono = config.stylix.fonts.monospace.name;
+  inherit (config.dotnix.profiles.theme) palette webFont webMonoFont;
 
   bases = map (n: "base0${n}") [
     "0"
@@ -90,32 +92,37 @@ let
     ) (lib.lists.range 0 13)
     ++ [ "var(--base07)" ];
 
+  face = family: file: format: ''
+    @font-face {
+      font-family: "${family}";
+      src: local("${family}"), url("${file}") format("${format}");
+      font-display: swap;
+    }
+  '';
+
   css = ''
-    ${lib.strings.optionalString (webFont != null) ''
-      @font-face {
-        font-family: "${name}";
-        src: local("${name}"), url("font.otf") format("opentype");
-        font-display: swap;
-      }
-    ''}
+    ${lib.strings.optionalString (webFont != null) (face name "font.otf" "opentype")}
+    ${lib.strings.optionalString (webMonoFont != null) (face mono "font-mono.ttf" "truetype")}
     :root {
     ${lib.strings.concatMapStrings (b: "  --${b}: ${colors.${b}};\n") bases}
     ${lib.strings.concatStrings (lib.lists.imap0 (i: v: "  --ramp-${toString i}: ${v};\n") ramp)}
-      --bg: var(--base00);
-      --surface: var(--base01);
-      --overlay: var(--base02);
-      --border: var(--base02);
-      --muted: var(--base04);
-      --text: var(--base05);
-      --bright: var(--base07);
-      --accent: var(--base0D);
-      --accent-hover: color-mix(in oklab, var(--base0D), var(--base07) 20%);
-      --accent-soft: color-mix(in oklab, var(--base0D) 20%, transparent);
-      --ok: var(--base0B);
-      --warn: var(--base0A);
-      --error: var(--base08);
-      --info: var(--base0C);
+    ${lib.strings.concatStrings (
+      lib.attrsets.mapAttrsToList (role: color: "  --${role}: ${color};\n") palette
+    )}
+      --overlay: var(--raised);
+      --accent-hover: color-mix(in oklab, var(--accent), var(--bright) 20%);
+      --accent-soft: color-mix(in oklab, var(--accent) 20%, transparent);
       --font: "${name}", sans-serif;
+      --mono: "${mono}", monospace;
+    }
+
+    /* links in running text point up and out; app links with their own
+       class are left alone */
+    p a:not([class])::after,
+    li a:not([class])::after {
+      content: "\2197";
+      font-size: 0.8em;
+      margin-left: 1px;
     }
   '';
 
@@ -123,6 +130,7 @@ let
     mkdir $out
     cp ${pkgs.writeText "theme.css" css} $out/theme.css
     ${lib.strings.optionalString (webFont != null) "cp ${webFont} $out/font.otf"}
+    ${lib.strings.optionalString (webMonoFont != null) "cp ${webMonoFont} $out/font-mono.ttf"}
   '';
 in
 
@@ -137,6 +145,7 @@ in
           rgb = lib.attrsets.genAttrs bases rgb;
           hsl = lib.attrsets.genAttrs bases hsl;
           font = name;
+          inherit mono palette;
           url = "https://theme.${home.domain}/theme.css";
           import = ''@import url("https://theme.${home.domain}/theme.css");'';
         }
@@ -144,8 +153,9 @@ in
         null;
     description = ''
       The stylix theme for web apps, or null without stylix: colors as hex,
-      rgb and hsl, the font's name, the stylesheet's url with css to import
-      it, and its folder for apps that only load styles from themselves.
+      rgb and hsl, the palette's roles, the font and code font names, the
+      stylesheet's url with css to import it, and its folder for apps that
+      only load styles from themselves.
     '';
   };
 
@@ -158,6 +168,7 @@ in
       extraConfig = ''
         header Access-Control-Allow-Origin *
         header /font.otf Content-Type font/otf
+        header /font-mono.ttf Content-Type font/ttf
       '';
     };
   };

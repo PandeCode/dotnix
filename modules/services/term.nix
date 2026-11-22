@@ -47,7 +47,7 @@ in
         "exec ${lib.meta.getExe pkgs.tmux} -L term new-session -A -s term"
       ];
       clientOptions = lib.attrsets.optionalAttrs (theme != null) {
-        fontFamily = "${theme.font}, monospace";
+        fontFamily = "${theme.mono}, monospace";
         theme = builtins.toJSON {
           background = c.base00;
           foreground = c.base05;

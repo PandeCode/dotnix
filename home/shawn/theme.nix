@@ -8,6 +8,7 @@
 
 let
   c = config.lib.stylix.colors.withHashtag;
+  p = osConfig.dotnix.profiles.theme.palette;
 
   bases = map (n: "base0${lib.strings.toUpper (lib.trivial.toHexString n)}") (lib.lists.range 0 15);
   colors = map (name: c.${name}) bases;
@@ -20,8 +21,8 @@ let
         panel1 = s.base01;
         panel2 = s.base00;
         text = s.base05;
-        textDisabled = s.base03;
-        border = s.base02;
+        textDisabled = lib.strings.removePrefix "#" p.dim;
+        border = lib.strings.removePrefix "#" p.border;
         buttonNormal = s.base02;
         buttonHovered = s.base03;
         buttonPressed = s.base00;
@@ -31,12 +32,12 @@ let
         codeFocused = s.base02;
         codeBackground = s.base00;
         codeDefault = s.base05;
-        codeComment = s.base04;
+        codeComment = lib.strings.removePrefix "#" p.muted;
         codeString = s.base0B;
         codeNumber = s.base09;
         codeOperator = s.base0C;
         codePreprocessor = s.base0E;
-        selected = s.base0D;
+        selected = lib.strings.removePrefix "#" p.accent;
         textSelected = s.base00;
         # the status light, accent1 while running and accent2 when stopped
         accent1 = s.base08;
@@ -61,20 +62,25 @@ let
 
   # config/tmux/.tmux.conf keeps these in place of its own when @theme is set
   tmuxColors = {
-    bg = c.base00;
-    surface = c.base01;
-    line = c.base02;
-    muted = c.base04;
-    text = c.base05;
-    bright = c.base07;
-    normal = c.base0D;
-    insert = c.base0B;
-    visual = c.base0E;
-    command = c.base0A;
-    replace = c.base08;
-    warn = c.base0A;
-    error = c.base08;
+    inherit (p)
+      bg
+      surface
+      muted
+      text
+      bright
+      warn
+      error
+      ;
+    line = p.border;
+    normal = p.accent;
+    insert = p.string;
+    visual = p.keyword;
+    command = p.type;
+    replace = p.error;
   };
+
+  # the roles for scripts, prefixed so sourcing them clobbers nothing
+  roles = lib.attrsets.attrNames p;
 in
 
 lib.modules.mkIf osConfig.dotnix.profiles.theme.enable {
@@ -132,17 +138,30 @@ lib.modules.mkIf osConfig.dotnix.profiles.theme.enable {
       return {
       ${lib.strings.concatLines (map (name: "  ${name} = '${c.${name}}',") bases)}}
     '';
+
+    "stylix/palette.sh".text = lib.strings.concatLines (
+      map (role: "export palette_${role}=${p.${role}}") roles
+    );
+
+    "stylix/palette.scss".text = lib.strings.concatLines (
+      map (role: "\$palette-${role}: ${p.${role}};") roles
+    );
+
+    "stylix/palette.lua".text = ''
+      return {
+      ${lib.strings.concatLines (map (role: "  ${role} = '${p.${role}}',") roles)}}
+    '';
   };
 
   # stylix has no niri target (that came from niri-flake)
   dotnix.niri.settings.layout = {
     focus-ring = {
-      active-color = c.base0D;
-      inactive-color = c.base03;
+      active-color = p.accent;
+      inactive-color = p.dim;
     };
     border = {
-      active-color = c.base0D;
-      inactive-color = c.base03;
+      active-color = p.accent;
+      inactive-color = p.dim;
     };
   };
 }

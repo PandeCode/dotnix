@@ -50,20 +50,14 @@ mkIf osConfig.dotnix.profiles.desktop.enable {
   dotnix.modes = mkMerge [
     {
       presentation = {
-        # a plain font for people who aren't used to opendyslexic
-        config.stylix.fonts = {
-          monospace = {
-            package = pkgs.nerd-fonts.jetbrains-mono;
-            name = "JetBrainsMono Nerd Font Mono";
-          };
+        # lexend for people who aren't used to opendyslexic, like the
+        # public site. code stays in fantasque
+        config.stylix.fonts = rec {
           sansSerif = {
-            package = pkgs.noto-fonts;
-            name = "Noto Sans";
+            package = pkgs.lexend;
+            name = "Lexend";
           };
-          serif = {
-            package = pkgs.noto-fonts;
-            name = "Noto Serif";
-          };
+          serif = sansSerif;
         };
 
         # no popups on the projector

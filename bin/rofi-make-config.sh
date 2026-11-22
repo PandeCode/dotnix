@@ -6,6 +6,7 @@ image=$(wall get-last)
 font=$(cat ~/.config/stylix/font)
 
 source "$HOME/.config/stylix/style.sh"
+source "$HOME/.config/stylix/palette.sh" 2>/dev/null
 
 base00="${base00:-#000000}"
 base01="${base01:-#1c1f24}"
@@ -16,6 +17,8 @@ base07="${base07:-#c8ccd4}"
 base0B="${base0B:-#89ca78}"
 base0D="${base0D:-#61afef}"
 base0E="${base0E:-#d55fde}"
+muted="${palette_muted:-$base04}"
+accent="${palette_accent:-$base0D}"
 
 # laid out like an nvim window: modes in the tabline, the list as the
 # completion menu, then the statusline and the command line
@@ -34,11 +37,11 @@ configuration {
   bg: $base00;
   panel: $base01;
   line: $base02;
-  dim: $base04;
+  dim: $muted;
   fg: $base05;
   fg-alt: $base07;
   insert: $base0B;
-  accent: $base0D;
+  accent: $accent;
   colon: $base0E;
 
   background-color: transparent;

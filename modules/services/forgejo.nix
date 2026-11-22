@@ -83,7 +83,7 @@ let
       --color-purple-light: var(--base0E);
       --color-brown-light: var(--base0F);
       --fonts-proportional: var(--font);
-      --fonts-monospace: var(--font);
+      --fonts-monospace: var(--mono);
     }
   '';
 
