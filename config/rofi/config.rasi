@@ -164,7 +164,7 @@ configuration {
           kb-select-7               : "Super+7";
           kb-select-8               : "Super+8";
           kb-select-9               : "Super+9";
-          kb-toggle-case-sensitivity: "Alt+c";
+          kb-toggle-case-sensitivity: "Alt+i";
           kb-toggle-sort            : "Alt+grave";
           me-accept-custom          : "Control+MouseDPrimary";
           me-accept-entry           : "MouseDPrimary";
