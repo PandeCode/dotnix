@@ -17,6 +17,20 @@ let
     restart = "pkill greenclip && greenclip clear && greenclip daemon";
   };
 
+  # rofi-emoji reads a single database, so the rest of unicode goes in
+  # after its emoji
+  unicode =
+    pkgs.runCommandLocal "rofi-unicode" { nativeBuildInputs = [ pkgs.gawk ]; }
+      # bash
+      ''
+        ucd=${pkgs.unicode-character-database}/share/unicode
+        emoji=${pkgs.rofi-emoji}/share/rofi-emoji/all_emojis.txt
+        {
+          cat $emoji
+          LC_ALL=C awk -f ${./scripts/unicode-rows.awk} $ucd/Blocks.txt $emoji $ucd/UnicodeData.txt
+        } >$out
+      '';
+
   bind = mods: key: exec: { inherit mods key exec; };
   locked = mods: key: exec: {
     inherit mods key exec;
@@ -241,7 +255,10 @@ in
         "sunsetr"
       ];
 
-      binds = forSession "wayland";
+      # wayland only, i3 keeps super shift e for exit
+      binds = forSession "wayland" ++ [
+        (bind [ "Super" "Shift" ] "e" "rofi -modi emoji -show emoji -emoji-file ${unicode}")
+      ];
     };
   };
 }
