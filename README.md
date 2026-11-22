@@ -79,3 +79,9 @@ dotnix.niri.enable = true;
 ```
 
 `nix flake check` evaluates each one alone to keep it that way.
+
+# New machines.
+To get tmux:
+```
+curl -fsSL https://raw.githubusercontent.com/pandecode/dotnix/main/config/tmux/.tmux.conf -o ~/.tmux.conf
+```
