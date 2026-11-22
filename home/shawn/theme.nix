@@ -58,6 +58,23 @@ let
     } > "$ini.tmp"
     mv "$ini.tmp" "$ini"
   '';
+
+  # config/tmux/.tmux.conf keeps these in place of its own when @theme is set
+  tmuxColors = {
+    bg = c.base00;
+    surface = c.base01;
+    line = c.base02;
+    muted = c.base04;
+    text = c.base05;
+    bright = c.base07;
+    normal = c.base0D;
+    insert = c.base0B;
+    visual = c.base0E;
+    command = c.base0A;
+    replace = c.base08;
+    warn = c.base0A;
+    error = c.base08;
+  };
 in
 
 lib.modules.mkIf osConfig.dotnix.profiles.theme.enable {
@@ -83,6 +100,14 @@ lib.modules.mkIf osConfig.dotnix.profiles.theme.enable {
   home.activation.gf2Theme = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     run ${setGf2Theme}
   '';
+
+  # ahead of the source line in shell.nix
+  home.file.".tmux.conf".text = lib.modules.mkBefore (
+    lib.strings.concatLines (
+      [ "set -g @theme stylix" ]
+      ++ lib.attrsets.mapAttrsToList (role: color: ''set -g @c_${role} "${color}"'') tmuxColors
+    )
+  );
 
   programs.newsboat.extraConfig = lib.modules.mkBefore "color background ${c.base00}";
 
