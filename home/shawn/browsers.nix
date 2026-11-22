@@ -3,6 +3,7 @@
   lib,
   osConfig,
   pkgs,
+  self,
   ...
 }:
 
@@ -32,35 +33,52 @@ let
   # starts hermes for the firenvim extension
   firenvimHost = lib.lists.optional osConfig.programs.hermes.enable osConfig.programs.hermes.firenvimHost;
 
-  # the keys browsers keep for themselves, handed to firenvim. outside a
-  # firenvim frame it does what the browser would have done
-  firenvimKeys = {
-    "send_C-n" = "Ctrl+N";
-    "send_C-t" = "Ctrl+T";
-    "send_C-w" = "Ctrl+W";
-    "send_CS-n" = "Ctrl+Shift+N";
-    "send_CS-t" = "Ctrl+Shift+T";
-    "send_CS-w" = "Ctrl+Shift+W";
+  # alt+d closes the tab, from an extension of mine
+  browserKeys = self.packages.${pkgs.stdenv.hostPlatform.system}.browser-keys;
+
+  firenvim = command: key: {
+    inherit command key;
+    firefox = "firenvim@lacamb.re";
+    chromium = "egpjdkipkomnmjhjmdamaniclmdlobbo";
   };
+
+  # extension shortcuts on keys the browsers keep for themselves. firenvim
+  # gets the ones nvim needs, and outside a firenvim frame they do what the
+  # browser would have done
+  shortcuts = [
+    (firenvim "send_C-n" "Ctrl+N")
+    (firenvim "send_C-t" "Ctrl+T")
+    (firenvim "send_C-w" "Ctrl+W")
+    (firenvim "send_CS-n" "Ctrl+Shift+N")
+    (firenvim "send_CS-t" "Ctrl+Shift+T")
+    (firenvim "send_CS-w" "Ctrl+Shift+W")
+    # alt+d used to focus the address bar, ctrl+l still does
+    {
+      command = "close-tab";
+      key = "Alt+D";
+      firefox = browserKeys.firefoxId;
+      chromium = browserKeys.chromiumId;
+    }
+  ];
 
   # extension shortcuts live in profile state that the browser rewrites, so
   # they are merged in on each switch while the browser is closed (its lock is
   # gone), and the file is only replaced when something changed
-  setFirenvimKeys = pkgs.writeShellScript "set-firenvim-keys" ''
+  setShortcuts = pkgs.writeShellScript "set-shortcuts" ''
     jq=${lib.meta.getExe pkgs.jq}
-    keys='${builtins.toJSON firenvimKeys}'
+    shortcuts='${builtins.toJSON shortcuts}'
 
     # merge FILE LOCK FILTER: run the jq filter over FILE unless LOCK exists.
     # it only warns, so a browser's state never stops a switch
     merge() {
       [ -e "$1" ] || return 0
       if [ -L "$2" ] || [ -e "$2" ]; then
-        echo "firenvim keys: $1 is in use, close the browser and switch again" >&2
+        echo "shortcuts: $1 is in use, close the browser and switch again" >&2
         return 0
       fi
-      if ! "$jq" -c --argjson keys "$keys" "$3" "$1" > "$1.tmp"; then
+      if ! "$jq" -c --argjson shortcuts "$shortcuts" "$3" "$1" > "$1.tmp"; then
         rm -f "$1.tmp"
-        echo "firenvim keys: can't read $1, left alone" >&2
+        echo "shortcuts: can't read $1, left alone" >&2
         return 0
       fi
       if ${pkgs.diffutils}/bin/cmp -s "$1" "$1.tmp"; then
@@ -77,21 +95,22 @@ let
       echo '{"version":4}' > "$librewolf/extension-settings.json"
     merge "$librewolf/extension-settings.json" "$librewolf/lock" '
       .commands //= {}
-      | reduce ($keys | to_entries[]) as $k (.;
-          .commands[$k.key].precedenceList =
-            ([.commands[$k.key].precedenceList[]? | select(.id != "firenvim@lacamb.re")]
-             + [{id: "firenvim@lacamb.re", installDate: 0,
-                 value: {shortcut: $k.value}, enabled: true}]))
+      | reduce $shortcuts[] as $s (.;
+          .commands[$s.command].precedenceList =
+            ([.commands[$s.command].precedenceList[]? | select(.id != $s.firefox)]
+             + [{id: $s.firefox, installDate: 0,
+                 value: {shortcut: $s.key}, enabled: true}]))
     '
 
-    # chromium: extensions.commands, keyed by platform and accelerator
+    # chromium: extensions.commands, keyed by platform and accelerator. it
+    # won't take an extension's suggested key when the browser uses it
     chromium=$HOME/.config/chromium
     merge "$chromium/Default/Preferences" "$chromium/SingletonLock" '
       .extensions.commands //= {}
-      | reduce ($keys | to_entries[]) as $k (.;
-          .extensions.commands["linux:" + $k.value] = {
-            command_name: $k.key,
-            extension: "egpjdkipkomnmjhjmdamaniclmdlobbo",
+      | reduce $shortcuts[] as $s (.;
+          .extensions.commands["linux:" + $s.key] = {
+            command_name: $s.command,
+            extension: $s.chromium,
             global: false
           })
     '
@@ -106,8 +125,8 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
   home = {
     packages = [ browser ];
     sessionVariables.BROWSER = lib.meta.getExe browser;
-    activation.firenvimKeys = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      run ${setFirenvimKeys}
+    activation.browserShortcuts = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      run ${setShortcuts}
     '';
   };
 
@@ -117,7 +136,13 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
       package = pkgs.ungoogled-chromium;
       dictionaries = [ pkgs.hunspellDictsChromium.en_US ];
       # pinned in nixbuilds, which keeps them up to date
-      extensions = pkgs.chromium-extensions.extensions;
+      extensions = pkgs.chromium-extensions.extensions ++ [
+        {
+          id = browserKeys.chromiumId;
+          crxPath = browserKeys.crx;
+          inherit (browserKeys) version;
+        }
+      ];
       nativeMessagingHosts = firenvimHost;
     };
 
@@ -125,8 +150,12 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
       enable = true;
       nativeMessagingHosts = [ pkgs.firefoxpwa ] ++ firenvimHost;
 
+      profiles.main.settings = {
+        # browser-keys is mine and not signed by mozilla
+        "xpinstall.signatures.required" = false;
+      }
       # syncs through firefly instead of mozilla's servers
-      profiles.main.settings = lib.attrsets.optionalAttrs home {
+      // lib.attrsets.optionalAttrs home {
         "identity.fxaccounts.enabled" = true;
         "identity.sync.tokenserver.uri" = "https://firefox.${domain}/1.0/sync/1.5";
       };
@@ -218,6 +247,12 @@ lib.modules.mkIf osConfig.dotnix.profiles.desktop.enable {
               "sponsorBlocker@ajay.app" = "sponsorblock";
               "uBlock0@raymondhill.net" = "ublock-origin";
             }
+          // {
+            ${browserKeys.firefoxId} = {
+              install_url = "file://${browserKeys.xpi}";
+              installation_mode = "force_installed";
+            };
+          }
           // lib.attrsets.optionalAttrs home {
             # saves the page to read.<domain>
             "readeck@readeck.com" = "readeck";

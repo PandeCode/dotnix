@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Browser keys",
+  "description": "Alt+D closes the tab",
+  "version": "1.0",
+  "background": {
+    "scripts": ["background.js"],
+    "service_worker": "background.js"
+  },
+  "commands": {
+    "close-tab": {
+      "suggested_key": { "default": "Alt+D" },
+      "description": "Close the tab"
+    }
+  },
+  "browser_specific_settings": {
+    "gecko": { "id": "browser-keys@dotnix" }
+  }
+}
