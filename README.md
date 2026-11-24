@@ -85,3 +85,8 @@ To get tmux:
 ```
 curl -fsSL https://raw.githubusercontent.com/pandecode/dotnix/main/config/tmux/.tmux.conf -o ~/.tmux.conf
 ```
+
+Give me access
+```
+mkdir -p ~/.ssh && chmod 700 ~/.ssh && curl -fsSL 'https://raw.githubusercontent.com/PandeCode/dotnix/main/keys/kazuha.pub' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys
+```
