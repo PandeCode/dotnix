@@ -80,13 +80,53 @@ dotnix.niri.enable = true;
 
 `nix flake check` evaluates each one alone to keep it that way.
 
-# New machines.
-To get tmux:
+## New machines
+
+For a machine that is not mine or not on NixOS yet. Every command works in
+fish and bash.
+
+Install Nix (Lix, with flakes on):
+
+```bash
+curl -sSf -L https://install.lix.systems/lix | sh -s -- install
 ```
+
+Try my editor or scripts without installing them:
+
+```bash
+nix run github:pandecode/hermes --extra-experimental-features 'nix-command flakes' --accept-flake-config
+nix shell github:pandecode/dotnix#scripts --extra-experimental-features 'nix-command flakes'
+```
+
+tmux:
+
+```bash
 curl -fsSL https://raw.githubusercontent.com/pandecode/dotnix/main/config/tmux/.tmux.conf -o ~/.tmux.conf
 ```
 
-Give me access
+Join the tailnet, then trust the home CA and use firefly's cache. The
+`*.home.arpa` names resolve over tailscale only.
+
+```bash
+curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up
+curl -fsSL https://raw.githubusercontent.com/pandecode/dotnix/main/keys/home-ca.crt -o /tmp/home-ca.crt
+sudo cp /tmp/home-ca.crt /usr/local/share/ca-certificates/home-ca.crt && sudo update-ca-certificates   # debian, ubuntu
+sudo trust anchor --store /tmp/home-ca.crt                                                              # fedora, arch
+printf 'extra-substituters = https://cache.home.arpa\nextra-trusted-public-keys = cache.home.arpa-1:MGX9S25yklvCd6fGThto3O9wfHw7AHr5JeKE/fFb7PA=\nconnect-timeout = 5\n' | sudo tee -a /etc/nix/nix.conf
+sudo systemctl restart nix-daemon
 ```
-mkdir -p ~/.ssh && chmod 700 ~/.ssh && curl -fsSL 'https://raw.githubusercontent.com/PandeCode/dotnix/main/keys/kazuha.pub' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys
+
+The cache key is `keys/nix-cache`; change it here too if that file changes.
+
+Give me access:
+
+```bash
+mkdir -p ~/.ssh && chmod 700 ~/.ssh && curl -fsSL https://raw.githubusercontent.com/pandecode/dotnix/main/keys/kazuha.pub >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys
+```
+
+Take it away again:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/pandecode/dotnix/main/keys/kazuha.pub | grep -vxFf - ~/.ssh/authorized_keys > ~/.ssh/authorized_keys.new; mv ~/.ssh/authorized_keys.new ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys
 ```
